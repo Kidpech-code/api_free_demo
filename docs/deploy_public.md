@@ -15,8 +15,11 @@
 1. build binary และ image (`make docker-build`)
 2. tag + push ขึ้น Docker Hub (ค่า default `kidpechcode/api_free_demo:latest`)
 3. สร้าง network `demo-net` ถ้ายังไม่มี
-4. เรียก Postgres และคอนเทนเนอร์ API ในเครือข่ายเดียวกัน (สคริปต์จะรอให้ Postgres พร้อมก่อน)
-5. เปิด `cloudflared tunnel run api-demo` เพื่อให้ Cloudflare forward traffic มาที่ `localhost:8080`
+4. เรียก Postgres ในเครือข่ายเดียวกัน (สคริปต์จะรอให้ Postgres พร้อมก่อน)
+5. รัน `migrate/migrate` ภายในเครือข่ายเดียวกันเพื่อสร้างตารางและ migration ใหม่ใน `migrations/postgres`
+6. เรียก API container หลังจาก schema พร้อมแล้ว (เชื่อมต่อกับ Postgres ผ่าน network เดียวกัน)
+7. แสดงบันทึกเตือนเรื่อง `~/.cloudflared/config.yml` (ตรวจสอบ tunnel path)
+8. เปิด `cloudflared tunnel run api-demo` เพื่อให้ Cloudflare forward traffic มาที่ `localhost:8080`
 
 ### คำสั่ง (รันจาก root repo)
 
@@ -40,7 +43,16 @@ curl -i https://api.twentcode.com/api/v1/health
 
 - **ขั้นตอน build+push**: สร้าง binary จากโค้ดปัจจุบัน และ push ไปยัง registry ที่กำหนด
 - **Postgres + API**: เรียก container ใช้ environment เดียวกันกับที่ใช้ local เพื่อให้ API มีฐานข้อมูลพร้อม
+- **Migrations**: รัน `docker run --rm --network demo-net -v $PWD/migrations:/migrations migrate/migrate -path=/migrations/postgres -database "$DB_DSN" up` เพื่อสร้างตารางก่อน API เริ่มรับ traffic
 - **Cloudflare Tunnel**: ใช้ tunnel ที่เคยสร้างไว้ (`api-demo`) เพื่อ expose `https://api.twentcode.com`
+
+> ถ้าต้องการเปลี่ยนค่า DSN ที่สคริปต์ใช้ สามารถกำหนด `DB_DSN` ก่อนรัน script ได้ เช่น
+
+```bash
+DB_DSN=postgres://postgres:postgres@pg.example.com:5432/demo_db?sslmode=disable ./scripts/deploy_public.sh
+```
+
+> หาก migrations ถูกเก็บไว้คนละ path ให้ตั้ง `MIGRATIONS_PATH` เพื่ออ้างอิงโฟลเดอร์แทน `migrations`
 
 หากต้องการให้ tunnel ทำงานใน background:
 
