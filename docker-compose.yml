@@ -1,0 +1,63 @@
+version: "3.9"
+
+services:
+  api:
+    build: .
+    command: ["/app/api"]
+    env_file:
+      - .env.example
+    environment:
+      - DB_DSN=postgres://postgres:postgres@postgres:5432/demo_db?sslmode=disable
+      - REDIS_ADDR=redis:6379
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - demo
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: demo_db
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 5s
+      retries: 5
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+      - ./migrations/postgres:/docker-entrypoint-initdb.d
+    networks:
+      - demo
+    ports:
+      - "5432:5432"
+
+  mysql:
+    image: mysql:8
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: demo_db
+    ports:
+      - "3306:3306"
+    networks:
+      - demo
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+    networks:
+      - demo
+
+volumes:
+  pg-data:
+
+networks:
+  demo:
+    driver: bridge

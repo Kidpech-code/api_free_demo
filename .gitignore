@@ -1,0 +1,11 @@
+# local env / secrets
+.env
+*.pem
+*.key
+*.crt
+credentials.json
+# docker
+docker-compose.override.yml
+# IDE
+.vscode/
+.idea/

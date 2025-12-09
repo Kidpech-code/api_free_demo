@@ -1,0 +1,393 @@
+openapi: 3.0.3
+info:
+  title: Kidpech Demo API
+  version: "0.1.0"
+  description: |
+    Public demo REST API for testing Flutter or backend integrations. Supports JWT auth,
+    profile CRUD, admin dashboards, metrics, and rate limiting.
+servers:
+  - url: https://api.kidpech.app
+  - url: https://api.twentcode.com
+  - url: http://localhost:8080
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        profile_image:
+          type: string
+        role:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        last_login_at:
+          type: string
+          format: date-time
+    Profile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        first_name:
+          type: string
+        last_name:
+          type: string
+        bio:
+          type: string
+        profile_image:
+          type: string
+        cover_image:
+          type: string
+        date_of_birth:
+          type: string
+          format: date
+        phone:
+          type: string
+        website:
+          type: string
+        location:
+          type: string
+        version:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    AuthResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        tokens:
+          type: object
+          properties:
+            access_token:
+              type: string
+            refresh_token:
+              type: string
+            expires_in:
+              type: integer
+            token_type:
+              type: string
+    BulkDeleteRequest:
+      type: object
+      required: [ids]
+      properties:
+        ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+        hard_delete:
+          type: boolean
+        reason:
+          type: string
+paths:
+  /api/v1/health:
+    get:
+      summary: Liveness health check
+      responses:
+        "200":
+          description: Service is healthy
+  /api/v1/auth/register:
+    post:
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password, name]
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+                name:
+                  type: string
+      responses:
+        "201":
+          description: Created user + tokens
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "409":
+          description: Duplicate email
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/auth/login:
+    post:
+      summary: Login with email/password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        "200":
+          description: Auth tokens
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/auth/refresh:
+    post:
+      summary: Refresh JWT pair
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refresh_token]
+              properties:
+                refresh_token:
+                  type: string
+      responses:
+        "200":
+          description: New token pair
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid refresh token
+  /api/v1/users/me:
+    get:
+      security:
+        - bearerAuth: []
+      summary: Get current user profile
+      responses:
+        "200":
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+    put:
+      security:
+        - bearerAuth: []
+      summary: Update current user profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                profile_image:
+                  type: string
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+  /api/v1/admin/users:
+    get:
+      security:
+        - bearerAuth: []
+      summary: Admin list users
+      parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+        - in: query
+          name: limit
+          schema:
+            type: integer
+        - in: query
+          name: offset
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Paginated user list
+  /api/v1/profiles:
+    get:
+      security:
+        - bearerAuth: []
+      summary: List profiles belonging to current user
+      parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+        - in: query
+          name: limit
+          schema:
+            type: integer
+        - in: query
+          name: offset
+          schema:
+            type: integer
+        - in: query
+          name: cursor
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: Paginated response
+    post:
+      security:
+        - bearerAuth: []
+      summary: Create profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [first_name, last_name]
+              properties:
+                first_name:
+                  type: string
+                last_name:
+                  type: string
+      responses:
+        "201":
+          description: Created profile
+  /api/v1/profiles/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      security:
+        - bearerAuth: []
+      summary: Get profile by id
+      responses:
+        "200":
+          description: Profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+    put:
+      security:
+        - bearerAuth: []
+      summary: Replace profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Profile"
+      responses:
+        "200":
+          description: Updated profile
+    patch:
+      security:
+        - bearerAuth: []
+      summary: Patch profile fields
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [fields, version]
+              properties:
+                version:
+                  type: integer
+                fields:
+                  type: object
+      responses:
+        "200":
+          description: Updated profile
+    delete:
+      security:
+        - bearerAuth: []
+      summary: Delete profile (soft default)
+      parameters:
+        - in: query
+          name: hard
+          schema:
+            type: boolean
+        - in: query
+          name: version
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+  /api/v1/profiles/bulk:
+    post:
+      security:
+        - bearerAuth: []
+      summary: Bulk create profiles (partial success)
+      responses:
+        "207":
+          description: Multi-status summary
+    delete:
+      security:
+        - bearerAuth: []
+      summary: Bulk delete profiles by ID list
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BulkDeleteRequest"
+      responses:
+        "200":
+          description: Delete count
+security:
+  - bearerAuth: []
