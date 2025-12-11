@@ -57,6 +57,8 @@ func (s *Service) Register(ctx context.Context, req RegisterRequest) (*AuthRespo
 	if !s.allowSignup {
 		return nil, ErrRegistrationDisabled
 	}
+	req.Email = strings.TrimSpace(req.Email)
+	req.Password = strings.TrimSpace(req.Password)
 	req.Name = strings.TrimSpace(s.sanitizer.Sanitize(req.Name))
 	if err := s.validator.Struct(req); err != nil {
 		return nil, err
@@ -104,6 +106,8 @@ func (s *Service) Register(ctx context.Context, req RegisterRequest) (*AuthRespo
 
 // Login authenticates by email/password.
 func (s *Service) Login(ctx context.Context, req LoginRequest) (*AuthResponse, error) {
+	req.Email = strings.TrimSpace(req.Email)
+	req.Password = strings.TrimSpace(req.Password)
 	if err := s.validator.Struct(req); err != nil {
 		return nil, err
 	}
