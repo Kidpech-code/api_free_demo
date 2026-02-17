@@ -92,9 +92,8 @@ func Connect(ctx context.Context, cfg config.DatabaseConfig, logger *zap.Logger)
 	// Auto-migrate: create tables if they don't exist (idempotent)
 	if cfg.AutoMigrate && strings.Contains(strings.ToLower(cfg.Driver), "postgres") {
 		if err := autoMigratePostgres(write, logger); err != nil {
-			if logger != nil {
-				logger.Warn("auto-migration failed (tables may already exist)", zap.Error(err))
-			}
+			write.Close()
+			return nil, fmt.Errorf("auto-migration failed: %w", err)
 		}
 	}
 
@@ -141,11 +140,10 @@ func (m *Manager) Close() error {
 func autoMigratePostgres(db *sqlx.DB, logger *zap.Logger) error {
 	migration := `
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE EXTENSION IF NOT EXISTS citext;
 
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY,
-    email CITEXT UNIQUE NOT NULL,
+    email TEXT UNIQUE NOT NULL,
     name TEXT NOT NULL,
     password_hash TEXT NOT NULL,
     profile_image TEXT,
@@ -178,7 +176,7 @@ CREATE TABLE IF NOT EXISTS profiles (
 );
 
 CREATE INDEX IF NOT EXISTS idx_profiles_user_id ON profiles(user_id);
-CREATE INDEX IF NOT EXISTS idx_users_email ON users(LOWER(email));
+CREATE INDEX IF NOT EXISTS idx_users_email_lower ON users(LOWER(email));
 `
 
 	seed := `
@@ -196,10 +194,10 @@ ON CONFLICT (id) DO NOTHING;
 `
 
 	if _, err := db.Exec(migration); err != nil {
-		return fmt.Errorf("migration: %w", err)
+		return fmt.Errorf("migration schema creation: %w", err)
 	}
 	if logger != nil {
-		logger.Info("auto-migration completed successfully")
+		logger.Info("auto-migration: schema created successfully")
 	}
 
 	if _, err := db.Exec(seed); err != nil {

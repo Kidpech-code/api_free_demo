@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"strings"
 
 	"github.com/google/uuid"
@@ -24,13 +25,21 @@ func NewUserRepository(db *sqlx.DB) user.Repository {
 func (r *UserRepository) Create(ctx context.Context, u *user.User) error {
 	query := `INSERT INTO users (id, email, name, password_hash, profile_image, role, refresh_version, created_at, updated_at)
 		VALUES (:id, :email, :name, :password_hash, :profile_image, :role, :refresh_version, :created_at, :updated_at)`
-	_, err := r.db.NamedExecContext(ctx, query, u)
+	result, err := r.db.NamedExecContext(ctx, query, u)
 	if err != nil {
 		if isDuplicate(err) {
 			return user.ErrDuplicateEmail
 		}
+		return fmt.Errorf("user create exec failed: %w", err)
 	}
-	return err
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("user create rows check failed: %w", err)
+	}
+	if rows == 0 {
+		return fmt.Errorf("user create: no rows inserted (id=%s, email=%s)", u.ID, u.Email)
+	}
+	return nil
 }
 
 func (r *UserRepository) Update(ctx context.Context, u *user.User) error {

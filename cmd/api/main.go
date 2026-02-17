@@ -50,11 +50,11 @@ func main() {
 	dbManager, err := dbinfra.Connect(ctx, cfg.Database, logger)
 	if err != nil {
 		maskedDSN := maskDSN(cfg.Database.DSN)
-		
+
 		// Check if this is a Railway configuration issue
 		isRailway := os.Getenv("RAILWAY_ENVIRONMENT") != "" || os.Getenv("RAILWAY_PROJECT_ID") != ""
 		hasDatabaseURL := os.Getenv("DATABASE_URL") != "" || os.Getenv("DATABASE_PRIVATE_URL") != "" || os.Getenv("PGHOST") != ""
-		
+
 		if isRailway && !hasDatabaseURL {
 			logger.Error("❌ RAILWAY CONFIGURATION ERROR: Postgres service not linked to API service",
 				zap.Error(err),
