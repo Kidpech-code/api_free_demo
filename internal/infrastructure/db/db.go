@@ -23,6 +23,11 @@ type Manager struct {
 
 // Connect establishes sqlx connections based on configuration.
 func Connect(ctx context.Context, cfg config.DatabaseConfig, logger *zap.Logger) (*Manager, error) {
+	// Check for empty DSN (Railway without linked Postgres service)
+	if cfg.DSN == "" {
+		return nil, fmt.Errorf("database DSN is empty. If running on Railway, please link the Postgres service: Railway Dashboard → %s → Variables → New Variable → Reference → DATABASE_URL from Postgres service", "your-api-service")
+	}
+
 	// sqlx driver name mapping: allow "postgres" in config but use the
 	// compiled pgx stdlib driver which registers under "pgx".
 	driverName := cfg.Driver

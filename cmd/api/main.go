@@ -50,14 +50,27 @@ func main() {
 	dbManager, err := dbinfra.Connect(ctx, cfg.Database, logger)
 	if err != nil {
 		maskedDSN := maskDSN(cfg.Database.DSN)
-		logger.Error("db connect failed - app will start without database",
-			zap.Error(err),
-			zap.String("dsn_host", maskedDSN),
-			zap.String("driver", cfg.Database.Driver),
-			zap.Bool("has_DATABASE_URL", os.Getenv("DATABASE_URL") != ""),
-			zap.Bool("has_DATABASE_PRIVATE_URL", os.Getenv("DATABASE_PRIVATE_URL") != ""),
-			zap.Bool("has_PGHOST", os.Getenv("PGHOST") != ""),
-		)
+		
+		// Check if this is a Railway configuration issue
+		isRailway := os.Getenv("RAILWAY_ENVIRONMENT") != "" || os.Getenv("RAILWAY_PROJECT_ID") != ""
+		hasDatabaseURL := os.Getenv("DATABASE_URL") != "" || os.Getenv("DATABASE_PRIVATE_URL") != "" || os.Getenv("PGHOST") != ""
+		
+		if isRailway && !hasDatabaseURL {
+			logger.Error("❌ RAILWAY CONFIGURATION ERROR: Postgres service not linked to API service",
+				zap.Error(err),
+				zap.String("fix", "Railway Dashboard → API Service → Variables → New Variable → Reference → DATABASE_URL (from Postgres service)"),
+				zap.String("docs", "https://docs.railway.app/guides/postgresql#reference-variables"),
+			)
+		} else {
+			logger.Error("db connect failed - app will start without database",
+				zap.Error(err),
+				zap.String("dsn_host", maskedDSN),
+				zap.String("driver", cfg.Database.Driver),
+				zap.Bool("has_DATABASE_URL", os.Getenv("DATABASE_URL") != ""),
+				zap.Bool("has_DATABASE_PRIVATE_URL", os.Getenv("DATABASE_PRIVATE_URL") != ""),
+				zap.Bool("has_PGHOST", os.Getenv("PGHOST") != ""),
+			)
+		}
 		// Continue without DB - some endpoints will return 503
 		// Background reconnector will keep trying
 	} else {

@@ -278,6 +278,14 @@ func resolveDSN() string {
 			pgUser, pgPass, pgHost, pgPort, pgDB, sslMode)
 	}
 
-	// Docker Compose default
+	// Check if running in Railway without database env vars
+	// Railway injects RAILWAY_ENVIRONMENT or RAILWAY_PROJECT_ID
+	if os.Getenv("RAILWAY_ENVIRONMENT") != "" || os.Getenv("RAILWAY_PROJECT_ID") != "" {
+		// Return empty DSN to trigger clear error message
+		// User needs to link Postgres service in Railway dashboard
+		return ""
+	}
+
+	// Docker Compose default (for local development only)
 	return "postgres://postgres:postgres@db:5432/demo_db?sslmode=disable"
 }
