@@ -120,7 +120,7 @@ func Load() (*Config, error) {
 		},
 		Database: DatabaseConfig{
 			Driver:           strings.ToLower(getenv("DB_DRIVER", "postgres")),
-			DSN:              getenv("DB_DSN", "postgres://postgres:postgres@db:5432/demo_db?sslmode=disable"),
+			DSN:              getenv("DB_DSN", getenv("DATABASE_URL", getenv("DATABASE_PRIVATE_URL", "postgres://postgres:postgres@db:5432/demo_db?sslmode=disable"))),
 			ReadOnlyDSN:      getenv("DB_READ_DSN", ""),
 			MaxOpenConns:     getInt("DB_MAX_OPEN", 25),
 			MaxIdleConns:     getInt("DB_MAX_IDLE", 10),
@@ -129,7 +129,7 @@ func Load() (*Config, error) {
 			PreferSimpleProt: getBool("DB_PREFER_SIMPLE", true),
 		},
 		Redis: RedisConfig{
-			Addr:     getenv("REDIS_ADDR", "redis:6379"),
+			Addr:     getenv("REDIS_ADDR", getenv("REDIS_URL", getenv("REDIS_PRIVATE_URL", ""))),
 			Username: getenv("REDIS_USER", ""),
 			Password: getenv("REDIS_PASSWORD", ""),
 			DB:       getInt("REDIS_DB", 0),

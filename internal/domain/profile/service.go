@@ -36,6 +36,11 @@ func NewService(repo Repository) *Service {
 	}
 }
 
+// SetRepository hot-swaps the repository (used for deferred DB connections).
+func (s *Service) SetRepository(repo Repository) {
+	s.repo = repo
+}
+
 // Create persists a profile.
 func (s *Service) Create(ctx context.Context, userID uuid.UUID, req CreateRequest) (*Profile, error) {
 	if s.repo == nil {

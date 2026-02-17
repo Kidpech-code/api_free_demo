@@ -3,6 +3,8 @@ package redis
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
+	"strings"
 	"time"
 
 	redis "github.com/redis/go-redis/v9"
@@ -18,12 +20,24 @@ type Client struct {
 
 // Connect instantiates redis client.
 func Connect(cfg config.RedisConfig, logger *zap.Logger) (*Client, error) {
-	options := &redis.Options{
-		Addr:     cfg.Addr,
-		Username: cfg.Username,
-		Password: cfg.Password,
-		DB:       cfg.DB,
+	var options *redis.Options
+
+	// Railway provides REDIS_URL as redis://... — parse it automatically
+	if strings.HasPrefix(cfg.Addr, "redis://") || strings.HasPrefix(cfg.Addr, "rediss://") {
+		var err error
+		options, err = redis.ParseURL(cfg.Addr)
+		if err != nil {
+			return nil, fmt.Errorf("parse redis url: %w", err)
+		}
+	} else {
+		options = &redis.Options{
+			Addr:     cfg.Addr,
+			Username: cfg.Username,
+			Password: cfg.Password,
+			DB:       cfg.DB,
+		}
 	}
+
 	if cfg.TLS {
 		options.TLSConfig = &tls.Config{MinVersion: tls.VersionTLS12}
 	}

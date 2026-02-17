@@ -53,6 +53,11 @@ func NewService(repo Repository, tokens TokenManager, logger *zap.Logger, allowS
 	}
 }
 
+// SetRepository hot-swaps the repository (used for deferred DB connections).
+func (s *Service) SetRepository(repo Repository) {
+	s.repo = repo
+}
+
 // Register creates a new user and immediately issues tokens.
 func (s *Service) Register(ctx context.Context, req RegisterRequest) (*AuthResponse, error) {
 	if s.repo == nil {

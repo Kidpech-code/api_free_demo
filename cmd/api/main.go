@@ -3,9 +3,11 @@ package main
 import (
 	"context"
 	"log"
+	"net/url"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"go.uber.org/zap"
 
@@ -45,9 +47,16 @@ func main() {
 
 	dbManager, err := dbinfra.Connect(ctx, cfg.Database, logger)
 	if err != nil {
-		logger.Error("db connect failed - app will start without database", zap.Error(err))
+		maskedDSN := maskDSN(cfg.Database.DSN)
+		logger.Error("db connect failed - app will start without database",
+			zap.Error(err),
+			zap.String("dsn_host", maskedDSN),
+			zap.String("driver", cfg.Database.Driver),
+		)
 		// Continue without DB - some endpoints will return 503
-		// This allows Railway healthcheck to succeed while DB is initializing
+		// Background reconnector will keep trying
+	} else {
+		logger.Info("database connected successfully on startup")
 	}
 	if dbManager != nil {
 		defer dbManager.Close()
@@ -79,6 +88,32 @@ func main() {
 
 	userService := user.NewService(userRepo, authManager, logger, cfg.Security.AllowRegistration)
 	profileService := profile.NewService(profileRepo)
+
+	// Background DB reconnector — if initial connection failed, keep trying
+	if dbManager == nil {
+		go func() {
+			ticker := time.NewTicker(5 * time.Second)
+			defer ticker.Stop()
+			for {
+				select {
+				case <-ctx.Done():
+					return
+				case <-ticker.C:
+					logger.Info("attempting background DB reconnection...")
+					mgr, err := dbinfra.Connect(ctx, cfg.Database, logger)
+					if err != nil {
+						logger.Warn("background DB reconnect failed", zap.Error(err))
+						continue
+					}
+					dbManager = mgr
+					userService.SetRepository(dbinfra.NewUserRepository(mgr.Write))
+					profileService.SetRepository(dbinfra.NewProfileRepository(mgr.Write))
+					logger.Info("database connected via background reconnector — all endpoints available")
+					return
+				}
+			}
+		}()
+	}
 
 	logBuffer := diagnostics.NewLogBuffer(cfg.Diagnostics.MaxLogLines)
 	diagHandler := diagnostics.NewHandler(logBuffer)
@@ -112,4 +147,16 @@ func main() {
 	if err := server.Run(ctx); err != nil {
 		logger.Fatal("server error", zap.Error(err))
 	}
+}
+
+// maskDSN extracts host from DSN for safe logging (no credentials).
+func maskDSN(dsn string) string {
+	u, err := url.Parse(dsn)
+	if err != nil {
+		if len(dsn) > 20 {
+			return dsn[:20] + "..."
+		}
+		return dsn
+	}
+	return u.Hostname() + ":" + u.Port()
 }
