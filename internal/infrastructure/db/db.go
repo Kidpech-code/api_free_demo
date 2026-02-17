@@ -37,10 +37,38 @@ func Connect(ctx context.Context, cfg config.DatabaseConfig, logger *zap.Logger)
 	write.SetMaxIdleConns(cfg.MaxIdleConns)
 	write.SetConnMaxLifetime(cfg.ConnMaxLifetime)
 
-	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
-	defer cancel()
-	if err := write.PingContext(ctx); err != nil {
-		return nil, fmt.Errorf("ping db: %w", err)
+	// Retry connection with exponential backoff for Railway startup
+	var pingErr error
+	maxRetries := 5
+	for i := 0; i < maxRetries; i++ {
+		ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+		pingErr = write.PingContext(ctx)
+		cancel()
+		
+		if pingErr == nil {
+			break
+		}
+		
+		if logger != nil {
+			logger.Warn("db ping failed, retrying...", 
+				zap.Int("attempt", i+1), 
+				zap.Int("max_retries", maxRetries),
+				zap.Error(pingErr))
+		}
+		
+		if i < maxRetries-1 {
+			waitTime := time.Duration(i+1) * 2 * time.Second
+			time.Sleep(waitTime)
+		}
+	}
+	
+	if pingErr != nil {
+		write.Close()
+		return nil, fmt.Errorf("ping db after %d retries: %w", maxRetries, pingErr)
+	}
+
+	if logger != nil {
+		logger.Info("database connected successfully")
 	}
 
 	mgr := &Manager{Write: write, Read: write}
