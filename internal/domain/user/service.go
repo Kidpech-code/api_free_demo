@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -33,6 +34,7 @@ type TokenManager interface {
 
 // Service encapsulates user orchestration.
 type Service struct {
+	mu          sync.RWMutex
 	repo        Repository
 	tokens      TokenManager
 	validator   *validator.Validate
@@ -55,12 +57,23 @@ func NewService(repo Repository, tokens TokenManager, logger *zap.Logger, allowS
 
 // SetRepository hot-swaps the repository (used for deferred DB connections).
 func (s *Service) SetRepository(repo Repository) {
+	s.mu.Lock()
 	s.repo = repo
+	s.mu.Unlock()
+}
+
+// getRepo returns the current repository (thread-safe).
+func (s *Service) getRepo() Repository {
+	s.mu.RLock()
+	r := s.repo
+	s.mu.RUnlock()
+	return r
 }
 
 // Register creates a new user and immediately issues tokens.
 func (s *Service) Register(ctx context.Context, req RegisterRequest) (*AuthResponse, error) {
-	if s.repo == nil {
+	repo := s.getRepo()
+	if repo == nil {
 		return nil, ErrDatabaseUnavailable
 	}
 	if !s.allowSignup {
@@ -73,7 +86,7 @@ func (s *Service) Register(ctx context.Context, req RegisterRequest) (*AuthRespo
 		return nil, err
 	}
 
-	existing, err := s.repo.GetByEmail(ctx, strings.ToLower(req.Email))
+	existing, err := repo.GetByEmail(ctx, strings.ToLower(req.Email))
 	if err == nil && existing != nil {
 		return nil, ErrDuplicateEmail
 	}
@@ -98,7 +111,7 @@ func (s *Service) Register(ctx context.Context, req RegisterRequest) (*AuthRespo
 		user.ProfileImage = &req.ProfileImage
 	}
 
-	if err := s.repo.Create(ctx, user); err != nil {
+	if err := repo.Create(ctx, user); err != nil {
 		if errors.Is(err, ErrDuplicateEmail) {
 			return nil, ErrDuplicateEmail
 		}
@@ -115,7 +128,8 @@ func (s *Service) Register(ctx context.Context, req RegisterRequest) (*AuthRespo
 
 // Login authenticates by email/password.
 func (s *Service) Login(ctx context.Context, req LoginRequest) (*AuthResponse, error) {
-	if s.repo == nil {
+	repo := s.getRepo()
+	if repo == nil {
 		return nil, ErrDatabaseUnavailable
 	}
 	req.Email = strings.TrimSpace(req.Email)
@@ -124,7 +138,7 @@ func (s *Service) Login(ctx context.Context, req LoginRequest) (*AuthResponse, e
 		return nil, err
 	}
 
-	user, err := s.repo.GetByEmail(ctx, strings.ToLower(req.Email))
+	user, err := repo.GetByEmail(ctx, strings.ToLower(req.Email))
 	if err != nil || user == nil {
 		return nil, ErrInvalidCreds
 	}
@@ -136,7 +150,7 @@ func (s *Service) Login(ctx context.Context, req LoginRequest) (*AuthResponse, e
 	now := time.Now().UTC()
 	user.LastLoginAt = &now
 	user.UpdatedAt = now
-	_ = s.repo.Update(ctx, user)
+	_ = repo.Update(ctx, user)
 
 	tokens, err := s.tokens.IssueTokens(ctx, user)
 	if err != nil {
@@ -150,14 +164,15 @@ func (s *Service) Login(ctx context.Context, req LoginRequest) (*AuthResponse, e
 
 // Refresh uses refresh token to rotate credentials.
 func (s *Service) Refresh(ctx context.Context, refreshToken string) (*AuthResponse, error) {
-	if s.repo == nil {
+	repo := s.getRepo()
+	if repo == nil {
 		return nil, ErrDatabaseUnavailable
 	}
 	userID, err := s.tokens.ExtractUserID(refreshToken)
 	if err != nil {
 		return nil, ErrInvalidToken
 	}
-	user, err := s.repo.GetByID(ctx, userID)
+	user, err := repo.GetByID(ctx, userID)
 	if err != nil || user == nil {
 		return nil, ErrInvalidToken
 	}
@@ -170,10 +185,11 @@ func (s *Service) Refresh(ctx context.Context, refreshToken string) (*AuthRespon
 
 // GetMe returns the authed profile.
 func (s *Service) GetMe(ctx context.Context, userID uuid.UUID) (*User, error) {
-	if s.repo == nil {
+	repo := s.getRepo()
+	if repo == nil {
 		return nil, ErrDatabaseUnavailable
 	}
-	user, err := s.repo.GetByID(ctx, userID)
+	user, err := repo.GetByID(ctx, userID)
 	if err != nil {
 		return nil, ErrUserNotFound
 	}
@@ -182,13 +198,14 @@ func (s *Service) GetMe(ctx context.Context, userID uuid.UUID) (*User, error) {
 
 // UpdateMe mutates the authed user.
 func (s *Service) UpdateMe(ctx context.Context, userID uuid.UUID, req UpdateUserRequest) (*User, error) {
-	if s.repo == nil {
+	repo := s.getRepo()
+	if repo == nil {
 		return nil, ErrDatabaseUnavailable
 	}
 	if err := s.validator.Struct(req); err != nil {
 		return nil, err
 	}
-	user, err := s.repo.GetByID(ctx, userID)
+	user, err := repo.GetByID(ctx, userID)
 	if err != nil {
 		return nil, ErrUserNotFound
 	}
@@ -197,7 +214,7 @@ func (s *Service) UpdateMe(ctx context.Context, userID uuid.UUID, req UpdateUser
 		user.ProfileImage = req.ProfileImage
 	}
 	user.UpdatedAt = time.Now().UTC()
-	if err := s.repo.Update(ctx, user); err != nil {
+	if err := repo.Update(ctx, user); err != nil {
 		return nil, err
 	}
 	return user, nil
@@ -205,8 +222,9 @@ func (s *Service) UpdateMe(ctx context.Context, userID uuid.UUID, req UpdateUser
 
 // List returns paginated users for admin dashboards.
 func (s *Service) List(ctx context.Context, filter UserFilter) ([]User, int, error) {
-	if s.repo == nil {
+	repo := s.getRepo()
+	if repo == nil {
 		return nil, 0, ErrDatabaseUnavailable
 	}
-	return s.repo.List(ctx, filter)
+	return repo.List(ctx, filter)
 }

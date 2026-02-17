@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -14,6 +15,7 @@ import (
 
 // Service orchestrates profile logic.
 type Service struct {
+	mu        sync.RWMutex
 	repo      Repository
 	validator *validator.Validate
 	sanitizer *bluemonday.Policy
@@ -38,12 +40,23 @@ func NewService(repo Repository) *Service {
 
 // SetRepository hot-swaps the repository (used for deferred DB connections).
 func (s *Service) SetRepository(repo Repository) {
+	s.mu.Lock()
 	s.repo = repo
+	s.mu.Unlock()
+}
+
+// getRepo returns the current repository (thread-safe).
+func (s *Service) getRepo() Repository {
+	s.mu.RLock()
+	r := s.repo
+	s.mu.RUnlock()
+	return r
 }
 
 // Create persists a profile.
 func (s *Service) Create(ctx context.Context, userID uuid.UUID, req CreateRequest) (*Profile, error) {
-	if s.repo == nil {
+	repo := s.getRepo()
+	if repo == nil {
 		return nil, ErrDatabaseUnavailable
 	}
 	if err := s.validator.Struct(req); err != nil {
@@ -62,7 +75,7 @@ func (s *Service) Create(ctx context.Context, userID uuid.UUID, req CreateReques
 	if err := assignOptionalFields(s.sanitizer, profile, req); err != nil {
 		return nil, err
 	}
-	if err := s.repo.Create(ctx, profile); err != nil {
+	if err := repo.Create(ctx, profile); err != nil {
 		return nil, err
 	}
 	return profile, nil
@@ -70,7 +83,8 @@ func (s *Service) Create(ctx context.Context, userID uuid.UUID, req CreateReques
 
 // BulkCreate inserts many profiles and returns successes/failures.
 func (s *Service) BulkCreate(ctx context.Context, userID uuid.UUID, req BulkCreateRequest) ([]*Profile, []error) {
-	if s.repo == nil {
+	repo := s.getRepo()
+	if repo == nil {
 		return nil, []error{ErrDatabaseUnavailable}
 	}
 	profiles := make([]*Profile, 0, len(req.Profiles))
@@ -97,17 +111,18 @@ func (s *Service) BulkCreate(ctx context.Context, userID uuid.UUID, req BulkCrea
 		profiles = append(profiles, p)
 	}
 	if len(profiles) > 0 {
-		_ = s.repo.BulkCreate(ctx, profiles)
+		_ = repo.BulkCreate(ctx, profiles)
 	}
 	return profiles, errs
 }
 
 // Get fetches a profile ensuring ownership.
 func (s *Service) Get(ctx context.Context, id, userID uuid.UUID) (*Profile, error) {
-	if s.repo == nil {
+	repo := s.getRepo()
+	if repo == nil {
 		return nil, ErrDatabaseUnavailable
 	}
-	p, err := s.repo.GetByID(ctx, id, userID)
+	p, err := repo.GetByID(ctx, id, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -119,21 +134,23 @@ func (s *Service) Get(ctx context.Context, id, userID uuid.UUID) (*Profile, erro
 
 // List returns paginated profiles.
 func (s *Service) List(ctx context.Context, filter Filter) ([]Profile, int, error) {
-	if s.repo == nil {
+	repo := s.getRepo()
+	if repo == nil {
 		return nil, 0, ErrDatabaseUnavailable
 	}
-	return s.repo.List(ctx, filter)
+	return repo.List(ctx, filter)
 }
 
 // Update performs PUT semantics.
 func (s *Service) Update(ctx context.Context, id, userID uuid.UUID, req UpdateRequest) (*Profile, error) {
-	if s.repo == nil {
+	repo := s.getRepo()
+	if repo == nil {
 		return nil, ErrDatabaseUnavailable
 	}
 	if err := s.validator.Struct(req); err != nil {
 		return nil, err
 	}
-	profile, err := s.repo.GetByID(ctx, id, userID)
+	profile, err := repo.GetByID(ctx, id, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -150,7 +167,7 @@ func (s *Service) Update(ctx context.Context, id, userID uuid.UUID, req UpdateRe
 	}
 	profile.Version++
 	profile.UpdatedAt = time.Now().UTC()
-	if err := s.repo.Update(ctx, profile); err != nil {
+	if err := repo.Update(ctx, profile); err != nil {
 		return nil, err
 	}
 	return profile, nil
@@ -158,7 +175,8 @@ func (s *Service) Update(ctx context.Context, id, userID uuid.UUID, req UpdateRe
 
 // Patch performs partial updates via a whitelist.
 func (s *Service) Patch(ctx context.Context, id, userID uuid.UUID, req PatchRequest) (*Profile, error) {
-	if s.repo == nil {
+	repo := s.getRepo()
+	if repo == nil {
 		return nil, ErrDatabaseUnavailable
 	}
 	if err := s.validator.Struct(req); err != nil {
@@ -189,7 +207,7 @@ func (s *Service) Patch(ctx context.Context, id, userID uuid.UUID, req PatchRequ
 	if len(update) == 0 {
 		return nil, errors.New("no valid fields to update")
 	}
-	updated, err := s.repo.Patch(ctx, id, userID, update, req.Version)
+	updated, err := repo.Patch(ctx, id, userID, update, req.Version)
 	if err != nil {
 		return nil, err
 	}
@@ -198,10 +216,11 @@ func (s *Service) Patch(ctx context.Context, id, userID uuid.UUID, req PatchRequ
 
 // Delete removes a profile (soft default).
 func (s *Service) Delete(ctx context.Context, id, userID uuid.UUID, hard bool, version int) error {
-	if s.repo == nil {
+	repo := s.getRepo()
+	if repo == nil {
 		return ErrDatabaseUnavailable
 	}
-	profile, err := s.repo.GetByID(ctx, id, userID)
+	profile, err := repo.GetByID(ctx, id, userID)
 	if err != nil {
 		return err
 	}
@@ -211,18 +230,19 @@ func (s *Service) Delete(ctx context.Context, id, userID uuid.UUID, hard bool, v
 	if profile.Version != version {
 		return ErrVersionConflict
 	}
-	return s.repo.Delete(ctx, id, userID, hard, version)
+	return repo.Delete(ctx, id, userID, hard, version)
 }
 
 // BulkDelete removes multiple profiles at once.
 func (s *Service) BulkDelete(ctx context.Context, userID uuid.UUID, req BulkDeleteRequest) (int, error) {
-	if s.repo == nil {
+	repo := s.getRepo()
+	if repo == nil {
 		return 0, ErrDatabaseUnavailable
 	}
 	if len(req.IDs) == 0 {
 		return 0, errors.New("ids required")
 	}
-	return s.repo.BulkDelete(ctx, userID, req.IDs, req.Hard)
+	return repo.BulkDelete(ctx, userID, req.IDs, req.Hard)
 }
 
 func assignOptionalFields(policy *bluemonday.Policy, profile *Profile, req CreateRequest) error {

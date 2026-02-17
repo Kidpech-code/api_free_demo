@@ -6,6 +6,7 @@ import (
 	"os"
 	"runtime"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -19,6 +20,7 @@ type HealthChecker interface {
 // Handler exposes health + debug endpoints.
 type Handler struct {
 	buffer      *LogBuffer
+	mu          sync.RWMutex
 	deps        map[string]HealthChecker
 	start       time.Time
 	dbConnected bool
@@ -36,13 +38,17 @@ func NewHandler(buffer *LogBuffer) *Handler {
 
 // RegisterDependency adds a named dependency for health reporting.
 func (h *Handler) RegisterDependency(name string, checker HealthChecker) {
+	h.mu.Lock()
 	h.deps[name] = checker
+	h.mu.Unlock()
 }
 
 // SetDBStatus updates the database connection status for diagnostics.
 func (h *Handler) SetDBStatus(connected bool, errMsg string) {
+	h.mu.Lock()
 	h.dbConnected = connected
 	h.dbError = errMsg
+	h.mu.Unlock()
 }
 
 // RegisterPublic attaches non-auth endpoints.
@@ -72,6 +78,7 @@ func (h *Handler) readiness(c *gin.Context) {
 	code := http.StatusOK
 	deps := make(map[string]string)
 
+	h.mu.RLock()
 	for name, checker := range h.deps {
 		if checker.IsHealthy(ctx) {
 			deps[name] = "up"
@@ -81,6 +88,7 @@ func (h *Handler) readiness(c *gin.Context) {
 			code = http.StatusServiceUnavailable
 		}
 	}
+	h.mu.RUnlock()
 
 	c.JSON(code, gin.H{
 		"status":       status,
@@ -98,6 +106,7 @@ func (h *Handler) detailedHealth(c *gin.Context) {
 	runtime.ReadMemStats(&mem)
 
 	deps := make(map[string]string)
+	h.mu.RLock()
 	for name, checker := range h.deps {
 		if checker.IsHealthy(ctx) {
 			deps[name] = "up"
@@ -105,6 +114,7 @@ func (h *Handler) detailedHealth(c *gin.Context) {
 			deps[name] = "down"
 		}
 	}
+	h.mu.RUnlock()
 
 	c.JSON(http.StatusOK, gin.H{
 		"status":       "ok",
@@ -147,19 +157,22 @@ func (h *Handler) debugEnv(c *gin.Context) {
 		}
 	}
 
+	h.mu.RLock()
 	dbStatus := "not connected"
 	if h.dbConnected {
 		dbStatus = "connected"
 	}
+	dbErr := h.dbError
+	h.mu.RUnlock()
 
 	c.JSON(http.StatusOK, gin.H{
-		"status":       "ok",
-		"uptime":       time.Since(h.start).String(),
-		"db_status":    dbStatus,
-		"db_error":     h.dbError,
-		"env_vars":     envStatus,
-		"go_version":   runtime.Version(),
-		"goroutines":   runtime.NumGoroutine(),
+		"status":     "ok",
+		"uptime":     time.Since(h.start).String(),
+		"db_status":  dbStatus,
+		"db_error":   dbErr,
+		"env_vars":   envStatus,
+		"go_version": runtime.Version(),
+		"goroutines": runtime.NumGoroutine(),
 	})
 }
 
@@ -185,11 +198,4 @@ func maskValue(key, val string) string {
 	}
 	// Everything else: just show it's set
 	return "set (" + strings.Repeat("*", min(len(val), 8)) + ")"
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
 }

@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 	"time"
 
@@ -130,6 +131,8 @@ func main() {
 	}
 
 	// Background DB reconnector — if initial connection failed, keep trying
+	var reconnectedDB *dbinfra.Manager
+	var reconnectMu sync.Mutex
 	if dbManager == nil {
 		go func() {
 			ticker := time.NewTicker(5 * time.Second)
@@ -146,7 +149,9 @@ func main() {
 						logger.Warn("background DB reconnect failed", zap.Error(err))
 						continue
 					}
-					dbManager = mgr
+					reconnectMu.Lock()
+					reconnectedDB = mgr
+					reconnectMu.Unlock()
 					rawUserRepo := dbinfra.NewUserRepository(mgr.Write)
 					rawProfileRepo := dbinfra.NewProfileRepository(mgr.Write)
 					userService.SetRepository(cacheinfra.NewUserRepository(rawUserRepo, cacheLayer))
@@ -159,6 +164,15 @@ func main() {
 			}
 		}()
 	}
+
+	// Ensure reconnected DB is properly closed on shutdown
+	defer func() {
+		reconnectMu.Lock()
+		if reconnectedDB != nil {
+			_ = reconnectedDB.Close()
+		}
+		reconnectMu.Unlock()
+	}()
 
 	userHandler := user.NewHandler(userService)
 	profileHandler := profile.NewHandler(profileService)
