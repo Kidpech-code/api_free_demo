@@ -142,6 +142,8 @@ func (h *Handler) listUsers(c *gin.Context) {
 
 func (h *Handler) handleError(c *gin.Context, err error) {
 	switch {
+	case errors.Is(err, ErrDatabaseUnavailable):
+		c.JSON(503, gin.H{"error": "service_unavailable", "message": "database is initializing, please try again"})
 	case errors.Is(err, ErrDuplicateEmail):
 		response.Conflict(c, "duplicate_email", "email already registered")
 	case errors.Is(err, ErrInvalidCreds):

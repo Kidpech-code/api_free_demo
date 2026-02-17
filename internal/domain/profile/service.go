@@ -21,9 +21,10 @@ type Service struct {
 
 // Sentinel errors for HTTP mapping.
 var (
-	ErrNotFound        = errors.New("profile not found")
-	ErrForbidden       = errors.New("forbidden")
-	ErrVersionConflict = errors.New("version mismatch")
+	ErrNotFound            = errors.New("profile not found")
+	ErrForbidden           = errors.New("forbidden")
+	ErrVersionConflict     = errors.New("version mismatch")
+	ErrDatabaseUnavailable = errors.New("database unavailable")
 )
 
 // NewService provides a profile service.
@@ -37,6 +38,9 @@ func NewService(repo Repository) *Service {
 
 // Create persists a profile.
 func (s *Service) Create(ctx context.Context, userID uuid.UUID, req CreateRequest) (*Profile, error) {
+	if s.repo == nil {
+		return nil, ErrDatabaseUnavailable
+	}
 	if err := s.validator.Struct(req); err != nil {
 		return nil, err
 	}
@@ -61,6 +65,9 @@ func (s *Service) Create(ctx context.Context, userID uuid.UUID, req CreateReques
 
 // BulkCreate inserts many profiles and returns successes/failures.
 func (s *Service) BulkCreate(ctx context.Context, userID uuid.UUID, req BulkCreateRequest) ([]*Profile, []error) {
+	if s.repo == nil {
+		return nil, []error{ErrDatabaseUnavailable}
+	}
 	profiles := make([]*Profile, 0, len(req.Profiles))
 	errs := make([]error, len(req.Profiles))
 	for i, payload := range req.Profiles {
@@ -92,6 +99,9 @@ func (s *Service) BulkCreate(ctx context.Context, userID uuid.UUID, req BulkCrea
 
 // Get fetches a profile ensuring ownership.
 func (s *Service) Get(ctx context.Context, id, userID uuid.UUID) (*Profile, error) {
+	if s.repo == nil {
+		return nil, ErrDatabaseUnavailable
+	}
 	p, err := s.repo.GetByID(ctx, id, userID)
 	if err != nil {
 		return nil, err
@@ -104,11 +114,17 @@ func (s *Service) Get(ctx context.Context, id, userID uuid.UUID) (*Profile, erro
 
 // List returns paginated profiles.
 func (s *Service) List(ctx context.Context, filter Filter) ([]Profile, int, error) {
+	if s.repo == nil {
+		return nil, 0, ErrDatabaseUnavailable
+	}
 	return s.repo.List(ctx, filter)
 }
 
 // Update performs PUT semantics.
 func (s *Service) Update(ctx context.Context, id, userID uuid.UUID, req UpdateRequest) (*Profile, error) {
+	if s.repo == nil {
+		return nil, ErrDatabaseUnavailable
+	}
 	if err := s.validator.Struct(req); err != nil {
 		return nil, err
 	}
@@ -137,6 +153,9 @@ func (s *Service) Update(ctx context.Context, id, userID uuid.UUID, req UpdateRe
 
 // Patch performs partial updates via a whitelist.
 func (s *Service) Patch(ctx context.Context, id, userID uuid.UUID, req PatchRequest) (*Profile, error) {
+	if s.repo == nil {
+		return nil, ErrDatabaseUnavailable
+	}
 	if err := s.validator.Struct(req); err != nil {
 		return nil, err
 	}
@@ -174,6 +193,9 @@ func (s *Service) Patch(ctx context.Context, id, userID uuid.UUID, req PatchRequ
 
 // Delete removes a profile (soft default).
 func (s *Service) Delete(ctx context.Context, id, userID uuid.UUID, hard bool, version int) error {
+	if s.repo == nil {
+		return ErrDatabaseUnavailable
+	}
 	profile, err := s.repo.GetByID(ctx, id, userID)
 	if err != nil {
 		return err
@@ -189,6 +211,9 @@ func (s *Service) Delete(ctx context.Context, id, userID uuid.UUID, hard bool, v
 
 // BulkDelete removes multiple profiles at once.
 func (s *Service) BulkDelete(ctx context.Context, userID uuid.UUID, req BulkDeleteRequest) (int, error) {
+	if s.repo == nil {
+		return 0, ErrDatabaseUnavailable
+	}
 	if len(req.IDs) == 0 {
 		return 0, errors.New("ids required")
 	}

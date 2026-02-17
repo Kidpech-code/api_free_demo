@@ -221,6 +221,8 @@ func parseVersion(val string) int {
 
 func (h *Handler) handleError(c *gin.Context, err error) {
 	switch {
+	case errors.Is(err, ErrDatabaseUnavailable):
+		c.JSON(503, gin.H{"error": "service_unavailable", "message": "database is initializing, please try again"})
 	case errors.Is(err, ErrNotFound):
 		response.NotFound(c, "profile")
 	case errors.Is(err, ErrForbidden):

@@ -45,9 +45,13 @@ func main() {
 
 	dbManager, err := dbinfra.Connect(ctx, cfg.Database, logger)
 	if err != nil {
-		logger.Fatal("db connect failed", zap.Error(err))
+		logger.Error("db connect failed - app will start without database", zap.Error(err))
+		// Continue without DB - some endpoints will return 503
+		// This allows Railway healthcheck to succeed while DB is initializing
 	}
-	defer dbManager.Close()
+	if dbManager != nil {
+		defer dbManager.Close()
+	}
 
 	var redisClient *redisintra.Client
 	if cfg.Redis.Addr != "" {
@@ -65,8 +69,13 @@ func main() {
 		authManager = auth.NewManager(cfg.Auth, redisClient.Native)
 	}
 
-	userRepo := dbinfra.NewUserRepository(dbManager.Write)
-	profileRepo := dbinfra.NewProfileRepository(dbManager.Write)
+	// Initialize repositories only if DB is available
+	var userRepo user.Repository
+	var profileRepo profile.Repository
+	if dbManager != nil {
+		userRepo = dbinfra.NewUserRepository(dbManager.Write)
+		profileRepo = dbinfra.NewProfileRepository(dbManager.Write)
+	}
 
 	userService := user.NewService(userRepo, authManager, logger, cfg.Security.AllowRegistration)
 	profileService := profile.NewService(profileRepo)

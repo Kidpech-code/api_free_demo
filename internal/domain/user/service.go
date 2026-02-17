@@ -21,6 +21,7 @@ var (
 	ErrUserNotFound         = errors.New("user not found")
 	ErrInvalidToken         = errors.New("invalid token")
 	ErrRegistrationDisabled = errors.New("registration disabled")
+	ErrDatabaseUnavailable  = errors.New("database unavailable")
 )
 
 // TokenManager abstracts JWT/refresh issuance.
@@ -54,6 +55,9 @@ func NewService(repo Repository, tokens TokenManager, logger *zap.Logger, allowS
 
 // Register creates a new user and immediately issues tokens.
 func (s *Service) Register(ctx context.Context, req RegisterRequest) (*AuthResponse, error) {
+	if s.repo == nil {
+		return nil, ErrDatabaseUnavailable
+	}
 	if !s.allowSignup {
 		return nil, ErrRegistrationDisabled
 	}
@@ -106,6 +110,9 @@ func (s *Service) Register(ctx context.Context, req RegisterRequest) (*AuthRespo
 
 // Login authenticates by email/password.
 func (s *Service) Login(ctx context.Context, req LoginRequest) (*AuthResponse, error) {
+	if s.repo == nil {
+		return nil, ErrDatabaseUnavailable
+	}
 	req.Email = strings.TrimSpace(req.Email)
 	req.Password = strings.TrimSpace(req.Password)
 	if err := s.validator.Struct(req); err != nil {
@@ -138,6 +145,9 @@ func (s *Service) Login(ctx context.Context, req LoginRequest) (*AuthResponse, e
 
 // Refresh uses refresh token to rotate credentials.
 func (s *Service) Refresh(ctx context.Context, refreshToken string) (*AuthResponse, error) {
+	if s.repo == nil {
+		return nil, ErrDatabaseUnavailable
+	}
 	userID, err := s.tokens.ExtractUserID(refreshToken)
 	if err != nil {
 		return nil, ErrInvalidToken
@@ -155,6 +165,9 @@ func (s *Service) Refresh(ctx context.Context, refreshToken string) (*AuthRespon
 
 // GetMe returns the authed profile.
 func (s *Service) GetMe(ctx context.Context, userID uuid.UUID) (*User, error) {
+	if s.repo == nil {
+		return nil, ErrDatabaseUnavailable
+	}
 	user, err := s.repo.GetByID(ctx, userID)
 	if err != nil {
 		return nil, ErrUserNotFound
@@ -164,6 +177,9 @@ func (s *Service) GetMe(ctx context.Context, userID uuid.UUID) (*User, error) {
 
 // UpdateMe mutates the authed user.
 func (s *Service) UpdateMe(ctx context.Context, userID uuid.UUID, req UpdateUserRequest) (*User, error) {
+	if s.repo == nil {
+		return nil, ErrDatabaseUnavailable
+	}
 	if err := s.validator.Struct(req); err != nil {
 		return nil, err
 	}
@@ -184,5 +200,8 @@ func (s *Service) UpdateMe(ctx context.Context, userID uuid.UUID, req UpdateUser
 
 // List returns paginated users for admin dashboards.
 func (s *Service) List(ctx context.Context, filter UserFilter) ([]User, int, error) {
+	if s.repo == nil {
+		return nil, 0, ErrDatabaseUnavailable
+	}
 	return s.repo.List(ctx, filter)
 }
