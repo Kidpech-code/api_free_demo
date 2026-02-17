@@ -38,6 +38,7 @@ func NewRouter(deps RouterDeps) *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Recovery())
 	r.Use(middleware.RequestID())
+	r.Use(middleware.Compression()) // gzip — reduce bandwidth (Uber CacheFront optimization)
 	if deps.Config != nil {
 		r.Use(middleware.CORS(deps.Config.Cors))
 	}

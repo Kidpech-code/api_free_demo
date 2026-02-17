@@ -17,6 +17,7 @@ import (
 	"github.com/kidpech/api_free_demo/internal/domain/profile"
 	"github.com/kidpech/api_free_demo/internal/domain/user"
 	"github.com/kidpech/api_free_demo/internal/infrastructure/auth"
+	cacheinfra "github.com/kidpech/api_free_demo/internal/infrastructure/cache"
 	dbinfra "github.com/kidpech/api_free_demo/internal/infrastructure/db"
 	"github.com/kidpech/api_free_demo/internal/infrastructure/logging"
 	"github.com/kidpech/api_free_demo/internal/infrastructure/monitoring"
@@ -78,12 +79,30 @@ func main() {
 		authManager = auth.NewManager(cfg.Auth, redisClient.Native)
 	}
 
-	// Initialize repositories only if DB is available
+	// Initialize integrated cache layer (inspired by Uber's CacheFront)
+	// Cache-aside pattern with singleflight, circuit breaker, negative caching
+	var cacheLayer *cacheinfra.Layer
+	if redisClient != nil {
+		cacheLayer = cacheinfra.NewLayer(redisClient.Native, logger, cacheinfra.Config{
+			Prefix:       "api",
+			TTL:          cacheinfra.DefaultTTL,
+			CBThreshold:  5,
+			CBResetAfter: 30 * time.Second,
+		})
+		logger.Info("integrated cache layer initialized (CacheFront pattern)")
+	} else {
+		logger.Warn("cache layer disabled — no Redis connection")
+	}
+
+	// Initialize repositories with cache decorators if DB is available
 	var userRepo user.Repository
 	var profileRepo profile.Repository
 	if dbManager != nil {
-		userRepo = dbinfra.NewUserRepository(dbManager.Write)
-		profileRepo = dbinfra.NewProfileRepository(dbManager.Write)
+		rawUserRepo := dbinfra.NewUserRepository(dbManager.Write)
+		rawProfileRepo := dbinfra.NewProfileRepository(dbManager.Write)
+		// Wrap with cache-aside decorator
+		userRepo = cacheinfra.NewUserRepository(rawUserRepo, cacheLayer)
+		profileRepo = cacheinfra.NewProfileRepository(rawProfileRepo, cacheLayer)
 	}
 
 	userService := user.NewService(userRepo, authManager, logger, cfg.Security.AllowRegistration)
@@ -106,8 +125,10 @@ func main() {
 						continue
 					}
 					dbManager = mgr
-					userService.SetRepository(dbinfra.NewUserRepository(mgr.Write))
-					profileService.SetRepository(dbinfra.NewProfileRepository(mgr.Write))
+					rawUserRepo := dbinfra.NewUserRepository(mgr.Write)
+					rawProfileRepo := dbinfra.NewProfileRepository(mgr.Write)
+					userService.SetRepository(cacheinfra.NewUserRepository(rawUserRepo, cacheLayer))
+					profileService.SetRepository(cacheinfra.NewProfileRepository(rawProfileRepo, cacheLayer))
 					logger.Info("database connected via background reconnector — all endpoints available")
 					return
 				}
@@ -117,6 +138,15 @@ func main() {
 
 	logBuffer := diagnostics.NewLogBuffer(cfg.Diagnostics.MaxLogLines)
 	diagHandler := diagnostics.NewHandler(logBuffer)
+
+	// Register dependency health checkers for readiness endpoint
+	if dbManager != nil {
+		diagHandler.RegisterDependency("database", dbinfra.NewHealthChecker(dbManager))
+	}
+	if redisClient != nil {
+		diagHandler.RegisterDependency("redis", redisintra.NewHealthChecker(redisClient))
+	}
+
 	userHandler := user.NewHandler(userService)
 	profileHandler := profile.NewHandler(profileService)
 
