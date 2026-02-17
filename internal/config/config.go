@@ -113,10 +113,10 @@ func Load() (*Config, error) {
 			Env:             getenv("APP_ENV", "development"),
 			Version:         getenv("APP_VERSION", "0.1.0"),
 			Port:            getenv("PORT", "8080"),
-			BaseURL:         getenv("BASE_URL", "http://localhost:8080"),
-			AllowedHosts:    splitAndTrim(getenv("ALLOWED_HOSTS", "api.kidpech.app,api.twentcode.com")),
-			AllowedOrigins:  splitAndTrim(getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:5173,http://localhost:8080,https://dev.kidpech.app")),
-			CloudflareHosts: splitAndTrim(getenv("CLOUDFLARE_HOSTS", "api.kidpech.app,api.twentcode.com")),
+			BaseURL:         getenv("BASE_URL", "https://freeapi.kidpech.app"),
+			AllowedHosts:    splitAndTrim(getenv("ALLOWED_HOSTS", "freeapi.kidpech.app")),
+			AllowedOrigins:  splitAndTrim(getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:5173,http://localhost:8080,https://freeapi.kidpech.app")),
+			CloudflareHosts: splitAndTrim(getenv("CLOUDFLARE_HOSTS", "freeapi.kidpech.app")),
 		},
 		Database: DatabaseConfig{
 			Driver:           strings.ToLower(getenv("DB_DRIVER", "postgres")),
@@ -152,7 +152,7 @@ func Load() (*Config, error) {
 			RedisPrefix:       getenv("RATE_LIMIT_PREFIX", "ratelimit"),
 		},
 		Cors: CORSConfig{
-			AllowedOrigins:   splitAndTrim(getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:5173,http://localhost:8080,https://dev.kidpech.app")),
+			AllowedOrigins:   splitAndTrim(getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:5173,http://localhost:8080,https://freeapi.kidpech.app")),
 			AllowedMethods:   splitAndTrim(getenv("CORS_METHODS", "GET,POST,PUT,PATCH,DELETE,OPTIONS")),
 			AllowedHeaders:   splitAndTrim(getenv("CORS_HEADERS", "Authorization,Content-Type,Accept,X-Requested-With")),
 			AllowCredentials: getBool("CORS_ALLOW_CREDENTIALS", true),

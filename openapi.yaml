@@ -6,8 +6,7 @@ info:
     Public demo REST API for testing Flutter or backend integrations. Supports JWT auth,
     profile CRUD, admin dashboards, metrics, and rate limiting.
 servers:
-  - url: https://api.kidpech.app
-  - url: https://api.twentcode.com
+  - url: https://freeapi.kidpech.app
   - url: http://localhost:8080
 components:
   securitySchemes:

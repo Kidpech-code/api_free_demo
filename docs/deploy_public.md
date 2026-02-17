@@ -5,7 +5,7 @@
 ## การตั้งค่าก่อนเริ่ม
 
 1. ตรวจสอบว่า `cloudflared login` เสร็จเรียบร้อย และไฟล์ `~/.cloudflared/config.yml` ชี้ไปที่ tunnel ของบัญชีคุณ (UUID จะตรงกับที่สร้างไว้ใหม่)
-2. confirm ว่า DNS ของ `api.twentcode.com` ชี้ไปที่ tunnel (ใช้ `cloudflared tunnel route dns api-demo api.twentcode.com` ถ้าจำเป็น)
+2. confirm ว่า DNS ของ `freeapi.kidpech.app` ชี้ไปที่ tunnel (ใช้ `cloudflared tunnel route dns api-demo freeapi.kidpech.app` ถ้าจำเป็น)
 3. แก้ไขค่าที่จำเป็นใน `.env` เช่น DSN ของ Postgres/Redis ถ้ารันในพื้นที่ production
 
 ## คำสั่งเดียวจบ
@@ -36,7 +36,7 @@ REGISTRY=ghcr.io/kidpech ./scripts/deploy_public.sh
 หลังจากรันแล้ว ให้เปิด tab ใหม่ และเช็คว่า public endpoint ตอบ:
 
 ```bash
-curl -i https://api.twentcode.com/api/v1/health
+curl -i https://freeapi.kidpech.app/api/v1/health
 ```
 
 ## รายละเอียดที่ script ทำให้
@@ -44,7 +44,7 @@ curl -i https://api.twentcode.com/api/v1/health
 - **ขั้นตอน build+push**: สร้าง binary จากโค้ดปัจจุบัน และ push ไปยัง registry ที่กำหนด
 - **Postgres + API**: เรียก container ใช้ environment เดียวกันกับที่ใช้ local เพื่อให้ API มีฐานข้อมูลพร้อม
 - **Migrations**: รัน `docker run --rm --network demo-net -v $PWD/migrations:/migrations migrate/migrate -path=/migrations/postgres -database "$DB_DSN" up` เพื่อสร้างตารางก่อน API เริ่มรับ traffic
-- **Cloudflare Tunnel**: ใช้ tunnel ที่เคยสร้างไว้ (`api-demo`) เพื่อ expose `https://api.twentcode.com`
+- **Cloudflare Tunnel**: ใช้ tunnel ที่เคยสร้างไว้ (`api-demo`) เพื่อ expose `https://freeapi.kidpech.app`
 
 > ถ้าต้องการเปลี่ยนค่า DSN ที่สคริปต์ใช้ สามารถกำหนด `DB_DSN` ก่อนรัน script ได้ เช่น
 

@@ -1,13 +1,13 @@
 # Cloudflare Tunnel Deployment Guide
 
-This document covers the full lifecycle of exposing `api.twentcode.com` through a Cloudflare Tunnel and wiring it to the Go API.
+This document covers the full lifecycle of exposing `freeapi.kidpech.app` through a Cloudflare Tunnel and wiring it to the Go API.
 
 ## Prerequisites
 
 1. `cloudflared` installed locally or on the host machine.
    - macOS/Linux: `brew install cloudflare/cloudflare/cloudflared`
    - Linux: download from https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/install-and-setup/installation
-2. Logged into Cloudflare: `cloudflared login` opens your browser; select the zone that owns `api.twentcode.com`.
+2. Logged into Cloudflare: `cloudflared login` opens your browser; select the zone that owns `freeapi.kidpech.app`.
 
 ## Tunnel Setup
 
@@ -15,6 +15,7 @@ This document covers the full lifecycle of exposing `api.twentcode.com` through 
    ```bash
    cloudflared tunnel create api-demo
    ```
+
    - Save the generated `Tunnel ID` and credentials file (`~/.cloudflared/<tunnel-id>.json`).
 2. Configure `~/.cloudflared/config.yml` (or `/etc/cloudflared/config.yml` on Linux):
 
@@ -23,23 +24,23 @@ This document covers the full lifecycle of exposing `api.twentcode.com` through 
    credentials-file: ~/.cloudflared/<tunnel-id>.json
 
    ingress:
-     - hostname: api.twentcode.com
+     - hostname: freeapi.kidpech.app
        service: http://localhost:8080
      - service: http_status:404
    ```
 
 3. DNS routing in Cloudflare:
-   - Create a CNAME for `api.twentcode.com` pointing to `<tunnel-id>.cfargotunnel.com`.
+   - Create a CNAME for `freeapi.kidpech.app` pointing to `<tunnel-id>.cfargotunnel.com`.
    - Ensure the record is proxied (orange cloud).
 
 ## Running the Tunnel and API Together
 
 1. Export production-ready environment variables (see `.env.example` for defaults):
    ```bash
-   export BASE_URL=https://api.twentcode.com
+   export BASE_URL=https://freeapi.kidpech.app
    export APP_ENV=production
-   export ALLOWED_HOSTS=api.twentcode.com
-   export CORS_ORIGINS=https://api.twentcode.com
+   export ALLOWED_HOSTS=freeapi.kidpech.app
+   export CORS_ORIGINS=https://freeapi.kidpech.app
    export JWT_SECRET=your-strong-secret
    export JWT_REFRESH_SECRET=your-other-secret
    ```

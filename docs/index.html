@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free API — Learn & Play | freeapi.kidpech.app</title>
+<meta name="description" content="Free REST API for learning — JWT Auth, CRUD, Pagination. ใช้ฟรี ไม่ต้องสมัคร ไม่มีค่าใช้จ่าย">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0f;--surface:#12121a;--surface2:#1a1a28;--surface3:#222236;
+  --border:#2a2a40;--border2:#3a3a55;
+  --text:#e8e8f0;--text2:#a0a0b8;--text3:#6a6a85;
+  --accent:#6c5ce7;--accent2:#a29bfe;--accent3:#fd79a8;
+  --green:#00b894;--green2:#55efc4;--orange:#fdcb6e;--red:#ff7675;--blue:#74b9ff;
+  --gradient:linear-gradient(135deg,#6c5ce7 0%,#a29bfe 50%,#fd79a8 100%);
+  --gradient2:linear-gradient(135deg,#00b894 0%,#55efc4 100%);
+  --radius:12px;--radius2:16px;--radius3:24px;
+  --shadow:0 4px 24px rgba(0,0,0,.4);
+  --shadow2:0 8px 40px rgba(108,92,231,.15);
+  --font:'Inter',system-ui,-apple-system,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:8px}
+::-webkit-scrollbar-track{background:var(--surface)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+
+/* Animated background */
+.bg-grid{position:fixed;inset:0;z-index:-1;
+  background-image:radial-gradient(circle at 1px 1px,rgba(108,92,231,.08) 1px,transparent 0);
+  background-size:40px 40px;
+}
+.bg-glow{position:fixed;z-index:-1;border-radius:50%;filter:blur(120px);opacity:.15;animation:float 20s ease-in-out infinite}
+.bg-glow.g1{width:600px;height:600px;top:-200px;left:-100px;background:var(--accent)}
+.bg-glow.g2{width:500px;height:500px;bottom:-150px;right:-100px;background:var(--accent3);animation-delay:-10s}
+.bg-glow.g3{width:400px;height:400px;top:40%;left:50%;background:var(--green);animation-delay:-5s}
+@keyframes float{0%,100%{transform:translate(0,0)}25%{transform:translate(30px,-40px)}50%{transform:translate(-20px,30px)}75%{transform:translate(40px,20px)}}
+
+/* Navigation */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 2rem;backdrop-filter:blur(20px);background:rgba(10,10,15,.8);border-bottom:1px solid var(--border);transition:all .3s}
+nav .nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px}
+nav .logo{font-weight:800;font-size:1.2rem;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
+nav .nav-links{display:flex;gap:2rem;list-style:none}
+nav .nav-links a{color:var(--text2);text-decoration:none;font-size:.9rem;font-weight:500;transition:color .2s;position:relative}
+nav .nav-links a:hover{color:var(--text)}
+nav .nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:2px;background:var(--gradient);transition:width .3s}
+nav .nav-links a:hover::after{width:100%}
+.nav-badge{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .8rem;border-radius:20px;background:rgba(108,92,231,.15);border:1px solid rgba(108,92,231,.3);color:var(--accent2);font-size:.75rem;font-weight:600;text-decoration:none;transition:all .2s}
+.nav-badge:hover{background:rgba(108,92,231,.25);transform:translateY(-1px)}
+@media(max-width:768px){nav .nav-links{display:none}}
+
+/* Hero */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:6rem 2rem 4rem;position:relative}
+.hero-badge{display:inline-flex;align-items:center;gap:.5rem;padding:.5rem 1.2rem;border-radius:99px;background:rgba(108,92,231,.1);border:1px solid rgba(108,92,231,.25);color:var(--accent2);font-size:.85rem;font-weight:600;margin-bottom:2rem;animation:fadeUp .8s ease-out}
+.hero-badge .dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero h1{font-size:clamp(2.5rem,6vw,4.5rem);font-weight:900;line-height:1.1;margin-bottom:1.5rem;animation:fadeUp .8s ease-out .1s both}
+.hero h1 .gradient{background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero .subtitle{font-size:clamp(1rem,2vw,1.3rem);color:var(--text2);max-width:600px;margin:0 auto 3rem;animation:fadeUp .8s ease-out .2s both}
+.hero-actions{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;animation:fadeUp .8s ease-out .3s both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.8rem 1.8rem;border-radius:var(--radius);font-weight:600;font-size:.95rem;text-decoration:none;transition:all .25s;cursor:pointer;border:none;font-family:var(--font)}
+.btn-primary{background:var(--gradient);color:#fff;box-shadow:0 4px 20px rgba(108,92,231,.4)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(108,92,231,.5)}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{background:var(--surface3);border-color:var(--border2);transform:translateY(-2px)}
+.btn-sm{padding:.5rem 1rem;font-size:.8rem;border-radius:8px}
+
+/* Stats Row */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1.5rem;max-width:700px;margin:3rem auto 0;animation:fadeUp .8s ease-out .4s both}
+.stat{text-align:center;padding:1.5rem;border-radius:var(--radius2);background:rgba(255,255,255,.03);border:1px solid var(--border)}
+.stat-value{font-size:2rem;font-weight:800;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-label{font-size:.8rem;color:var(--text3);margin-top:.3rem;font-weight:500}
+
+/* Sections */
+section{padding:5rem 2rem}
+.container{max-width:1200px;margin:0 auto}
+.section-label{display:inline-flex;align-items:center;gap:.4rem;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:var(--accent2);margin-bottom:1rem}
+.section-label .icon{font-size:1rem}
+.section-title{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;margin-bottom:1rem;line-height:1.2}
+.section-desc{color:var(--text2);font-size:1.05rem;max-width:600px;margin-bottom:3rem}
+
+/* Features Grid */
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem}
+.feature-card{padding:2rem;border-radius:var(--radius2);background:var(--surface);border:1px solid var(--border);transition:all .3s;position:relative;overflow:hidden}
+.feature-card:hover{border-color:var(--border2);transform:translateY(-4px);box-shadow:var(--shadow2)}
+.feature-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gradient);opacity:0;transition:opacity .3s}
+.feature-card:hover::before{opacity:1}
+.feature-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:1rem}
+.feature-icon.purple{background:rgba(108,92,231,.15);color:var(--accent2)}
+.feature-icon.green{background:rgba(0,184,148,.15);color:var(--green2)}
+.feature-icon.pink{background:rgba(253,121,168,.15);color:var(--accent3)}
+.feature-icon.blue{background:rgba(116,185,255,.15);color:var(--blue)}
+.feature-icon.orange{background:rgba(253,203,110,.15);color:var(--orange)}
+.feature-card h3{font-size:1.15rem;font-weight:700;margin-bottom:.5rem}
+.feature-card p{color:var(--text2);font-size:.9rem;line-height:1.6}
+
+/* API Explorer */
+.api-section{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.endpoint-group{margin-bottom:2rem}
+.endpoint-group-title{display:flex;align-items:center;gap:.6rem;font-size:1.1rem;font-weight:700;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
+.endpoint-group-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.85rem}
+.endpoint{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:1rem;padding:.8rem 1rem;border-radius:var(--radius);margin-bottom:.5rem;background:var(--surface2);border:1px solid transparent;transition:all .2s;cursor:pointer}
+.endpoint:hover{border-color:var(--border2);background:var(--surface3)}
+.method{font-family:var(--mono);font-size:.7rem;font-weight:700;padding:.25rem .6rem;border-radius:6px;text-transform:uppercase;min-width:60px;text-align:center}
+.method.get{background:rgba(0,184,148,.15);color:var(--green2)}
+.method.post{background:rgba(108,92,231,.15);color:var(--accent2)}
+.method.put{background:rgba(253,203,110,.15);color:var(--orange)}
+.method.patch{background:rgba(116,185,255,.15);color:var(--blue)}
+.method.delete{background:rgba(255,118,117,.15);color:var(--red)}
+.endpoint-path{font-family:var(--mono);font-size:.85rem;color:var(--text)}
+.endpoint-desc{font-size:.8rem;color:var(--text3);text-align:right}
+.auth-badge{font-size:.65rem;padding:.15rem .5rem;border-radius:4px;font-weight:600;display:inline-flex;align-items:center;gap:.3rem}
+.auth-badge.required{background:rgba(253,121,168,.1);color:var(--accent3)}
+.auth-badge.public{background:rgba(0,184,148,.1);color:var(--green2)}
+
+/* Code Blocks */
+.code-tabs{margin-bottom:2rem}
+.tab-bar{display:flex;gap:0;background:var(--surface2);border-radius:var(--radius) var(--radius) 0 0;border:1px solid var(--border);border-bottom:none;overflow-x:auto}
+.tab-btn{padding:.6rem 1.2rem;font-size:.8rem;font-weight:600;color:var(--text3);border:none;background:none;cursor:pointer;font-family:var(--font);transition:all .2s;border-bottom:2px solid transparent;white-space:nowrap}
+.tab-btn.active{color:var(--accent2);border-bottom-color:var(--accent)}
+.tab-btn:hover{color:var(--text)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+pre{background:var(--surface);border:1px solid var(--border);border-radius:0 0 var(--radius) var(--radius);padding:1.5rem;overflow-x:auto;position:relative}
+pre code{font-family:var(--mono);font-size:.82rem;line-height:1.8;color:var(--text)}
+.copy-btn{position:absolute;top:.8rem;right:.8rem;padding:.35rem .7rem;border-radius:6px;background:var(--surface3);border:1px solid var(--border);color:var(--text2);font-size:.7rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:var(--font)}
+.copy-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* Syntax highlighting */
+.k{color:var(--accent2)}.s{color:var(--green2)}.c{color:var(--text3)}.n{color:var(--orange)}.p{color:var(--accent3)}.u{color:var(--blue)}
+
+/* Interactive Demo */
+.demo-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2);overflow:hidden}
+.demo-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;background:var(--surface2);border-bottom:1px solid var(--border)}
+.demo-header h4{font-size:.9rem;font-weight:700;display:flex;align-items:center;gap:.5rem}
+.demo-body{padding:1.5rem}
+.demo-url{display:flex;align-items:center;gap:.5rem;padding:.6rem 1rem;border-radius:8px;background:var(--bg);border:1px solid var(--border);margin-bottom:1rem;font-family:var(--mono);font-size:.82rem;overflow-x:auto}
+.demo-url .method-tag{flex-shrink:0}
+.demo-response{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem;font-family:var(--mono);font-size:.8rem;line-height:1.7;max-height:300px;overflow-y:auto;white-space:pre-wrap}
+.try-btn{background:var(--gradient);color:#fff;border:none;padding:.5rem 1.2rem;border-radius:8px;font-weight:600;font-size:.82rem;cursor:pointer;font-family:var(--font);transition:all .2s}
+.try-btn:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(108,92,231,.4)}
+.try-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+/* Steps / Tutorial */
+.steps{counter-reset:step;max-width:800px}
+.step{display:flex;gap:2rem;margin-bottom:3rem;position:relative}
+.step::before{counter-increment:step;content:counter(step);width:48px;height:48px;flex-shrink:0;border-radius:50%;background:var(--gradient);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;box-shadow:0 4px 20px rgba(108,92,231,.3)}
+.step::after{content:'';position:absolute;left:23px;top:56px;bottom:-2rem;width:2px;background:linear-gradient(to bottom,var(--accent),transparent)}
+.step:last-child::after{display:none}
+.step-content{flex:1}
+.step-content h3{font-size:1.2rem;font-weight:700;margin-bottom:.5rem}
+.step-content p{color:var(--text2);font-size:.95rem;margin-bottom:1rem}
+.step-content pre{border-radius:var(--radius);margin-top:.5rem}
+
+/* Tech Stack */
+.tech-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem}
+.tech-card{display:flex;align-items:center;gap:.8rem;padding:1rem;border-radius:var(--radius);background:var(--surface);border:1px solid var(--border);transition:all .2s}
+.tech-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.tech-logo{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.2rem}
+.tech-card .tech-name{font-weight:600;font-size:.85rem}
+.tech-card .tech-role{font-size:.7rem;color:var(--text3)}
+
+/* Footer */
+footer{padding:3rem 2rem;border-top:1px solid var(--border);text-align:center}
+footer p{color:var(--text3);font-size:.85rem}
+footer a{color:var(--accent2);text-decoration:none}
+footer a:hover{text-decoration:underline}
+
+/* Responsive */
+@media(max-width:768px){
+  .endpoint{grid-template-columns:auto 1fr;gap:.5rem}
+  .endpoint-desc{display:none}
+  .step{flex-direction:column;gap:1rem}
+  .step::after{display:none}
+  section{padding:3rem 1rem}
+  .hero{padding:5rem 1.5rem 3rem}
+}
+
+/* Animations - intersection observer */
+.reveal{opacity:0;transform:translateY(30px);transition:all .6s cubic-bezier(.16,1,.3,1)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+/* Loading spinner */
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Toast */
+.toast{position:fixed;bottom:2rem;right:2rem;padding:.8rem 1.5rem;border-radius:var(--radius);background:var(--green);color:#fff;font-weight:600;font-size:.85rem;transform:translateY(100px);opacity:0;transition:all .3s;z-index:200}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* Confetti canvas */
+#confetti{position:fixed;inset:0;z-index:300;pointer-events:none}
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="bg-glow g1"></div>
+<div class="bg-glow g2"></div>
+<div class="bg-glow g3"></div>
+<canvas id="confetti"></canvas>
+
+<!-- Navigation -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="logo">⚡ Free API</a>
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#quickstart">Quick Start</a></li>
+      <li><a href="#endpoints">Endpoints</a></li>
+      <li><a href="#playground">Playground</a></li>
+      <li><a href="#examples">Examples</a></li>
+    </ul>
+    <a href="https://github.com/kidpech/api_free_demo" target="_blank" class="nav-badge">
+      <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      GitHub
+    </a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero" id="home">
+  <div class="hero-badge">
+    <span class="dot"></span>
+    Live & Free — ใช้ได้เลยตอนนี้
+  </div>
+  <h1>
+    API ฟรีสำหรับ<br><span class="gradient">เรียนรู้อย่างสนุก</span>
+  </h1>
+  <p class="subtitle">
+    REST API ที่พร้อมใช้งาน — JWT Auth, Profile CRUD, Pagination, Rate Limiting<br>
+    ออกแบบมาเพื่อให้คุณ <strong>ทดลอง เล่น เรียนรู้</strong> ได้ทันที ไม่ต้องตั้ง server เอง
+  </p>
+  <div class="hero-actions">
+    <a href="#quickstart" class="btn btn-primary">🚀 เริ่มเลย — 30 วินาที</a>
+    <a href="#playground" class="btn btn-secondary">🎮 ลองเล่น Playground</a>
+  </div>
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">15+</div>
+      <div class="stat-label">API Endpoints</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">0 ฿</div>
+      <div class="stat-label">ค่าใช้จ่าย</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">&lt;50ms</div>
+      <div class="stat-label">Response Time</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">24/7</div>
+      <div class="stat-label">Always On</div>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section id="features">
+  <div class="container reveal">
+    <span class="section-label"><span class="icon">✨</span> Features</span>
+    <h2 class="section-title">ทุกอย่างที่ต้องการ — พร้อมใช้</h2>
+    <p class="section-desc">ไม่ว่าจะทำ Flutter, React, Vue หรือ Backend integration — API นี้ครอบคลุมทุก use case ที่ต้องการ</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon purple">🔐</div>
+        <h3>JWT Authentication</h3>
+        <p>Register, Login, Refresh Token — ระบบ auth ครบวงจร เรียนรู้วิธีจัดการ token อย่างถูกต้อง</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon green">📝</div>
+        <h3>Full CRUD Operations</h3>
+        <p>Create, Read, Update (PUT/PATCH), Delete — รองรับ Bulk operations, Soft delete, Version control</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon pink">📄</div>
+        <h3>Pagination & Search</h3>
+        <p>Offset-based, Cursor-based pagination — Full-text search พร้อม filter ที่ยืดหยุ่น</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon blue">🛡️</div>
+        <h3>Rate Limiting</h3>
+        <p>60 requests/min ต่อ IP — เรียนรู้วิธีจัดการ 429 Too Many Requests อย่าง graceful</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon orange">👥</div>
+        <h3>Role-based Access</h3>
+        <p>User & Admin roles — เรียนรู้ระบบสิทธิ์ middleware, protected routes, admin-only endpoints</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon purple">⚡</div>
+        <h3>Production-grade</h3>
+        <p>Structured logging, Prometheus metrics, Sentry error tracking — เหมือน API ระดับ production จริง</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Quick Start -->
+<section id="quickstart" class="api-section">
+  <div class="container reveal">
+    <span class="section-label"><span class="icon">🚀</span> Quick Start</span>
+    <h2 class="section-title">เริ่มใช้ใน 30 วินาที</h2>
+    <p class="section-desc">ไม่ต้อง setup อะไรเลย — แค่ copy คำสั่ง แล้ววาง!</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <h3>ลอง Health Check ก่อน</h3>
+          <p>เช็คว่า API ออนไลน์อยู่ — ถ้าได้ <code>{"status":"ok"}</code> แสดงว่าพร้อมใช้งาน!</p>
+          <pre><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button><code><span class="k">curl</span> <span class="u">https://freeapi.kidpech.app/api/v1/health</span></code></pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <h3>สมัครสมาชิก</h3>
+          <p>สร้าง account ใหม่ — จะได้ access token กลับมาใช้ทันที</p>
+          <pre><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button><code><span class="k">curl</span> -X POST <span class="u">https://freeapi.kidpech.app/api/v1/auth/register</span> \
+  -H <span class="s">"Content-Type: application/json"</span> \
+  -d <span class="s">'{
+    "email": "you@example.com",
+    "password": "MySecret123",
+    "name": "Your Name"
+  }'</span></code></pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <h3>Login & รับ Token</h3>
+          <p>ใช้ email/password ที่สมัครไว้ — จะได้ <code>access_token</code> และ <code>refresh_token</code></p>
+          <pre><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button><code><span class="k">curl</span> -X POST <span class="u">https://freeapi.kidpech.app/api/v1/auth/login</span> \
+  -H <span class="s">"Content-Type: application/json"</span> \
+  -d <span class="s">'{"email": "you@example.com", "password": "MySecret123"}'</span></code></pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <h3>สร้าง Profile ✨</h3>
+          <p>ใช้ token ที่ได้มาเรียก protected endpoint — สร้างโปรไฟล์แรกของคุณ!</p>
+          <pre><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button><code><span class="k">curl</span> -X POST <span class="u">https://freeapi.kidpech.app/api/v1/profiles</span> \
+  -H <span class="s">"Authorization: Bearer YOUR_ACCESS_TOKEN"</span> \
+  -H <span class="s">"Content-Type: application/json"</span> \
+  -d <span class="s">'{
+    "first_name": "สมชาย",
+    "last_name": "ใจดี",
+    "bio": "กำลังเรียนรู้ API 🚀"
+  }'</span></code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Endpoints Reference -->
+<section id="endpoints">
+  <div class="container reveal">
+    <span class="section-label"><span class="icon">📡</span> API Reference</span>
+    <h2 class="section-title">ทุก Endpoint ที่มี</h2>
+    <p class="section-desc">Base URL: <code style="background:var(--surface2);padding:.2rem .5rem;border-radius:4px;font-family:var(--mono);font-size:.85rem">https://freeapi.kidpech.app</code></p>
+
+    <!-- System -->
+    <div class="endpoint-group">
+      <div class="endpoint-group-title">
+        <div class="endpoint-group-icon" style="background:rgba(0,184,148,.15);color:var(--green2)">💚</div>
+        System
+      </div>
+      <div class="endpoint" onclick="tryEndpoint('GET','/api/v1/health')">
+        <span class="method get">GET</span>
+        <span class="endpoint-path">/api/v1/health</span>
+        <span class="auth-badge public">🔓 Public</span>
+      </div>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <span class="endpoint-path">/api/v1/metrics</span>
+        <span class="auth-badge public">🔓 Public</span>
+      </div>
+    </div>
+
+    <!-- Auth -->
+    <div class="endpoint-group">
+      <div class="endpoint-group-title">
+        <div class="endpoint-group-icon" style="background:rgba(108,92,231,.15);color:var(--accent2)">🔐</div>
+        Authentication
+      </div>
+      <div class="endpoint">
+        <span class="method post">POST</span>
+        <span class="endpoint-path">/api/v1/auth/register</span>
+        <span class="auth-badge public">🔓 Public</span>
+      </div>
+      <div class="endpoint">
+        <span class="method post">POST</span>
+        <span class="endpoint-path">/api/v1/auth/login</span>
+        <span class="auth-badge public">🔓 Public</span>
+      </div>
+      <div class="endpoint">
+        <span class="method post">POST</span>
+        <span class="endpoint-path">/api/v1/auth/refresh</span>
+        <span class="auth-badge public">🔓 Public</span>
+      </div>
+    </div>
+
+    <!-- User -->
+    <div class="endpoint-group">
+      <div class="endpoint-group-title">
+        <div class="endpoint-group-icon" style="background:rgba(253,121,168,.15);color:var(--accent3)">👤</div>
+        User Management
+      </div>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <span class="endpoint-path">/api/v1/users/me</span>
+        <span class="auth-badge required">🔒 Auth</span>
+      </div>
+      <div class="endpoint">
+        <span class="method put">PUT</span>
+        <span class="endpoint-path">/api/v1/users/me</span>
+        <span class="auth-badge required">🔒 Auth</span>
+      </div>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <span class="endpoint-path">/api/v1/admin/users</span>
+        <span class="auth-badge required">🔒 Admin</span>
+      </div>
+    </div>
+
+    <!-- Profiles -->
+    <div class="endpoint-group">
+      <div class="endpoint-group-title">
+        <div class="endpoint-group-icon" style="background:rgba(116,185,255,.15);color:var(--blue)">📋</div>
+        Profiles — Full CRUD
+      </div>
+      <div class="endpoint">
+        <span class="method post">POST</span>
+        <span class="endpoint-path">/api/v1/profiles</span>
+        <span class="auth-badge required">🔒 Auth</span>
+      </div>
+      <div class="endpoint">
+        <span class="method post">POST</span>
+        <span class="endpoint-path">/api/v1/profiles/bulk</span>
+        <span class="auth-badge required">🔒 Auth</span>
+      </div>
+      <div class="endpoint" onclick="tryEndpoint('GET','/api/v1/profiles?limit=5')">
+        <span class="method get">GET</span>
+        <span class="endpoint-path">/api/v1/profiles</span>
+        <span class="auth-badge required">🔒 Auth</span>
+      </div>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <span class="endpoint-path">/api/v1/profiles/:id</span>
+        <span class="auth-badge required">🔒 Auth</span>
+      </div>
+      <div class="endpoint">
+        <span class="method put">PUT</span>
+        <span class="endpoint-path">/api/v1/profiles/:id</span>
+        <span class="auth-badge required">🔒 Auth</span>
+      </div>
+      <div class="endpoint">
+        <span class="method patch">PATCH</span>
+        <span class="endpoint-path">/api/v1/profiles/:id</span>
+        <span class="auth-badge required">🔒 Auth</span>
+      </div>
+      <div class="endpoint">
+        <span class="method delete">DELETE</span>
+        <span class="endpoint-path">/api/v1/profiles/:id</span>
+        <span class="auth-badge required">🔒 Auth</span>
+      </div>
+      <div class="endpoint">
+        <span class="method delete">DELETE</span>
+        <span class="endpoint-path">/api/v1/profiles/bulk</span>
+        <span class="auth-badge required">🔒 Auth</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Interactive Playground -->
+<section id="playground" class="api-section">
+  <div class="container reveal">
+    <span class="section-label"><span class="icon">🎮</span> Playground</span>
+    <h2 class="section-title">ลองเล่นเลย — ไม่ต้องเปิด Terminal</h2>
+    <p class="section-desc">กดปุ่มแล้วเห็นผลทันที — เรียนรู้ว่า API ตอบกลับยังไง</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:2rem" class="playground-grid">
+      <!-- Health -->
+      <div class="demo-box">
+        <div class="demo-header">
+          <h4>💚 Health Check</h4>
+          <button class="try-btn" onclick="fireRequest(this,'GET','/api/v1/health')">▶ ลองเลย</button>
+        </div>
+        <div class="demo-body">
+          <div class="demo-url"><span class="method-tag method get" style="font-size:.65rem;padding:.15rem .4rem">GET</span>/api/v1/health</div>
+          <div class="demo-response" id="res-health">
+<span class="c">// กดปุ่ม "▶ ลองเลย" เพื่อเห็นผลลัพธ์</span>
+</div>
+        </div>
+      </div>
+
+      <!-- Register -->
+      <div class="demo-box">
+        <div class="demo-header">
+          <h4>🔐 สมัครสมาชิก</h4>
+          <button class="try-btn" onclick="fireRegister(this)">▶ สมัครเลย</button>
+        </div>
+        <div class="demo-body">
+          <div class="demo-url"><span class="method-tag method post" style="font-size:.65rem;padding:.15rem .4rem">POST</span>/api/v1/auth/register</div>
+          <div class="demo-response" id="res-register">
+<span class="c">// ระบบจะสร้าง account ให้อัตโนมัติ
+// แล้วเก็บ token ไว้ใช้กับ endpoint อื่น</span>
+</div>
+        </div>
+      </div>
+
+      <!-- Login -->
+      <div class="demo-box">
+        <div class="demo-header">
+          <h4>🔑 Login</h4>
+          <button class="try-btn" onclick="fireLogin(this)">▶ Login เลย</button>
+        </div>
+        <div class="demo-body">
+          <div class="demo-url"><span class="method-tag method post" style="font-size:.65rem;padding:.15rem .4rem">POST</span>/api/v1/auth/login</div>
+          <div class="demo-response" id="res-login">
+<span class="c">// ต้องสมัครสมาชิกก่อน แล้วค่อย login</span>
+</div>
+        </div>
+      </div>
+
+      <!-- Get Me -->
+      <div class="demo-box">
+        <div class="demo-header">
+          <h4>👤 ข้อมูลฉัน</h4>
+          <button class="try-btn" onclick="fireAuthGet(this,'GET','/api/v1/users/me','res-me')">▶ ดูข้อมูล</button>
+        </div>
+        <div class="demo-body">
+          <div class="demo-url"><span class="method-tag method get" style="font-size:.65rem;padding:.15rem .4rem">GET</span>/api/v1/users/me</div>
+          <div class="demo-response" id="res-me">
+<span class="c">// ต้อง login ก่อน — จะใช้ token อัตโนมัติ</span>
+</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-box">
+      <div class="demo-header">
+        <h4>📋 สร้าง Profile + ดู List</h4>
+        <button class="try-btn" onclick="fireCreateAndList(this)">▶ สร้างแล้วดู</button>
+      </div>
+      <div class="demo-body">
+        <div class="demo-url"><span class="method-tag method post" style="font-size:.65rem;padding:.15rem .4rem">POST</span>/api/v1/profiles → <span class="method-tag method get" style="font-size:.65rem;padding:.15rem .4rem">GET</span>/api/v1/profiles</div>
+        <div class="demo-response" id="res-profiles">
+<span class="c">// จะสร้าง profile ให้อัตโนมัติ แล้วแสดง list ทั้งหมด
+// ต้อง login ก่อน</span>
+</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Code Examples -->
+<section id="examples">
+  <div class="container reveal">
+    <span class="section-label"><span class="icon">💻</span> Code Examples</span>
+    <h2 class="section-title">ใช้จากภาษาที่คุณถนัด</h2>
+    <p class="section-desc">Copy → Paste → Run — ใช้ได้ทันทีกับทุกภาษา</p>
+
+    <div class="code-tabs">
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab(event,'curl')">cURL</button>
+        <button class="tab-btn" onclick="switchTab(event,'js')">JavaScript</button>
+        <button class="tab-btn" onclick="switchTab(event,'python')">Python</button>
+        <button class="tab-btn" onclick="switchTab(event,'dart')">Flutter/Dart</button>
+        <button class="tab-btn" onclick="switchTab(event,'go')">Go</button>
+      </div>
+
+      <div class="tab-content active" id="tab-curl">
+        <pre><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button><code><span class="c"># 1. Register</span>
+<span class="k">curl</span> -X POST <span class="u">https://freeapi.kidpech.app/api/v1/auth/register</span> \
+  -H <span class="s">"Content-Type: application/json"</span> \
+  -d <span class="s">'{"email":"test@example.com","password":"MySecret123","name":"Demo"}'</span>
+
+<span class="c"># 2. Login → save token</span>
+<span class="k">TOKEN</span>=$(<span class="k">curl</span> -s -X POST <span class="u">https://freeapi.kidpech.app/api/v1/auth/login</span> \
+  -H <span class="s">"Content-Type: application/json"</span> \
+  -d <span class="s">'{"email":"test@example.com","password":"MySecret123"}'</span> | jq -r '.tokens.access_token')
+
+<span class="c"># 3. Create profile</span>
+<span class="k">curl</span> -X POST <span class="u">https://freeapi.kidpech.app/api/v1/profiles</span> \
+  -H <span class="s">"Authorization: Bearer $TOKEN"</span> \
+  -H <span class="s">"Content-Type: application/json"</span> \
+  -d <span class="s">'{"first_name":"Demo","last_name":"User","bio":"Hello API!"}'</span>
+
+<span class="c"># 4. List profiles</span>
+<span class="k">curl</span> <span class="u">https://freeapi.kidpech.app/api/v1/profiles?limit=10</span> \
+  -H <span class="s">"Authorization: Bearer $TOKEN"</span></code></pre>
+      </div>
+
+      <div class="tab-content" id="tab-js">
+        <pre><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button><code><span class="k">const</span> BASE = <span class="s">'https://freeapi.kidpech.app/api/v1'</span>;
+
+<span class="c">// Register</span>
+<span class="k">const</span> registerRes = <span class="k">await</span> fetch(`${BASE}/auth/register`, {
+  method: <span class="s">'POST'</span>,
+  headers: { <span class="s">'Content-Type'</span>: <span class="s">'application/json'</span> },
+  body: JSON.stringify({
+    email: <span class="s">'test@example.com'</span>,
+    password: <span class="s">'MySecret123'</span>,
+    name: <span class="s">'Demo User'</span>
+  })
+});
+
+<span class="c">// Login</span>
+<span class="k">const</span> loginRes = <span class="k">await</span> fetch(`${BASE}/auth/login`, {
+  method: <span class="s">'POST'</span>,
+  headers: { <span class="s">'Content-Type'</span>: <span class="s">'application/json'</span> },
+  body: JSON.stringify({
+    email: <span class="s">'test@example.com'</span>,
+    password: <span class="s">'MySecret123'</span>
+  })
+});
+<span class="k">const</span> { tokens } = <span class="k">await</span> loginRes.json();
+
+<span class="c">// Create Profile</span>
+<span class="k">const</span> profile = <span class="k">await</span> fetch(`${BASE}/profiles`, {
+  method: <span class="s">'POST'</span>,
+  headers: {
+    <span class="s">'Content-Type'</span>: <span class="s">'application/json'</span>,
+    <span class="s">'Authorization'</span>: `Bearer ${tokens.access_token}`
+  },
+  body: JSON.stringify({
+    first_name: <span class="s">'Demo'</span>,
+    last_name: <span class="s">'User'</span>,
+    bio: <span class="s">'Made with JavaScript 🚀'</span>
+  })
+}).<span class="k">then</span>(r => r.json());
+
+console.log(profile);</code></pre>
+      </div>
+
+      <div class="tab-content" id="tab-python">
+        <pre><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button><code><span class="k">import</span> requests
+
+BASE = <span class="s">"https://freeapi.kidpech.app/api/v1"</span>
+
+<span class="c"># Register</span>
+requests.post(f<span class="s">"{BASE}/auth/register"</span>, json={
+    <span class="s">"email"</span>: <span class="s">"test@example.com"</span>,
+    <span class="s">"password"</span>: <span class="s">"MySecret123"</span>,
+    <span class="s">"name"</span>: <span class="s">"Demo"</span>
+})
+
+<span class="c"># Login</span>
+res = requests.post(f<span class="s">"{BASE}/auth/login"</span>, json={
+    <span class="s">"email"</span>: <span class="s">"test@example.com"</span>,
+    <span class="s">"password"</span>: <span class="s">"MySecret123"</span>
+})
+token = res.json()[<span class="s">"tokens"</span>][<span class="s">"access_token"</span>]
+headers = {<span class="s">"Authorization"</span>: f<span class="s">"Bearer {token}"</span>}
+
+<span class="c"># Create profile</span>
+profile = requests.post(f<span class="s">"{BASE}/profiles"</span>,
+    headers=headers,
+    json={<span class="s">"first_name"</span>: <span class="s">"Demo"</span>, <span class="s">"last_name"</span>: <span class="s">"User"</span>}
+).json()
+
+<span class="c"># List profiles</span>
+profiles = requests.get(f<span class="s">"{BASE}/profiles?limit=10"</span>,
+    headers=headers
+).json()
+
+print(profiles)</code></pre>
+      </div>
+
+      <div class="tab-content" id="tab-dart">
+        <pre><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button><code><span class="k">import</span> <span class="s">'package:http/http.dart'</span> <span class="k">as</span> http;
+<span class="k">import</span> <span class="s">'dart:convert'</span>;
+
+<span class="k">const</span> base = <span class="s">'https://freeapi.kidpech.app/api/v1'</span>;
+
+<span class="c">// Register</span>
+<span class="k">await</span> http.post(
+  Uri.parse(<span class="s">'$base/auth/register'</span>),
+  headers: {<span class="s">'Content-Type'</span>: <span class="s">'application/json'</span>},
+  body: jsonEncode({
+    <span class="s">'email'</span>: <span class="s">'test@example.com'</span>,
+    <span class="s">'password'</span>: <span class="s">'MySecret123'</span>,
+    <span class="s">'name'</span>: <span class="s">'Demo'</span>,
+  }),
+);
+
+<span class="c">// Login</span>
+<span class="k">final</span> loginRes = <span class="k">await</span> http.post(
+  Uri.parse(<span class="s">'$base/auth/login'</span>),
+  headers: {<span class="s">'Content-Type'</span>: <span class="s">'application/json'</span>},
+  body: jsonEncode({
+    <span class="s">'email'</span>: <span class="s">'test@example.com'</span>,
+    <span class="s">'password'</span>: <span class="s">'MySecret123'</span>,
+  }),
+);
+<span class="k">final</span> token = jsonDecode(loginRes.body)[<span class="s">'tokens'</span>][<span class="s">'access_token'</span>];
+
+<span class="c">// Create Profile</span>
+<span class="k">final</span> profileRes = <span class="k">await</span> http.post(
+  Uri.parse(<span class="s">'$base/profiles'</span>),
+  headers: {
+    <span class="s">'Content-Type'</span>: <span class="s">'application/json'</span>,
+    <span class="s">'Authorization'</span>: <span class="s">'Bearer $token'</span>,
+  },
+  body: jsonEncode({
+    <span class="s">'first_name'</span>: <span class="s">'Demo'</span>,
+    <span class="s">'last_name'</span>: <span class="s">'User'</span>,
+    <span class="s">'bio'</span>: <span class="s">'Made with Flutter 💙'</span>,
+  }),
+);
+print(jsonDecode(profileRes.body));</code></pre>
+      </div>
+
+      <div class="tab-content" id="tab-go">
+        <pre><button class="copy-btn" onclick="copyCode(this)">📋 Copy</button><code><span class="k">package</span> main
+
+<span class="k">import</span> (
+    <span class="s">"bytes"</span>
+    <span class="s">"encoding/json"</span>
+    <span class="s">"fmt"</span>
+    <span class="s">"net/http"</span>
+)
+
+<span class="k">const</span> base = <span class="s">"https://freeapi.kidpech.app/api/v1"</span>
+
+<span class="k">func</span> main() {
+    <span class="c">// Login</span>
+    body, _ := json.Marshal(map[string]string{
+        <span class="s">"email"</span>:    <span class="s">"test@example.com"</span>,
+        <span class="s">"password"</span>: <span class="s">"MySecret123"</span>,
+    })
+    resp, _ := http.Post(base+<span class="s">"/auth/login"</span>,
+        <span class="s">"application/json"</span>, bytes.NewBuffer(body))
+    
+    <span class="k">var</span> result map[string]interface{}
+    json.NewDecoder(resp.Body).Decode(&result)
+    tokens := result[<span class="s">"tokens"</span>].(map[string]interface{})
+    token := tokens[<span class="s">"access_token"</span>].(string)
+
+    <span class="c">// Get Me</span>
+    req, _ := http.NewRequest(<span class="s">"GET"</span>, base+<span class="s">"/users/me"</span>, nil)
+    req.Header.Set(<span class="s">"Authorization"</span>, <span class="s">"Bearer "</span>+token)
+    resp, _ = http.DefaultClient.Do(req)
+    json.NewDecoder(resp.Body).Decode(&result)
+    fmt.Println(result)
+}</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Tech Stack -->
+<section id="tech">
+  <div class="container reveal">
+    <span class="section-label"><span class="icon">🔧</span> Tech Stack</span>
+    <h2 class="section-title">สร้างด้วยเทคโนโลยีระดับ Production</h2>
+    <p class="section-desc">เรียนรู้ได้ว่า API จริงๆ ใช้อะไรบ้าง</p>
+    <div class="tech-grid">
+      <div class="tech-card">
+        <div class="tech-logo" style="background:rgba(0,173,239,.15)">🐹</div>
+        <div><div class="tech-name">Go 1.23</div><div class="tech-role">Language</div></div>
+      </div>
+      <div class="tech-card">
+        <div class="tech-logo" style="background:rgba(108,92,231,.15)">⚡</div>
+        <div><div class="tech-name">Gin</div><div class="tech-role">Web Framework</div></div>
+      </div>
+      <div class="tech-card">
+        <div class="tech-logo" style="background:rgba(51,103,145,.15)">🐘</div>
+        <div><div class="tech-name">PostgreSQL</div><div class="tech-role">Database</div></div>
+      </div>
+      <div class="tech-card">
+        <div class="tech-logo" style="background:rgba(220,53,69,.15)">⚡</div>
+        <div><div class="tech-name">Redis</div><div class="tech-role">Cache & Rate Limit</div></div>
+      </div>
+      <div class="tech-card">
+        <div class="tech-logo" style="background:rgba(253,203,110,.15)">🔑</div>
+        <div><div class="tech-name">JWT</div><div class="tech-role">Authentication</div></div>
+      </div>
+      <div class="tech-card">
+        <div class="tech-logo" style="background:rgba(0,184,148,.15)">📊</div>
+        <div><div class="tech-name">Prometheus</div><div class="tech-role">Metrics</div></div>
+      </div>
+      <div class="tech-card">
+        <div class="tech-logo" style="background:rgba(116,185,255,.15)">🐳</div>
+        <div><div class="tech-name">Docker</div><div class="tech-role">Container</div></div>
+      </div>
+      <div class="tech-card">
+        <div class="tech-logo" style="background:rgba(253,121,168,.15)">🚂</div>
+        <div><div class="tech-name">Railway</div><div class="tech-role">Hosting</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="container">
+    <p style="margin-bottom:.5rem;font-size:1rem;font-weight:600;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:inline-block">⚡ Free API by Kidpech</p>
+    <p>Open source · ใช้ฟรี · เรียนรู้สนุก</p>
+    <p style="margin-top:.5rem">
+      <a href="https://github.com/kidpech/api_free_demo">GitHub</a> ·
+      <a href="https://freeapi.kidpech.app/api/v1/health">Health Check</a>
+    </p>
+  </div>
+</footer>
+
+<!-- Toast notification -->
+<div class="toast" id="toast"></div>
+
+<script>
+const BASE = 'https://freeapi.kidpech.app';
+let savedToken = '';
+let savedEmail = '';
+let savedPassword = '';
+
+// Intersection Observer for reveal animations
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// Tab switching
+function switchTab(e, tabId) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  e.target.classList.add('active');
+  document.getElementById('tab-' + tabId).classList.add('active');
+}
+
+// Copy code
+function copyCode(btn) {
+  const code = btn.parentElement.querySelector('code').innerText;
+  navigator.clipboard.writeText(code).then(() => {
+    btn.textContent = '✅ Copied!';
+    setTimeout(() => btn.textContent = '📋 Copy', 2000);
+    showToast('คัดลอกแล้ว! 📋');
+  });
+}
+
+// Toast
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+// Generate random email
+function randomEmail() {
+  const id = Math.random().toString(36).substring(2, 8);
+  return `demo_${id}@playground.test`;
+}
+
+// Pretty JSON
+function pretty(obj) {
+  return JSON.stringify(obj, null, 2);
+}
+
+// Loading state
+function setLoading(btn, loading) {
+  if (loading) {
+    btn.disabled = true;
+    btn.dataset.orig = btn.textContent;
+    btn.innerHTML = '<span class="spinner"></span> Loading...';
+  } else {
+    btn.disabled = false;
+    btn.textContent = btn.dataset.orig || '▶ ลองเลย';
+  }
+}
+
+// Fire simple GET
+async function fireRequest(btn, method, path) {
+  setLoading(btn, true);
+  try {
+    const res = await fetch(BASE + path);
+    const data = await res.json();
+    const id = 'res-' + path.split('/').pop().split('?')[0];
+    const el = btn.closest('.demo-box').querySelector('.demo-response');
+    el.textContent = pretty(data);
+    if (data.status === 'ok') {
+      showToast('API ออนไลน์อยู่! ✅');
+      launchConfetti();
+    }
+  } catch (e) {
+    showToast('Error: ' + e.message);
+  }
+  setLoading(btn, false);
+}
+
+// Register
+async function fireRegister(btn) {
+  setLoading(btn, true);
+  savedEmail = randomEmail();
+  savedPassword = 'DemoPass123!';
+  try {
+    const res = await fetch(BASE + '/api/v1/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: savedEmail, password: savedPassword, name: 'Playground User' })
+    });
+    const data = await res.json();
+    if (data.tokens) {
+      savedToken = data.tokens.access_token;
+      showToast('สมัครสำเร็จ! 🎉 Token saved!');
+      launchConfetti();
+    }
+    document.getElementById('res-register').textContent =
+      `// Email: ${savedEmail}\n// Password: ${savedPassword}\n// Token ถูกบันทึกอัตโนมัติ ✅\n\n` + pretty(data);
+  } catch (e) {
+    document.getElementById('res-register').textContent = '// Error: ' + e.message;
+  }
+  setLoading(btn, false);
+}
+
+// Login
+async function fireLogin(btn) {
+  if (!savedEmail) {
+    showToast('สมัครสมาชิกก่อนนะ! ☝️');
+    return;
+  }
+  setLoading(btn, true);
+  try {
+    const res = await fetch(BASE + '/api/v1/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: savedEmail, password: savedPassword })
+    });
+    const data = await res.json();
+    if (data.tokens) {
+      savedToken = data.tokens.access_token;
+      showToast('Login สำเร็จ! 🔑');
+    }
+    document.getElementById('res-login').textContent = pretty(data);
+  } catch (e) {
+    document.getElementById('res-login').textContent = '// Error: ' + e.message;
+  }
+  setLoading(btn, false);
+}
+
+// Auth GET
+async function fireAuthGet(btn, method, path, resId) {
+  if (!savedToken) {
+    showToast('ต้อง Login ก่อน! 🔐');
+    return;
+  }
+  setLoading(btn, true);
+  try {
+    const res = await fetch(BASE + path, {
+      headers: { 'Authorization': 'Bearer ' + savedToken }
+    });
+    const data = await res.json();
+    document.getElementById(resId).textContent = pretty(data);
+    showToast('สำเร็จ! ✅');
+  } catch (e) {
+    document.getElementById(resId).textContent = '// Error: ' + e.message;
+  }
+  setLoading(btn, false);
+}
+
+// Create + List profiles
+async function fireCreateAndList(btn) {
+  if (!savedToken) {
+    showToast('ต้อง Login ก่อน! 🔐');
+    return;
+  }
+  setLoading(btn, true);
+  const el = document.getElementById('res-profiles');
+  try {
+    // Create
+    const names = ['สมชาย','สมหญิง','นักเรียน','Dev','Tester','Builder'];
+    const name = names[Math.floor(Math.random() * names.length)];
+    const createRes = await fetch(BASE + '/api/v1/profiles', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + savedToken
+      },
+      body: JSON.stringify({
+        first_name: name,
+        last_name: 'API-' + Math.random().toString(36).substring(2,5),
+        bio: 'สร้างจาก Playground 🎮 ' + new Date().toLocaleTimeString()
+      })
+    });
+    const created = await createRes.json();
+
+    // List
+    const listRes = await fetch(BASE + '/api/v1/profiles?limit=5', {
+      headers: { 'Authorization': 'Bearer ' + savedToken }
+    });
+    const list = await listRes.json();
+
+    el.textContent = `// ✅ สร้าง Profile สำเร็จ!\n${pretty(created)}\n\n// 📋 Profiles ทั้งหมด:\n${pretty(list)}`;
+    showToast('สร้าง Profile สำเร็จ! 📋');
+    launchConfetti();
+  } catch (e) {
+    el.textContent = '// Error: ' + e.message;
+  }
+  setLoading(btn, false);
+}
+
+// Try endpoint from the reference section
+function tryEndpoint(method, path) {
+  document.getElementById('playground').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Mini confetti 🎊
+function launchConfetti() {
+  const canvas = document.getElementById('confetti');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const particles = [];
+  const colors = ['#6c5ce7','#a29bfe','#fd79a8','#00b894','#55efc4','#fdcb6e','#74b9ff','#ff7675'];
+
+  for (let i = 0; i < 80; i++) {
+    particles.push({
+      x: canvas.width / 2 + (Math.random() - 0.5) * 200,
+      y: canvas.height / 2,
+      vx: (Math.random() - 0.5) * 15,
+      vy: Math.random() * -18 - 5,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      size: Math.random() * 6 + 3,
+      rotation: Math.random() * 360,
+      rotSpeed: (Math.random() - 0.5) * 10,
+      life: 1
+    });
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let alive = false;
+    particles.forEach(p => {
+      if (p.life <= 0) return;
+      alive = true;
+      p.x += p.vx;
+      p.vy += 0.4;
+      p.y += p.vy;
+      p.rotation += p.rotSpeed;
+      p.life -= 0.012;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rotation * Math.PI / 180);
+      ctx.globalAlpha = p.life;
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+      ctx.restore();
+    });
+    if (alive) requestAnimationFrame(animate);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  animate();
+}
+
+// Responsive playground grid
+const style = document.createElement('style');
+style.textContent = '@media(max-width:768px){.playground-grid{grid-template-columns:1fr!important}}';
+document.head.appendChild(style);
+</script>
+</body>
+</html>

@@ -1,6 +1,9 @@
 package app
 
 import (
+	"net/http"
+	"os"
+
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
@@ -64,6 +67,18 @@ func NewRouter(deps RouterDeps) *gin.Engine {
 
 	deps.UserHandler.RegisterRoutes(api, authMW, adminMW)
 	deps.ProfileHandler.RegisterRoutes(api, authMW)
+
+	// Serve docs page at root
+	r.GET("/", func(c *gin.Context) {
+		// Try local docs/index.html first, fall back to embedded path
+		for _, p := range []string{"docs/index.html", "./docs/index.html"} {
+			if _, err := os.Stat(p); err == nil {
+				c.File(p)
+				return
+			}
+		}
+		c.Redirect(http.StatusTemporaryRedirect, "/api/v1/health")
+	})
 
 	return r
 }
