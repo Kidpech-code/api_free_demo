@@ -132,6 +132,7 @@ func main() {
 	if dbManager != nil {
 		diagHandler.SetDBStatus(true, "")
 		diagHandler.RegisterDependency("database", dbinfra.NewHealthChecker(dbManager))
+		diagHandler.RegisterDependency("users_table", dbinfra.NewTableHealthChecker(dbManager.Write, logger))
 	} else {
 		errMsg := "initial connection failed"
 		if err != nil {
