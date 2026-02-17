@@ -44,24 +44,24 @@ func Connect(ctx context.Context, cfg config.DatabaseConfig, logger *zap.Logger)
 		ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 		pingErr = write.PingContext(ctx)
 		cancel()
-		
+
 		if pingErr == nil {
 			break
 		}
-		
+
 		if logger != nil {
-			logger.Warn("db ping failed, retrying...", 
-				zap.Int("attempt", i+1), 
+			logger.Warn("db ping failed, retrying...",
+				zap.Int("attempt", i+1),
 				zap.Int("max_retries", maxRetries),
 				zap.Error(pingErr))
 		}
-		
+
 		if i < maxRetries-1 {
 			waitTime := time.Duration(i+1) * 2 * time.Second
 			time.Sleep(waitTime)
 		}
 	}
-	
+
 	if pingErr != nil {
 		write.Close()
 		return nil, fmt.Errorf("ping db after %d retries: %w", maxRetries, pingErr)
