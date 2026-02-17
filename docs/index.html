@@ -11,7 +11,7 @@
 <meta property="og:url" content="https://freeapi.kidpech.app">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+Thai:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -26,7 +26,7 @@
   --radius:12px;--radius2:16px;--radius3:24px;
   --shadow:0 4px 24px rgba(0,0,0,.4);
   --shadow2:0 8px 40px rgba(108,92,231,.15);
-  --font:'Inter',system-ui,-apple-system,sans-serif;
+  --font:'Inter','Noto Sans Thai',system-ui,-apple-system,sans-serif;
   --mono:'JetBrains Mono',ui-monospace,monospace;
 }
 html{scroll-behavior:smooth;font-size:16px}
@@ -263,6 +263,16 @@ footer{padding:4rem 2rem 3rem;border-top:1px solid var(--border)}
 .toast{position:fixed;bottom:2rem;right:2rem;padding:.7rem 1.3rem;border-radius:var(--radius);background:var(--green);color:#fff;font-weight:600;font-size:.82rem;transform:translateY(100px);opacity:0;transition:all .3s;z-index:200;box-shadow:0 8px 30px rgba(0,184,148,.3)}
 .toast.show{transform:translateY(0);opacity:1}
 #confetti{position:fixed;inset:0;z-index:300;pointer-events:none}
+
+/* Language Toggle */
+.lang-toggle{display:flex;align-items:center;gap:0;padding:.2rem;border-radius:8px;background:var(--surface2);border:1px solid var(--border);margin-left:.8rem}
+.lang-toggle button{padding:.25rem .55rem;border-radius:6px;border:none;background:none;color:var(--text3);font-size:.72rem;font-weight:700;cursor:pointer;font-family:var(--font);transition:all .2s;letter-spacing:.03em}
+.lang-toggle button.active{background:var(--accent);color:#fff}
+.lang-toggle button:hover:not(.active){color:var(--text)}
+.th{display:none}
+body.thai .th{display:block}
+body.thai span.th,body.thai a.th{display:inline}
+body.thai .en{display:none}
 </style>
 </head>
 <body>
@@ -277,17 +287,21 @@ footer{padding:4rem 2rem 3rem;border-top:1px solid var(--border)}
   <div class="nav-inner">
     <a href="#" class="logo">Free API</a>
     <ul class="nav-links">
-      <li><a href="#features">Features</a></li>
-      <li><a href="#architecture">Architecture</a></li>
-      <li><a href="#quickstart">Quick Start</a></li>
-      <li><a href="#endpoints">Endpoints</a></li>
-      <li><a href="#playground">Playground</a></li>
-      <li><a href="#patterns">Patterns</a></li>
+      <li><a href="#features"><span class="en">Features</span><span class="th">ฟีเจอร์</span></a></li>
+      <li><a href="#architecture"><span class="en">Architecture</span><span class="th">สถาปัตยกรรม</span></a></li>
+      <li><a href="#quickstart"><span class="en">Quick Start</span><span class="th">เริ่มต้นใช้งาน</span></a></li>
+      <li><a href="#endpoints"><span class="en">Endpoints</span><span class="th">Endpoints</span></a></li>
+      <li><a href="#playground"><span class="en">Playground</span><span class="th">ทดลองใช้</span></a></li>
+      <li><a href="#patterns"><span class="en">Patterns</span><span class="th">รูปแบบ</span></a></li>
     </ul>
     <a href="https://github.com/Kidpech-code" target="_blank" class="nav-badge">
       <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
       GitHub
     </a>
+    <div class="lang-toggle">
+      <button class="active" onclick="setLang('en')">EN</button>
+      <button onclick="setLang('th')">TH</button>
+    </div>
   </div>
 </nav>
 
@@ -295,63 +309,67 @@ footer{padding:4rem 2rem 3rem;border-top:1px solid var(--border)}
 <section class="hero" id="home">
   <div class="hero-badge">
     <span class="dot"></span>
-    Production-Grade &mdash; Live &amp; Free
+    <span class="en">Production-Grade &mdash; Live &amp; Free</span>
+    <span class="th">ระดับ Production &mdash; ใช้งานได้ฟรี</span>
   </div>
   <h1>
-    Learn API Integration<br>with <span class="gradient">Real Engineering</span>
+    <span class="en">Learn API Integration<br>with <span class="gradient">Real Engineering</span></span>
+    <span class="th">เรียนรู้การเชื่อมต่อ API<br>ด้วย<span class="gradient">วิศวกรรมจริง</span></span>
   </h1>
   <p class="subtitle">
-    Production-grade REST API built with Clean Architecture &mdash; JWT Auth, CRUD, Rate Limiting, Prometheus Metrics.<br>
-    <strong>Free forever</strong> &mdash; designed for developers who want to learn by doing.
+    <span class="en">Production-grade REST API built with Clean Architecture &mdash; JWT Auth, CRUD, Rate Limiting, Prometheus Metrics.<br>
+    <strong>Free forever</strong> &mdash; designed for developers who want to learn by doing.</span>
+    <span class="th">REST API ระดับ Production สร้างด้วย Clean Architecture &mdash; JWT Auth, CRUD, Rate Limiting, Prometheus Metrics<br>
+    <strong>ฟรีตลอดไป</strong> &mdash; ออกแบบมาสำหรับนักพัฒนาที่อยากเรียนรู้จากการลงมือทำ</span>
   </p>
   <div class="hero-actions">
-    <a href="#quickstart" class="btn btn-primary">Get Started &mdash; 30 seconds</a>
-    <a href="#playground" class="btn btn-secondary">Try Playground</a>
+    <a href="#quickstart" class="btn btn-primary"><span class="en">Get Started &mdash; 30 seconds</span><span class="th">เริ่มต้นใช้งาน &mdash; 30 วินาที</span></a>
+    <a href="#playground" class="btn btn-secondary"><span class="en">Try Playground</span><span class="th">ทดลองใช้งาน</span></a>
   </div>
   <div class="stats">
-    <div class="stat"><div class="stat-value">15+</div><div class="stat-label">Endpoints</div></div>
-    <div class="stat"><div class="stat-value">&lt;50ms</div><div class="stat-label">Latency</div></div>
-    <div class="stat"><div class="stat-value">24/7</div><div class="stat-label">Uptime</div></div>
-    <div class="stat"><div class="stat-value">$0</div><div class="stat-label">Forever Free</div></div>
+    <div class="stat"><div class="stat-value">15+</div><div class="stat-label"><span class="en">Endpoints</span><span class="th">Endpoints</span></div></div>
+    <div class="stat"><div class="stat-value">&lt;50ms</div><div class="stat-label"><span class="en">Latency</span><span class="th">ความเร็ว</span></div></div>
+    <div class="stat"><div class="stat-value">24/7</div><div class="stat-label"><span class="en">Uptime</span><span class="th">ออนไลน์</span></div></div>
+    <div class="stat"><div class="stat-value">$0</div><div class="stat-label"><span class="en">Forever Free</span><span class="th">ฟรีตลอด</span></div></div>
   </div>
 </section>
 
 <!-- Features -->
 <section id="features">
   <div class="container reveal">
-    <span class="section-label">Features</span>
-    <h2 class="section-title">Everything You Need to Learn API Integration</h2>
-    <p class="section-desc">Built with the same patterns used at Uber, Stripe, and Netflix &mdash; scaled down for learning.</p>
+    <span class="section-label"><span class="en">Features</span><span class="th">ฟีเจอร์</span></span>
+    <h2 class="section-title"><span class="en">Everything You Need to Learn API Integration</span><span class="th">ทุกสิ่งที่คุณต้องการเพื่อเรียนรู้การเชื่อมต่อ API</span></h2>
+    <p class="section-desc"><span class="en">Built with the same patterns used at Uber, Stripe, and Netflix &mdash; scaled down for learning.</span><span class="th">สร้างด้วย Pattern เดียวกับที่ Uber, Stripe และ Netflix ใช้ &mdash; ย่อส่วนมาเพื่อการเรียนรู้</span></p>
     <div class="features-grid">
       <div class="feature-card">
         <div class="feature-icon purple">&#x1f510;</div>
         <h3>JWT Authentication</h3>
-        <p>Register, Login, Refresh Token &mdash; complete auth flow with access/refresh token pair and bcrypt password hashing.</p>
+        <p><span class="en">Register, Login, Refresh Token &mdash; complete auth flow with access/refresh token pair and bcrypt password hashing.</span><span class="th">สมัครสมาชิก, เข้าสู่ระบบ, Refresh Token &mdash; ระบบยืนยันตัวตนครบวงจร พร้อม access/refresh token และการเข้ารหัสรหัสผ่านด้วย bcrypt</span></p>
       </div>
       <div class="feature-card">
         <div class="feature-icon green">&#x1f4dd;</div>
         <h3>Full CRUD Operations</h3>
-        <p>Create, Read, Update (PUT &amp; PATCH), Delete &mdash; with Bulk operations, Soft delete, and Version control via ETag.</p>
+        <p><span class="en">Create, Read, Update (PUT &amp; PATCH), Delete &mdash; with Bulk operations, Soft delete, and Version control via ETag.</span><span class="th">สร้าง, อ่าน, แก้ไข (PUT &amp; PATCH), ลบ &mdash; รองรับ Bulk operations, Soft delete และ Version control ผ่าน ETag</span></p>
       </div>
       <div class="feature-card">
         <div class="feature-icon pink">&#x1f4c4;</div>
         <h3>Pagination &amp; Search</h3>
-        <p>Offset-based and cursor-based pagination &mdash; full-text search with flexible filtering and sorting.</p>
+        <p><span class="en">Offset-based and cursor-based pagination &mdash; full-text search with flexible filtering and sorting.</span><span class="th">แบ่งหน้าแบบ Offset-based และ Cursor-based &mdash; ค้นหาแบบ Full-text พร้อมการกรองและเรียงลำดับ</span></p>
       </div>
       <div class="feature-card">
         <div class="feature-icon blue">&#x1f6e1;&#xfe0f;</div>
         <h3>Rate Limiting</h3>
-        <p>60 req/min per IP via Redis sliding window &mdash; learn to handle 429 Too Many Requests gracefully.</p>
+        <p><span class="en">60 req/min per IP via Redis sliding window &mdash; learn to handle 429 Too Many Requests gracefully.</span><span class="th">60 requests/นาที ต่อ IP ผ่าน Redis sliding window &mdash; เรียนรู้การจัดการ 429 Too Many Requests</span></p>
       </div>
       <div class="feature-card">
         <div class="feature-icon orange">&#x1f465;</div>
         <h3>Role-based Access Control</h3>
-        <p>User &amp; Admin roles &mdash; protected routes, admin-only endpoints, middleware-based authorization.</p>
+        <p><span class="en">User &amp; Admin roles &mdash; protected routes, admin-only endpoints, middleware-based authorization.</span><span class="th">สิทธิ์ User &amp; Admin &mdash; เส้นทางที่ป้องกัน, endpoints เฉพาะ admin, การกำหนดสิทธิ์ผ่าน middleware</span></p>
       </div>
       <div class="feature-card">
         <div class="feature-icon purple">&#x1f4ca;</div>
         <h3>Observability Stack</h3>
-        <p>Structured logging (Zap), Prometheus metrics, Sentry error tracking &mdash; full production observability.</p>
+        <p><span class="en">Structured logging (Zap), Prometheus metrics, Sentry error tracking &mdash; full production observability.</span><span class="th">Structured logging (Zap), Prometheus metrics, Sentry error tracking &mdash; ระบบ observability ระดับ production ครบครัน</span></p>
       </div>
     </div>
   </div>
@@ -360,9 +378,9 @@ footer{padding:4rem 2rem 3rem;border-top:1px solid var(--border)}
 <!-- System Architecture -->
 <section id="architecture" class="arch-section">
   <div class="container reveal">
-    <span class="section-label">System Architecture</span>
-    <h2 class="section-title">Clean Architecture &mdash; Production Patterns</h2>
-    <p class="section-desc">Dependency inversion, separation of concerns, and testability at every layer.</p>
+    <span class="section-label"><span class="en">System Architecture</span><span class="th">สถาปัตยกรรมระบบ</span></span>
+    <h2 class="section-title"><span class="en">Clean Architecture &mdash; Production Patterns</span><span class="th">Clean Architecture &mdash; รูปแบบระดับ Production</span></h2>
+    <p class="section-desc"><span class="en">Dependency inversion, separation of concerns, and testability at every layer.</span><span class="th">Dependency inversion, การแยกหน้าที่ และความสามารถในการทดสอบทุกชั้น</span></p>
 
     <div class="arch-diagram">
       <div class="arch-layer client">
@@ -475,22 +493,22 @@ footer{padding:4rem 2rem 3rem;border-top:1px solid var(--border)}
 <!-- Quick Start -->
 <section id="quickstart">
   <div class="container reveal">
-    <span class="section-label">Quick Start</span>
-    <h2 class="section-title">Start in 30 Seconds</h2>
-    <p class="section-desc">No setup needed &mdash; copy, paste, run.</p>
+    <span class="section-label"><span class="en">Quick Start</span><span class="th">เริ่มต้นใช้งาน</span></span>
+    <h2 class="section-title"><span class="en">Start in 30 Seconds</span><span class="th">เริ่มต้นใช้งานใน 30 วินาที</span></h2>
+    <p class="section-desc"><span class="en">No setup needed &mdash; copy, paste, run.</span><span class="th">ไม่ต้องติดตั้งอะไร &mdash; คัดลอก, วาง, รัน</span></p>
 
     <div class="steps">
       <div class="step">
         <div class="step-content">
-          <h3>Health Check</h3>
-          <p>Verify the API is online &mdash; expect <code style="background:var(--surface2);padding:.15rem .4rem;border-radius:4px;font-family:var(--mono);font-size:.82rem">{"status":"ok"}</code></p>
+          <h3><span class="en">Health Check</span><span class="th">ตรวจสอบสถานะ API</span></h3>
+          <p><span class="en">Verify the API is online &mdash; expect <code style="background:var(--surface2);padding:.15rem .4rem;border-radius:4px;font-family:var(--mono);font-size:.82rem">{"status":"ok"}</code></span><span class="th">ตรวจสอบว่า API ออนไลน์อยู่ &mdash; ถ้าทำงานปกติจะได้ <code style="background:var(--surface2);padding:.15rem .4rem;border-radius:4px;font-family:var(--mono);font-size:.82rem">{"status":"ok"}</code></span></p>
           <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code><span class="k">curl</span> <span class="u">https://freeapi.kidpech.app/api/v1/health</span></code></pre>
         </div>
       </div>
       <div class="step">
         <div class="step-content">
-          <h3>Register</h3>
-          <p>Create an account &mdash; you'll receive an access token immediately.</p>
+          <h3><span class="en">Register</span><span class="th">สมัครสมาชิก</span></h3>
+          <p><span class="en">Create an account &mdash; you'll receive an access token immediately.</span><span class="th">สร้างบัญชีผู้ใช้ &mdash; คุณจะได้รับ access token ทันที</span></p>
           <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code><span class="k">curl</span> -X POST <span class="u">https://freeapi.kidpech.app/api/v1/auth/register</span> \
   -H <span class="s">"Content-Type: application/json"</span> \
   -d <span class="s">'{"email":"you@example.com","password":"MySecret123","name":"Your Name"}'</span></code></pre>
@@ -498,8 +516,8 @@ footer{padding:4rem 2rem 3rem;border-top:1px solid var(--border)}
       </div>
       <div class="step">
         <div class="step-content">
-          <h3>Login &amp; Get Tokens</h3>
-          <p>Authenticate &mdash; receive <code style="background:var(--surface2);padding:.15rem .4rem;border-radius:4px;font-family:var(--mono);font-size:.82rem">access_token</code> and <code style="background:var(--surface2);padding:.15rem .4rem;border-radius:4px;font-family:var(--mono);font-size:.82rem">refresh_token</code>.</p>
+          <h3><span class="en">Login &amp; Get Tokens</span><span class="th">เข้าสู่ระบบ &amp; รับ Token</span></h3>
+          <p><span class="en">Authenticate &mdash; receive <code style="background:var(--surface2);padding:.15rem .4rem;border-radius:4px;font-family:var(--mono);font-size:.82rem">access_token</code> and <code style="background:var(--surface2);padding:.15rem .4rem;border-radius:4px;font-family:var(--mono);font-size:.82rem">refresh_token</code>.</span><span class="th">ยืนยันตัวตน &mdash; จะได้รับ <code style="background:var(--surface2);padding:.15rem .4rem;border-radius:4px;font-family:var(--mono);font-size:.82rem">access_token</code> และ <code style="background:var(--surface2);padding:.15rem .4rem;border-radius:4px;font-family:var(--mono);font-size:.82rem">refresh_token</code></span></p>
           <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code><span class="k">curl</span> -X POST <span class="u">https://freeapi.kidpech.app/api/v1/auth/login</span> \
   -H <span class="s">"Content-Type: application/json"</span> \
   -d <span class="s">'{"email":"you@example.com","password":"MySecret123"}'</span></code></pre>
@@ -507,8 +525,8 @@ footer{padding:4rem 2rem 3rem;border-top:1px solid var(--border)}
       </div>
       <div class="step">
         <div class="step-content">
-          <h3>Create a Profile</h3>
-          <p>Use your token to call a protected endpoint.</p>
+          <h3><span class="en">Create a Profile</span><span class="th">สร้าง Profile</span></h3>
+          <p><span class="en">Use your token to call a protected endpoint.</span><span class="th">ใช้ token ของคุณเพื่อเรียก endpoint ที่ต้องยืนยันตัวตน</span></p>
           <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code><span class="k">curl</span> -X POST <span class="u">https://freeapi.kidpech.app/api/v1/profiles</span> \
   -H <span class="s">"Authorization: Bearer YOUR_ACCESS_TOKEN"</span> \
   -H <span class="s">"Content-Type: application/json"</span> \
@@ -522,9 +540,9 @@ footer{padding:4rem 2rem 3rem;border-top:1px solid var(--border)}
 <!-- Endpoints -->
 <section id="endpoints" class="api-section">
   <div class="container reveal">
-    <span class="section-label">API Reference</span>
-    <h2 class="section-title">All Endpoints</h2>
-    <p class="section-desc">Base URL: <code style="background:var(--surface2);padding:.2rem .5rem;border-radius:4px;font-family:var(--mono);font-size:.82rem">https://freeapi.kidpech.app</code></p>
+    <span class="section-label"><span class="en">API Reference</span><span class="th">เอกสาร API</span></span>
+    <h2 class="section-title"><span class="en">All Endpoints</span><span class="th">Endpoints ทั้งหมด</span></h2>
+    <p class="section-desc"><span class="en">Base URL:</span><span class="th">URL หลัก:</span> <code style="background:var(--surface2);padding:.2rem .5rem;border-radius:4px;font-family:var(--mono);font-size:.82rem">https://freeapi.kidpech.app</code></p>
 
     <div class="endpoint-group">
       <div class="endpoint-group-title">
@@ -575,48 +593,50 @@ footer{padding:4rem 2rem 3rem;border-top:1px solid var(--border)}
 <!-- Playground -->
 <section id="playground">
   <div class="container reveal">
-    <span class="section-label">Interactive Playground</span>
-    <h2 class="section-title">Try It Live</h2>
-    <p class="section-desc">Click a button and see the real response &mdash; learn how APIs work by doing.</p>
+    <span class="section-label"><span class="en">Interactive Playground</span><span class="th">ทดลองใช้งานจริง</span></span>
+    <h2 class="section-title"><span class="en">Try It Live</span><span class="th">ทดลองใช้งานจริง</span></h2>
+    <p class="section-desc"><span class="en">Click a button and see the real response &mdash; learn how APIs work by doing.</span><span class="th">กดปุ่มแล้วดู response จริง &mdash; เรียนรู้วิธีทำงานของ API จากการลงมือทำ</span></p>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:1.5rem" class="playground-grid">
       <div class="demo-box">
-        <div class="demo-header"><h4>&#x1f49a; Health Check</h4><button class="try-btn" onclick="fireRequest(this,'GET','/api/v1/health')">&#x25b6; Try it</button></div>
+        <div class="demo-header"><h4>&#x1f49a; <span class="en">Health Check</span><span class="th">ตรวจสถานะ</span></h4><button class="try-btn" onclick="fireRequest(this,'GET','/api/v1/health')"><span class="en">&#x25b6; Try it</span><span class="th">&#x25b6; ลองเลย</span></button></div>
         <div class="demo-body">
           <div class="demo-url"><span class="method-tag method get" style="font-size:.6rem;padding:.12rem .4rem">GET</span>/api/v1/health</div>
-          <div class="demo-response" id="res-health"><span class="c">// Click "Try it" to see the response</span></div>
+          <div class="demo-response" id="res-health"><span class="c en">// Click "Try it" to see the response</span><span class="c th">// กดปุ่ม "ลองเลย" เพื่อดู response</span></div>
         </div>
       </div>
       <div class="demo-box">
-        <div class="demo-header"><h4>&#x1f510; Register</h4><button class="try-btn" onclick="fireRegister(this)">&#x25b6; Register</button></div>
+        <div class="demo-header"><h4>&#x1f510; <span class="en">Register</span><span class="th">สมัครสมาชิก</span></h4><button class="try-btn" onclick="fireRegister(this)"><span class="en">&#x25b6; Register</span><span class="th">&#x25b6; สมัคร</span></button></div>
         <div class="demo-body">
           <div class="demo-url"><span class="method-tag method post" style="font-size:.6rem;padding:.12rem .4rem">POST</span>/api/v1/auth/register</div>
-          <div class="demo-response" id="res-register"><span class="c">// Auto-generates a random account
-// Token is saved for other endpoints</span></div>
+          <div class="demo-response" id="res-register"><span class="c en">// Auto-generates a random account
+// Token is saved for other endpoints</span><span class="c th">// สร้างบัญชีอัตโนมัติแบบสุ่ม
+// Token จะถูกบันทึกเพื่อใช้กับ endpoints อื่น</span></div>
         </div>
       </div>
       <div class="demo-box">
-        <div class="demo-header"><h4>&#x1f511; Login</h4><button class="try-btn" onclick="fireLogin(this)">&#x25b6; Login</button></div>
+        <div class="demo-header"><h4>&#x1f511; <span class="en">Login</span><span class="th">เข้าสู่ระบบ</span></h4><button class="try-btn" onclick="fireLogin(this)"><span class="en">&#x25b6; Login</span><span class="th">&#x25b6; เข้าสู่ระบบ</span></button></div>
         <div class="demo-body">
           <div class="demo-url"><span class="method-tag method post" style="font-size:.6rem;padding:.12rem .4rem">POST</span>/api/v1/auth/login</div>
-          <div class="demo-response" id="res-login"><span class="c">// Register first, then login</span></div>
+          <div class="demo-response" id="res-login"><span class="c en">// Register first, then login</span><span class="c th">// สมัครสมาชิกก่อน แล้วค่อยเข้าสู่ระบบ</span></div>
         </div>
       </div>
       <div class="demo-box">
-        <div class="demo-header"><h4>&#x1f464; Get Me</h4><button class="try-btn" onclick="fireAuthGet(this,'GET','/api/v1/users/me','res-me')">&#x25b6; Get profile</button></div>
+        <div class="demo-header"><h4>&#x1f464; <span class="en">Get Me</span><span class="th">ดูข้อมูลตัวเอง</span></h4><button class="try-btn" onclick="fireAuthGet(this,'GET','/api/v1/users/me','res-me')"><span class="en">&#x25b6; Get profile</span><span class="th">&#x25b6; ดูข้อมูล</span></button></div>
         <div class="demo-body">
           <div class="demo-url"><span class="method-tag method get" style="font-size:.6rem;padding:.12rem .4rem">GET</span>/api/v1/users/me</div>
-          <div class="demo-response" id="res-me"><span class="c">// Login first — token is used automatically</span></div>
+          <div class="demo-response" id="res-me"><span class="c en">// Login first — token is used automatically</span><span class="c th">// เข้าสู่ระบบก่อน — token จะถูกใช้อัตโนมัติ</span></div>
         </div>
       </div>
     </div>
 
     <div class="demo-box">
-      <div class="demo-header"><h4>&#x1f4cb; Create Profile + List</h4><button class="try-btn" onclick="fireCreateAndList(this)">&#x25b6; Create &amp; List</button></div>
+      <div class="demo-header"><h4>&#x1f4cb; <span class="en">Create Profile + List</span><span class="th">สร้าง Profile + ดูรายการ</span></h4><button class="try-btn" onclick="fireCreateAndList(this)"><span class="en">&#x25b6; Create &amp; List</span><span class="th">&#x25b6; สร้าง &amp; ดู</span></button></div>
       <div class="demo-body">
         <div class="demo-url"><span class="method-tag method post" style="font-size:.6rem;padding:.12rem .4rem">POST</span>/api/v1/profiles &#x2192; <span class="method-tag method get" style="font-size:.6rem;padding:.12rem .4rem">GET</span>/api/v1/profiles</div>
-        <div class="demo-response" id="res-profiles"><span class="c">// Creates a profile, then lists all profiles
-// Login required</span></div>
+        <div class="demo-response" id="res-profiles"><span class="c en">// Creates a profile, then lists all profiles
+// Login required</span><span class="c th">// สร้าง profile แล้วแสดงรายการ profiles ทั้งหมด
+// ต้องเข้าสู่ระบบก่อน</span></div>
       </div>
     </div>
   </div>
@@ -625,17 +645,17 @@ footer{padding:4rem 2rem 3rem;border-top:1px solid var(--border)}
 <!-- Engineering Patterns -->
 <section id="patterns" class="arch-section">
   <div class="container reveal">
-    <span class="section-label">Engineering Patterns</span>
-    <h2 class="section-title">Production Patterns You Can Learn From</h2>
-    <p class="section-desc">Real-world engineering patterns implemented in this API &mdash; the same concepts powering systems at scale.</p>
+    <span class="section-label"><span class="en">Engineering Patterns</span><span class="th">รูปแบบวิศวกรรม</span></span>
+    <h2 class="section-title"><span class="en">Production Patterns You Can Learn From</span><span class="th">Production Patterns ที่คุณเรียนรู้ได้</span></h2>
+    <p class="section-desc"><span class="en">Real-world engineering patterns implemented in this API &mdash; the same concepts powering systems at scale.</span><span class="th">รูปแบบวิศวกรรมจริงที่ใช้ใน API นี้ &mdash; แนวคิดเดียวกับที่ระบบขนาดใหญ่ใช้</span></p>
 
     <div class="patterns-grid">
       <div class="pattern-card">
         <div class="pattern-header">
           <div class="pattern-icon" style="background:rgba(0,184,148,.12);color:var(--green2)">&#x1f504;</div>
-          <div><div class="pattern-title">Graceful Degradation</div><div class="pattern-subtitle">Resilience Pattern</div></div>
+          <div><div class="pattern-title">Graceful Degradation</div><div class="pattern-subtitle"><span class="en">Resilience Pattern</span><span class="th">รูปแบบความทนทาน</span></div></div>
         </div>
-        <div class="pattern-desc">The app starts even when the database is unavailable. Health check always responds 200, while DB-dependent endpoints return 503 until the connection is established.</div>
+        <div class="pattern-desc"><span class="en">The app starts even when the database is unavailable. Health check always responds 200, while DB-dependent endpoints return 503 until the connection is established.</span><span class="th">แอปเริ่มทำงานได้แม้ฐานข้อมูลจะยังไม่พร้อม Health check ตอบ 200 เสมอ ส่วน endpoints ที่ต้องใช้ DB จะตอบ 503 จนกว่าจะเชื่อมต่อได้</span></div>
         <div class="pattern-code"><span class="c">// Service layer checks repository availability</span>
 <span class="k">if</span> s.repo == <span class="n">nil</span> {
     <span class="k">return</span> <span class="n">nil</span>, <span class="p">ErrDatabaseUnavailable</span>
@@ -646,9 +666,9 @@ footer{padding:4rem 2rem 3rem;border-top:1px solid var(--border)}
       <div class="pattern-card">
         <div class="pattern-header">
           <div class="pattern-icon" style="background:rgba(108,92,231,.12);color:var(--accent2)">&#x1f501;</div>
-          <div><div class="pattern-title">Retry with Exponential Backoff</div><div class="pattern-subtitle">Reliability Pattern</div></div>
+          <div><div class="pattern-title">Retry with Exponential Backoff</div><div class="pattern-subtitle"><span class="en">Reliability Pattern</span><span class="th">รูปแบบความน่าเชื่อถือ</span></div></div>
         </div>
-        <div class="pattern-desc">Database connections retry up to 5 times with exponentially increasing delays. Prevents thundering herd on startup and gives dependent services time to become ready.</div>
+        <div class="pattern-desc"><span class="en">Database connections retry up to 5 times with exponentially increasing delays. Prevents thundering herd on startup and gives dependent services time to become ready.</span><span class="th">การเชื่อมต่อฐานข้อมูลจะลองใหม่สูงสุด 5 ครั้ง โดยเพิ่มเวลารอแบบทวีคูณ ป้องกัน thundering herd ตอนเริ่มต้น</span></div>
         <div class="pattern-code"><span class="k">for</span> i := <span class="n">0</span>; i &lt; <span class="n">5</span>; i++ {
     <span class="k">if</span> err := db.Ping(); err == <span class="n">nil</span> {
         <span class="k">break</span>
@@ -660,9 +680,9 @@ footer{padding:4rem 2rem 3rem;border-top:1px solid var(--border)}
       <div class="pattern-card">
         <div class="pattern-header">
           <div class="pattern-icon" style="background:rgba(253,121,168,.12);color:var(--accent3)">&#x26d3;&#xfe0f;</div>
-          <div><div class="pattern-title">Middleware Chain</div><div class="pattern-subtitle">Cross-cutting Concerns</div></div>
+          <div><div class="pattern-title">Middleware Chain</div><div class="pattern-subtitle"><span class="en">Cross-cutting Concerns</span><span class="th">งานที่ตัดข้ามทุกชั้น</span></div></div>
         </div>
-        <div class="pattern-desc">Every request flows through a composable middleware pipeline. Each middleware is a single-responsibility function that can be tested independently.</div>
+        <div class="pattern-desc"><span class="en">Every request flows through a composable middleware pipeline. Each middleware is a single-responsibility function that can be tested independently.</span><span class="th">ทุก request ผ่าน middleware pipeline ที่ประกอบได้ แต่ละ middleware เป็นฟังก์ชันที่มีหน้าที่เดียว ทดสอบแยกได้</span></div>
         <div class="pattern-code">router.Use(
     middleware.<span class="p">RequestID</span>(),
     middleware.<span class="p">CORS</span>(cfg),
@@ -674,9 +694,9 @@ footer{padding:4rem 2rem 3rem;border-top:1px solid var(--border)}
       <div class="pattern-card">
         <div class="pattern-header">
           <div class="pattern-icon" style="background:rgba(253,203,110,.12);color:var(--orange)">&#x1f5c3;&#xfe0f;</div>
-          <div><div class="pattern-title">Repository Pattern</div><div class="pattern-subtitle">Data Access Abstraction</div></div>
+          <div><div class="pattern-title">Repository Pattern</div><div class="pattern-subtitle"><span class="en">Data Access Abstraction</span><span class="th">การแยกชั้นเข้าถึงข้อมูล</span></div></div>
         </div>
-        <div class="pattern-desc">Domain layer defines repository interfaces. Infrastructure provides concrete implementations. Swap PostgreSQL for MySQL without touching service code.</div>
+        <div class="pattern-desc"><span class="en">Domain layer defines repository interfaces. Infrastructure provides concrete implementations. Swap PostgreSQL for MySQL without touching service code.</span><span class="th">Domain layer กำหนด repository interfaces ส่วน Infrastructure ให้การ implement จริง เปลี่ยนจาก PostgreSQL เป็น MySQL ได้โดยไม่ต้องแก้โค้ด service</span></div>
         <div class="pattern-code"><span class="c">// Domain defines the contract</span>
 <span class="k">type</span> Repository <span class="k">interface</span> {
     Create(ctx, profile) <span class="n">error</span>
@@ -689,9 +709,9 @@ footer{padding:4rem 2rem 3rem;border-top:1px solid var(--border)}
       <div class="pattern-card">
         <div class="pattern-header">
           <div class="pattern-icon" style="background:rgba(116,185,255,.12);color:var(--blue)">&#x1f4ca;</div>
-          <div><div class="pattern-title">Structured Observability</div><div class="pattern-subtitle">Three Pillars</div></div>
+          <div><div class="pattern-title">Structured Observability</div><div class="pattern-subtitle"><span class="en">Three Pillars</span><span class="th">สามเสาหลัก</span></div></div>
         </div>
-        <div class="pattern-desc">Complete observability stack: <strong>Logs</strong> via structured Zap logger, <strong>Metrics</strong> via Prometheus (latency histograms, counters), <strong>Errors</strong> via Sentry with context enrichment.</div>
+        <div class="pattern-desc"><span class="en">Complete observability stack: <strong>Logs</strong> via structured Zap logger, <strong>Metrics</strong> via Prometheus (latency histograms, counters), <strong>Errors</strong> via Sentry with context enrichment.</span><span class="th">ระบบ observability ครบครัน: <strong>Logs</strong> ผ่าน structured Zap logger, <strong>Metrics</strong> ผ่าน Prometheus, <strong>Errors</strong> ผ่าน Sentry พร้อม context enrichment</span></div>
         <div class="pattern-code"><span class="c">// Every request is traceable</span>
 logger.Info(<span class="s">"request completed"</span>,
     zap.String(<span class="s">"request_id"</span>, reqID),
@@ -703,9 +723,9 @@ logger.Info(<span class="s">"request completed"</span>,
       <div class="pattern-card">
         <div class="pattern-header">
           <div class="pattern-icon" style="background:rgba(0,184,148,.12);color:var(--green2)">&#x1f489;</div>
-          <div><div class="pattern-title">Dependency Injection</div><div class="pattern-subtitle">Testability Pattern</div></div>
+          <div><div class="pattern-title">Dependency Injection</div><div class="pattern-subtitle"><span class="en">Testability Pattern</span><span class="th">รูปแบบทดสอบได้</span></div></div>
         </div>
-        <div class="pattern-desc">All dependencies are injected through constructors. Services receive repository interfaces, handlers receive services. Unit testing with mocks requires no database.</div>
+        <div class="pattern-desc"><span class="en">All dependencies are injected through constructors. Services receive repository interfaces, handlers receive services. Unit testing with mocks requires no database.</span><span class="th">Dependency ทั้งหมดถูก inject ผ่าน constructor แต่ละ service รับ repository interfaces, handlers รับ services ทดสอบด้วย mocks ไม่ต้องใช้ฐานข้อมูล</span></div>
         <div class="pattern-code"><span class="c">// main.go wires everything</span>
 repo := db.<span class="p">NewUserRepo</span>(database)
 svc  := user.<span class="p">NewService</span>(repo, jwtMgr)
@@ -719,9 +739,9 @@ hdl  := user.<span class="p">NewHandler</span>(svc)
 <!-- Code Examples -->
 <section id="examples">
   <div class="container reveal">
-    <span class="section-label">Code Examples</span>
-    <h2 class="section-title">Use From Your Favorite Language</h2>
-    <p class="section-desc">Copy, paste, run &mdash; works immediately.</p>
+    <span class="section-label"><span class="en">Code Examples</span><span class="th">ตัวอย่างโค้ด</span></span>
+    <h2 class="section-title"><span class="en">Use From Your Favorite Language</span><span class="th">ใช้งานจากภาษาที่คุณถนัด</span></h2>
+    <p class="section-desc"><span class="en">Copy, paste, run &mdash; works immediately.</span><span class="th">คัดลอก, วาง, รัน &mdash; ใช้งานได้ทันที</span></p>
 
     <div class="code-tabs">
       <div class="tab-bar">
@@ -915,9 +935,9 @@ print(jsonDecode(profileRes.body));</code></pre>
 <!-- Tech Stack -->
 <section id="tech">
   <div class="container reveal">
-    <span class="section-label">Tech Stack</span>
-    <h2 class="section-title">Built with Production-Grade Technology</h2>
-    <p class="section-desc">Industry-standard tools &mdash; learn what powers real systems.</p>
+    <span class="section-label"><span class="en">Tech Stack</span><span class="th">เทคโนโลยี</span></span>
+    <h2 class="section-title"><span class="en">Built with Production-Grade Technology</span><span class="th">สร้างด้วยเทคโนโลยีระดับ Production</span></h2>
+    <p class="section-desc"><span class="en">Industry-standard tools &mdash; learn what powers real systems.</span><span class="th">เครื่องมือมาตรฐานอุตสาหกรรม &mdash; เรียนรู้สิ่งที่ขับเคลื่อนระบบจริง</span></p>
     <div class="tech-grid">
       <div class="tech-card"><div class="tech-logo" style="background:rgba(0,173,239,.12)">&#x1f439;</div><div><div class="tech-name">Go 1.23</div><div class="tech-role">Language</div></div></div>
       <div class="tech-card"><div class="tech-logo" style="background:rgba(108,92,231,.12)">&#x26a1;</div><div><div class="tech-name">Gin</div><div class="tech-role">Web Framework</div></div></div>
@@ -938,20 +958,20 @@ print(jsonDecode(profileRes.body));</code></pre>
   <div class="footer-inner">
     <div class="footer-brand">
       <div class="logo-text">Free API</div>
-      <p>A production-grade REST API built for learning. Open source, free forever, designed to teach real engineering patterns.</p>
+      <p><span class="en">A production-grade REST API built for learning. Open source, free forever, designed to teach real engineering patterns.</span><span class="th">REST API ระดับ Production สร้างมาเพื่อการเรียนรู้ Open source, ฟรีตลอดไป, ออกแบบมาเพื่อสอนรูปแบบวิศวกรรมจริง</span></p>
     </div>
     <div class="footer-col">
-      <h4>Learn</h4>
-      <a href="#quickstart">Quick Start</a>
-      <a href="#endpoints">API Reference</a>
-      <a href="#playground">Playground</a>
-      <a href="#examples">Code Examples</a>
+      <h4><span class="en">Learn</span><span class="th">เรียนรู้</span></h4>
+      <a href="#quickstart"><span class="en">Quick Start</span><span class="th">เริ่มต้นใช้งาน</span></a>
+      <a href="#endpoints"><span class="en">API Reference</span><span class="th">เอกสาร API</span></a>
+      <a href="#playground"><span class="en">Playground</span><span class="th">ทดลองใช้</span></a>
+      <a href="#examples"><span class="en">Code Examples</span><span class="th">ตัวอย่างโค้ด</span></a>
     </div>
     <div class="footer-col">
-      <h4>Architecture</h4>
-      <a href="#architecture">System Design</a>
-      <a href="#patterns">Eng Patterns</a>
-      <a href="#tech">Tech Stack</a>
+      <h4><span class="en">Architecture</span><span class="th">สถาปัตยกรรม</span></h4>
+      <a href="#architecture"><span class="en">System Design</span><span class="th">ออกแบบระบบ</span></a>
+      <a href="#patterns"><span class="en">Eng Patterns</span><span class="th">รูปแบบวิศวกรรม</span></a>
+      <a href="#tech"><span class="en">Tech Stack</span><span class="th">เทคโนโลยี</span></a>
     </div>
     <div class="footer-col">
       <h4>Links</h4>
@@ -961,7 +981,7 @@ print(jsonDecode(profileRes.body));</code></pre>
     </div>
   </div>
   <div class="footer-bottom">
-    <span>Built with Go, PostgreSQL, Redis &mdash; Deployed on Railway</span>
+    <span><span class="en">Built with Go, PostgreSQL, Redis &mdash; Deployed on Railway</span><span class="th">สร้างด้วย Go, PostgreSQL, Redis &mdash; Deploy บน Railway</span></span>
     <a href="https://github.com/Kidpech-code" target="_blank">by Kidpech</a>
   </div>
 </footer>
@@ -1004,6 +1024,10 @@ function showToast(msg) {
   setTimeout(() => toast.classList.remove('show'), 2500);
 }
 
+function t(en, th) {
+  return document.body.classList.contains('thai') ? th : en;
+}
+
 function randomEmail() {
   return `demo_${Math.random().toString(36).substring(2, 8)}@playground.test`;
 }
@@ -1027,7 +1051,7 @@ async function fireRequest(btn, method, path) {
     const res = await fetch(BASE + path);
     const data = await res.json();
     btn.closest('.demo-box').querySelector('.demo-response').textContent = pretty(data);
-    if (data.status === 'ok') { showToast('API is online \u2713'); launchConfetti(); }
+    if (data.status === 'ok') { showToast(t('API is online \u2713','API \u0e2d\u0e2d\u0e19\u0e44\u0e25\u0e19\u0e4c \u2713')); launchConfetti(); }
   } catch (e) { showToast('Error: ' + e.message); }
   setLoading(btn, false);
 }
@@ -1043,7 +1067,7 @@ async function fireRegister(btn) {
       body: JSON.stringify({ email: savedEmail, password: savedPassword, name: 'Playground User' })
     });
     const data = await res.json();
-    if (data.tokens) { savedToken = data.tokens.access_token; showToast('Registered! Token saved \u2713'); launchConfetti(); }
+    if (data.tokens) { savedToken = data.tokens.access_token; showToast(t('Registered! Token saved \u2713','\u0e2a\u0e21\u0e31\u0e04\u0e23\u0e41\u0e25\u0e49\u0e27! \u0e1a\u0e31\u0e19\u0e17\u0e36\u0e01 Token \u0e41\u0e25\u0e49\u0e27 \u2713')); launchConfetti(); }
     document.getElementById('res-register').textContent =
       `// Email: ${savedEmail}\n// Password: ${savedPassword}\n// Token saved automatically \u2713\n\n` + pretty(data);
   } catch (e) { document.getElementById('res-register').textContent = '// Error: ' + e.message; }
@@ -1051,7 +1075,7 @@ async function fireRegister(btn) {
 }
 
 async function fireLogin(btn) {
-  if (!savedEmail) { showToast('Register first \u2191'); return; }
+  if (!savedEmail) { showToast(t('Register first \u2191','\u0e2a\u0e21\u0e31\u0e04\u0e23\u0e2a\u0e21\u0e32\u0e0a\u0e34\u0e01\u0e01\u0e48\u0e2d\u0e19 \u2191')); return; }
   setLoading(btn, true);
   try {
     const res = await fetch(BASE + '/api/v1/auth/login', {
@@ -1060,26 +1084,26 @@ async function fireLogin(btn) {
       body: JSON.stringify({ email: savedEmail, password: savedPassword })
     });
     const data = await res.json();
-    if (data.tokens) { savedToken = data.tokens.access_token; showToast('Login successful \u2713'); }
+    if (data.tokens) { savedToken = data.tokens.access_token; showToast(t('Login successful \u2713','\u0e40\u0e02\u0e49\u0e32\u0e2a\u0e39\u0e48\u0e23\u0e30\u0e1a\u0e1a\u0e2a\u0e33\u0e40\u0e23\u0e47\u0e08 \u2713')); }
     document.getElementById('res-login').textContent = pretty(data);
   } catch (e) { document.getElementById('res-login').textContent = '// Error: ' + e.message; }
   setLoading(btn, false);
 }
 
 async function fireAuthGet(btn, method, path, resId) {
-  if (!savedToken) { showToast('Login first \u2191'); return; }
+  if (!savedToken) { showToast(t('Login first \u2191','\u0e40\u0e02\u0e49\u0e32\u0e2a\u0e39\u0e48\u0e23\u0e30\u0e1a\u0e1a\u0e01\u0e48\u0e2d\u0e19 \u2191')); return; }
   setLoading(btn, true);
   try {
     const res = await fetch(BASE + path, { headers: { 'Authorization': 'Bearer ' + savedToken } });
     const data = await res.json();
     document.getElementById(resId).textContent = pretty(data);
-    showToast('Success \u2713');
+    showToast(t('Success \u2713','\u0e2a\u0e33\u0e40\u0e23\u0e47\u0e08 \u2713'));
   } catch (e) { document.getElementById(resId).textContent = '// Error: ' + e.message; }
   setLoading(btn, false);
 }
 
 async function fireCreateAndList(btn) {
-  if (!savedToken) { showToast('Login first \u2191'); return; }
+  if (!savedToken) { showToast(t('Login first \u2191','\u0e40\u0e02\u0e49\u0e32\u0e2a\u0e39\u0e48\u0e23\u0e30\u0e1a\u0e1a\u0e01\u0e48\u0e2d\u0e19 \u2191')); return; }
   setLoading(btn, true);
   const el = document.getElementById('res-profiles');
   try {
@@ -1094,7 +1118,7 @@ async function fireCreateAndList(btn) {
     const listRes = await fetch(BASE + '/api/v1/profiles?limit=5', { headers: { 'Authorization': 'Bearer ' + savedToken } });
     const list = await listRes.json();
     el.textContent = `// \u2713 Profile created\n${pretty(created)}\n\n// All profiles:\n${pretty(list)}`;
-    showToast('Profile created \u2713'); launchConfetti();
+    showToast(t('Profile created \u2713','\u0e2a\u0e23\u0e49\u0e32\u0e07 Profile \u0e41\u0e25\u0e49\u0e27 \u2713')); launchConfetti();
   } catch (e) { el.textContent = '// Error: ' + e.message; }
   setLoading(btn, false);
 }
@@ -1144,6 +1168,24 @@ function launchConfetti() {
 const style = document.createElement('style');
 style.textContent = '@media(max-width:768px){.playground-grid{grid-template-columns:1fr!important}}';
 document.head.appendChild(style);
+
+function setLang(lang) {
+  const btns = document.querySelectorAll('.lang-toggle button');
+  btns.forEach(b => b.classList.remove('active'));
+  if (lang === 'th') {
+    document.body.classList.add('thai');
+    btns[1].classList.add('active');
+  } else {
+    document.body.classList.remove('thai');
+    btns[0].classList.add('active');
+  }
+  localStorage.setItem('lang', lang);
+}
+// Restore saved language preference
+(function() {
+  const saved = localStorage.getItem('lang');
+  if (saved === 'th') setLang('th');
+})();
 
 window.addEventListener('scroll', () => {
   document.querySelector('nav').style.background = window.scrollY > 100 ? 'rgba(10,10,15,.95)' : 'rgba(10,10,15,.85)';

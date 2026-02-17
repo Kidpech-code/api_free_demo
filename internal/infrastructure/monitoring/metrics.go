@@ -128,8 +128,8 @@ func ObserveDBQuery(operation string, seconds float64) {
 
 // FormatCacheStats returns formatted cache statistics for /debug/health.
 func FormatCacheStats(prefix string) map[string]string {
-	hits, _ := getCounterValue(cacheHitCounter, prefix)
-	misses, _ := getCounterValue(cacheMissCounter, prefix)
+	hits, _ := getCounterValue(prefix)
+	misses, _ := getCounterValue(prefix)
 	total := hits + misses
 	var hitRate float64
 	if total > 0 {
@@ -142,7 +142,7 @@ func FormatCacheStats(prefix string) map[string]string {
 	}
 }
 
-func getCounterValue(vec *prometheus.CounterVec, label string) (float64, error) {
+func getCounterValue(_ string) (float64, error) {
 	// Prometheus counters don't expose values directly via the API.
 	// This is a best-effort approach — use /metrics endpoint for accurate data.
 	return 0, nil
