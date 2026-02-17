@@ -111,6 +111,24 @@ func main() {
 	userService := user.NewService(userRepo, authManager, logger, cfg.Security.AllowRegistration)
 	profileService := profile.NewService(profileRepo)
 
+	logBuffer := diagnostics.NewLogBuffer(cfg.Diagnostics.MaxLogLines)
+	diagHandler := diagnostics.NewHandler(logBuffer)
+
+	// Set initial DB status
+	if dbManager != nil {
+		diagHandler.SetDBStatus(true, "")
+		diagHandler.RegisterDependency("database", dbinfra.NewHealthChecker(dbManager))
+	} else {
+		errMsg := "initial connection failed"
+		if err != nil {
+			errMsg = err.Error()
+		}
+		diagHandler.SetDBStatus(false, errMsg)
+	}
+	if redisClient != nil {
+		diagHandler.RegisterDependency("redis", redisintra.NewHealthChecker(redisClient))
+	}
+
 	// Background DB reconnector — if initial connection failed, keep trying
 	if dbManager == nil {
 		go func() {
@@ -124,6 +142,7 @@ func main() {
 					logger.Info("attempting background DB reconnection...")
 					mgr, err := dbinfra.Connect(ctx, cfg.Database, logger)
 					if err != nil {
+						diagHandler.SetDBStatus(false, err.Error())
 						logger.Warn("background DB reconnect failed", zap.Error(err))
 						continue
 					}
@@ -132,22 +151,13 @@ func main() {
 					rawProfileRepo := dbinfra.NewProfileRepository(mgr.Write)
 					userService.SetRepository(cacheinfra.NewUserRepository(rawUserRepo, cacheLayer))
 					profileService.SetRepository(cacheinfra.NewProfileRepository(rawProfileRepo, cacheLayer))
+					diagHandler.SetDBStatus(true, "")
+					diagHandler.RegisterDependency("database", dbinfra.NewHealthChecker(mgr))
 					logger.Info("database connected via background reconnector — all endpoints available")
 					return
 				}
 			}
 		}()
-	}
-
-	logBuffer := diagnostics.NewLogBuffer(cfg.Diagnostics.MaxLogLines)
-	diagHandler := diagnostics.NewHandler(logBuffer)
-
-	// Register dependency health checkers for readiness endpoint
-	if dbManager != nil {
-		diagHandler.RegisterDependency("database", dbinfra.NewHealthChecker(dbManager))
-	}
-	if redisClient != nil {
-		diagHandler.RegisterDependency("redis", redisintra.NewHealthChecker(redisClient))
 	}
 
 	userHandler := user.NewHandler(userService)

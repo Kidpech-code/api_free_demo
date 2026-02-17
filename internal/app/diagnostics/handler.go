@@ -3,7 +3,9 @@ package diagnostics
 import (
 	"context"
 	"net/http"
+	"os"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -16,9 +18,11 @@ type HealthChecker interface {
 
 // Handler exposes health + debug endpoints.
 type Handler struct {
-	buffer *LogBuffer
-	deps   map[string]HealthChecker
-	start  time.Time
+	buffer      *LogBuffer
+	deps        map[string]HealthChecker
+	start       time.Time
+	dbConnected bool
+	dbError     string
 }
 
 // NewHandler returns handler.
@@ -35,10 +39,17 @@ func (h *Handler) RegisterDependency(name string, checker HealthChecker) {
 	h.deps[name] = checker
 }
 
+// SetDBStatus updates the database connection status for diagnostics.
+func (h *Handler) SetDBStatus(connected bool, errMsg string) {
+	h.dbConnected = connected
+	h.dbError = errMsg
+}
+
 // RegisterPublic attaches non-auth endpoints.
 func (h *Handler) RegisterPublic(rg *gin.RouterGroup) {
 	rg.GET("/health", h.health)
 	rg.GET("/health/ready", h.readiness)
+	rg.GET("/health/debug", h.debugEnv)
 }
 
 // RegisterProtected attaches debug endpoints requiring auth.
@@ -111,4 +122,74 @@ func (h *Handler) detailedHealth(c *gin.Context) {
 
 func (h *Handler) logs(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"logs": h.buffer.Snapshot()})
+}
+
+// debugEnv shows which database env vars are available (no secrets).
+// This is PUBLIC so we can diagnose Railway env var issues.
+func (h *Handler) debugEnv(c *gin.Context) {
+	// Check which DB-related env vars exist (never show values)
+	envVars := []string{
+		"DB_DSN", "DATABASE_URL", "DATABASE_PRIVATE_URL",
+		"PGHOST", "PGPORT", "PGUSER", "PGPASSWORD", "PGDATABASE",
+		"DATABASE_HOST", "DATABASE_PORT", "DATABASE_USER", "DATABASE_NAME",
+		"REDIS_ADDR", "REDIS_URL", "REDIS_PRIVATE_URL",
+		"PORT", "APP_ENV",
+	}
+	envStatus := make(map[string]interface{})
+	for _, key := range envVars {
+		val := os.Getenv(key)
+		if val == "" {
+			envStatus[key] = false
+		} else {
+			// Show length and masked prefix for debugging (no secrets)
+			masked := maskValue(key, val)
+			envStatus[key] = masked
+		}
+	}
+
+	dbStatus := "not connected"
+	if h.dbConnected {
+		dbStatus = "connected"
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":       "ok",
+		"uptime":       time.Since(h.start).String(),
+		"db_status":    dbStatus,
+		"db_error":     h.dbError,
+		"env_vars":     envStatus,
+		"go_version":   runtime.Version(),
+		"goroutines":   runtime.NumGoroutine(),
+	})
+}
+
+// maskValue safely masks sensitive env var values.
+func maskValue(key, val string) string {
+	// For safe keys, show the value
+	safeKeys := map[string]bool{"PORT": true, "APP_ENV": true, "PGPORT": true, "DATABASE_PORT": true}
+	if safeKeys[key] {
+		return val
+	}
+	// For host keys, show the value (not secret)
+	hostKeys := map[string]bool{"PGHOST": true, "DATABASE_HOST": true}
+	if hostKeys[key] {
+		return val
+	}
+	// For URL keys, show scheme + host only
+	if strings.Contains(strings.ToLower(key), "url") || strings.Contains(strings.ToLower(key), "dsn") || strings.Contains(strings.ToLower(key), "addr") {
+		// Show length and first chars
+		if len(val) > 15 {
+			return val[:15] + "...(" + strings.Repeat("*", 4) + ")"
+		}
+		return strings.Repeat("*", len(val))
+	}
+	// Everything else: just show it's set
+	return "set (" + strings.Repeat("*", min(len(val), 8)) + ")"
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }
