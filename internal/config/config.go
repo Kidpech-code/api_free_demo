@@ -120,7 +120,7 @@ func Load() (*Config, error) {
 		},
 		Database: DatabaseConfig{
 			Driver:           strings.ToLower(getenv("DB_DRIVER", "postgres")),
-			DSN:              getenv("DB_DSN", getenv("DATABASE_URL", getenv("DATABASE_PRIVATE_URL", "postgres://postgres:postgres@db:5432/demo_db?sslmode=disable"))),
+			DSN:              resolveDSN(),
 			ReadOnlyDSN:      getenv("DB_READ_DSN", ""),
 			MaxOpenConns:     getInt("DB_MAX_OPEN", 25),
 			MaxIdleConns:     getInt("DB_MAX_IDLE", 10),
@@ -247,4 +247,37 @@ func splitAndTrim(val string) []string {
 		}
 	}
 	return out
+}
+
+// resolveDSN builds a database connection string from environment variables.
+// Priority: DB_DSN > DATABASE_URL > DATABASE_PRIVATE_URL > PGHOST-based > default
+func resolveDSN() string {
+	// Explicit DSN takes highest priority
+	if dsn := os.Getenv("DB_DSN"); strings.TrimSpace(dsn) != "" {
+		return strings.TrimSpace(dsn)
+	}
+	if dsn := os.Getenv("DATABASE_URL"); strings.TrimSpace(dsn) != "" {
+		return strings.TrimSpace(dsn)
+	}
+	if dsn := os.Getenv("DATABASE_PRIVATE_URL"); strings.TrimSpace(dsn) != "" {
+		return strings.TrimSpace(dsn)
+	}
+
+	// Railway also provides individual PG* env vars — build DSN from them
+	pgHost := os.Getenv("PGHOST")
+	if pgHost == "" {
+		pgHost = os.Getenv("DATABASE_HOST")
+	}
+	if pgHost != "" {
+		pgPort := getenv("PGPORT", getenv("DATABASE_PORT", "5432"))
+		pgUser := getenv("PGUSER", getenv("DATABASE_USER", "postgres"))
+		pgPass := getenv("PGPASSWORD", getenv("DATABASE_PASSWORD", ""))
+		pgDB := getenv("PGDATABASE", getenv("DATABASE_NAME", "railway"))
+		sslMode := getenv("PGSSLMODE", "disable")
+		return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s",
+			pgUser, pgPass, pgHost, pgPort, pgDB, sslMode)
+	}
+
+	// Docker Compose default
+	return "postgres://postgres:postgres@db:5432/demo_db?sslmode=disable"
 }

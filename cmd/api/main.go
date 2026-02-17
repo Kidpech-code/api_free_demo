@@ -53,6 +53,9 @@ func main() {
 			zap.Error(err),
 			zap.String("dsn_host", maskedDSN),
 			zap.String("driver", cfg.Database.Driver),
+			zap.Bool("has_DATABASE_URL", os.Getenv("DATABASE_URL") != ""),
+			zap.Bool("has_DATABASE_PRIVATE_URL", os.Getenv("DATABASE_PRIVATE_URL") != ""),
+			zap.Bool("has_PGHOST", os.Getenv("PGHOST") != ""),
 		)
 		// Continue without DB - some endpoints will return 503
 		// Background reconnector will keep trying

@@ -1034,6 +1034,34 @@ function randomEmail() {
 
 function pretty(obj) { return JSON.stringify(obj, null, 2); }
 
+// Retry wrapper for fetch — auto-retries on 503 (DB initializing)
+async function fetchWithRetry(url, options = {}, maxRetries = 3) {
+  for (let i = 0; i < maxRetries; i++) {
+    const res = await fetch(url, options);
+    if (res.status === 503 && i < maxRetries - 1) {
+      const waitSec = (i + 1) * 2;
+      showToast(t(
+        `⏳ Database initializing... retrying in ${waitSec}s (${i+1}/${maxRetries})`,
+        `⏳ ฐานข้อมูลกำลังเริ่มต้น... ลองใหม่ใน ${waitSec} วินาที (${i+1}/${maxRetries})`
+      ));
+      await new Promise(r => setTimeout(r, waitSec * 1000));
+      continue;
+    }
+    return res;
+  }
+}
+
+// Format error response for display
+function formatError(data, status) {
+  if (status === 503) {
+    return t(
+      `// ⚠️ Database is initializing — please wait a moment and try again.\n// This happens on cold start (Railway free tier).\n// The API will be ready in 10-30 seconds.\n\n`,
+      `// ⚠️ ฐานข้อมูลกำลังเริ่มต้น — กรุณารอสักครู่แล้วลองใหม่\n// เกิดขึ้นตอน cold start (Railway free tier)\n// API จะพร้อมใช้งานใน 10-30 วินาที\n\n`
+    ) + pretty(data);
+  }
+  return pretty(data);
+}
+
 function setLoading(btn, loading) {
   if (loading) {
     btn.disabled = true;
@@ -1048,9 +1076,9 @@ function setLoading(btn, loading) {
 async function fireRequest(btn, method, path) {
   setLoading(btn, true);
   try {
-    const res = await fetch(BASE + path);
+    const res = await fetchWithRetry(BASE + path);
     const data = await res.json();
-    btn.closest('.demo-box').querySelector('.demo-response').textContent = pretty(data);
+    btn.closest('.demo-box').querySelector('.demo-response').textContent = res.status === 200 ? pretty(data) : formatError(data, res.status);
     if (data.status === 'ok') { showToast(t('API is online \u2713','API \u0e2d\u0e2d\u0e19\u0e44\u0e25\u0e19\u0e4c \u2713')); launchConfetti(); }
   } catch (e) { showToast('Error: ' + e.message); }
   setLoading(btn, false);
@@ -1061,15 +1089,19 @@ async function fireRegister(btn) {
   savedEmail = randomEmail();
   savedPassword = 'DemoPass123!';
   try {
-    const res = await fetch(BASE + '/api/v1/auth/register', {
+    const res = await fetchWithRetry(BASE + '/api/v1/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: savedEmail, password: savedPassword, name: 'Playground User' })
     });
     const data = await res.json();
     if (data.tokens) { savedToken = data.tokens.access_token; showToast(t('Registered! Token saved \u2713','\u0e2a\u0e21\u0e31\u0e04\u0e23\u0e41\u0e25\u0e49\u0e27! \u0e1a\u0e31\u0e19\u0e17\u0e36\u0e01 Token \u0e41\u0e25\u0e49\u0e27 \u2713')); launchConfetti(); }
-    document.getElementById('res-register').textContent =
-      `// Email: ${savedEmail}\n// Password: ${savedPassword}\n// Token saved automatically \u2713\n\n` + pretty(data);
+    if (res.status === 503) {
+      document.getElementById('res-register').textContent = formatError(data, 503);
+    } else {
+      document.getElementById('res-register').textContent =
+        `// Email: ${savedEmail}\n// Password: ${savedPassword}\n// Token saved automatically \u2713\n\n` + pretty(data);
+    }
   } catch (e) { document.getElementById('res-register').textContent = '// Error: ' + e.message; }
   setLoading(btn, false);
 }
@@ -1078,14 +1110,14 @@ async function fireLogin(btn) {
   if (!savedEmail) { showToast(t('Register first \u2191','\u0e2a\u0e21\u0e31\u0e04\u0e23\u0e2a\u0e21\u0e32\u0e0a\u0e34\u0e01\u0e01\u0e48\u0e2d\u0e19 \u2191')); return; }
   setLoading(btn, true);
   try {
-    const res = await fetch(BASE + '/api/v1/auth/login', {
+    const res = await fetchWithRetry(BASE + '/api/v1/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: savedEmail, password: savedPassword })
     });
     const data = await res.json();
     if (data.tokens) { savedToken = data.tokens.access_token; showToast(t('Login successful \u2713','\u0e40\u0e02\u0e49\u0e32\u0e2a\u0e39\u0e48\u0e23\u0e30\u0e1a\u0e1a\u0e2a\u0e33\u0e40\u0e23\u0e47\u0e08 \u2713')); }
-    document.getElementById('res-login').textContent = pretty(data);
+    document.getElementById('res-login').textContent = res.status === 503 ? formatError(data, 503) : pretty(data);
   } catch (e) { document.getElementById('res-login').textContent = '// Error: ' + e.message; }
   setLoading(btn, false);
 }
@@ -1094,10 +1126,10 @@ async function fireAuthGet(btn, method, path, resId) {
   if (!savedToken) { showToast(t('Login first \u2191','\u0e40\u0e02\u0e49\u0e32\u0e2a\u0e39\u0e48\u0e23\u0e30\u0e1a\u0e1a\u0e01\u0e48\u0e2d\u0e19 \u2191')); return; }
   setLoading(btn, true);
   try {
-    const res = await fetch(BASE + path, { headers: { 'Authorization': 'Bearer ' + savedToken } });
+    const res = await fetchWithRetry(BASE + path, { headers: { 'Authorization': 'Bearer ' + savedToken } });
     const data = await res.json();
-    document.getElementById(resId).textContent = pretty(data);
-    showToast(t('Success \u2713','\u0e2a\u0e33\u0e40\u0e23\u0e47\u0e08 \u2713'));
+    document.getElementById(resId).textContent = res.status === 503 ? formatError(data, 503) : pretty(data);
+    if (res.ok) showToast(t('Success \u2713','\u0e2a\u0e33\u0e40\u0e23\u0e47\u0e08 \u2713'));
   } catch (e) { document.getElementById(resId).textContent = '// Error: ' + e.message; }
   setLoading(btn, false);
 }
@@ -1109,13 +1141,14 @@ async function fireCreateAndList(btn) {
   try {
     const names = ['Alice','Bob','Charlie','Dev','Tester','Builder'];
     const name = names[Math.floor(Math.random() * names.length)];
-    const createRes = await fetch(BASE + '/api/v1/profiles', {
+    const createRes = await fetchWithRetry(BASE + '/api/v1/profiles', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + savedToken },
       body: JSON.stringify({ first_name: name, last_name: 'API-' + Math.random().toString(36).substring(2,5), bio: 'Created from Playground \u2014 ' + new Date().toLocaleTimeString() })
     });
     const created = await createRes.json();
-    const listRes = await fetch(BASE + '/api/v1/profiles?limit=5', { headers: { 'Authorization': 'Bearer ' + savedToken } });
+    if (createRes.status === 503) { el.textContent = formatError(created, 503); setLoading(btn, false); return; }
+    const listRes = await fetchWithRetry(BASE + '/api/v1/profiles?limit=5', { headers: { 'Authorization': 'Bearer ' + savedToken } });
     const list = await listRes.json();
     el.textContent = `// \u2713 Profile created\n${pretty(created)}\n\n// All profiles:\n${pretty(list)}`;
     showToast(t('Profile created \u2713','\u0e2a\u0e23\u0e49\u0e32\u0e07 Profile \u0e41\u0e25\u0e49\u0e27 \u2713')); launchConfetti();

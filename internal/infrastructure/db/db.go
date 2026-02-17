@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"strings"
 	"time"
 
@@ -27,6 +28,14 @@ func Connect(ctx context.Context, cfg config.DatabaseConfig, logger *zap.Logger)
 	driverName := cfg.Driver
 	if driverName == "postgres" {
 		driverName = "pgx"
+	}
+
+	// Log DSN host for debugging (no credentials)
+	if logger != nil {
+		logger.Info("attempting database connection",
+			zap.String("driver", cfg.Driver),
+			zap.String("dsn_host", extractHost(cfg.DSN)),
+		)
 	}
 
 	write, err := sqlx.Open(driverName, cfg.DSN)
@@ -68,7 +77,7 @@ func Connect(ctx context.Context, cfg config.DatabaseConfig, logger *zap.Logger)
 
 	if pingErr != nil {
 		write.Close()
-		return nil, fmt.Errorf("ping db after %d retries: %w", maxRetries, pingErr)
+		return nil, fmt.Errorf("ping db after %d retries (host=%s): %w", maxRetries, extractHost(cfg.DSN), pingErr)
 	}
 
 	if logger != nil {
@@ -198,4 +207,16 @@ ON CONFLICT (id) DO NOTHING;
 	}
 
 	return nil
+}
+
+// extractHost returns just the host:port from a DSN for safe logging.
+func extractHost(dsn string) string {
+	// Try parsing as URL
+	if u, err := url.Parse(dsn); err == nil && u.Host != "" {
+		return u.Host
+	}
+	if len(dsn) > 30 {
+		return dsn[:30] + "..."
+	}
+	return dsn
 }
