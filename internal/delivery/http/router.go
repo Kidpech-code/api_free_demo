@@ -2,13 +2,11 @@ package http
 
 import (
 	"io/fs"
-	"net/http"
 	"strings"
 
 	"github.com/gofiber/adaptor/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/gofiber/fiber/v2/middleware/filesystem"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"github.com/prometheus/client_golang/prometheus"
@@ -23,6 +21,20 @@ import (
 	"api_free_demo/internal/infrastructure/metrics"
 	appUsecase "api_free_demo/internal/usecase"
 )
+
+// htmlPage returns a Fiber handler that reads the given filename from the
+// embedded FS and sends it with the correct Content-Type. Using explicit
+// ReadFile is more reliable than the filesystem middleware across Fiber versions.
+func htmlPage(webUI fs.FS, name string) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		data, err := fs.ReadFile(webUI, name)
+		if err != nil {
+			return fiber.ErrNotFound
+		}
+		c.Set(fiber.HeaderContentType, "text/html; charset=utf-8")
+		return c.Send(data)
+	}
+}
 
 // NewRouter creates and configures the Fiber application with all routes.
 func NewRouter(
@@ -130,15 +142,23 @@ func NewRouter(
 		})
 	})
 
-	// ── Web UI (served last — catches all unmatched routes) ───────────────
-	// Files are compiled directly into the binary via go:embed.
-	// intro.html is served as the index page for / and any unknown path.
-	app.Use("/", filesystem.New(filesystem.Config{
-		Root:         http.FS(webUI),
-		Index:        "intro.html",
-		Browse:       false,
-		NotFoundFile: "intro.html",
-	}))
-
+	// ── Web UI ────────────────────────────────────────────────────────────
+	// Files are compiled into the binary via go:embed (no volume needed).
+	// Each page has an explicit route; unknown paths fall back to intro.html.
+	app.Get("/", htmlPage(webUI, "intro.html"))
+	app.Get("/dashboard.html", htmlPage(webUI, "dashboard.html"))
+	app.Get("/docs.html", htmlPage(webUI, "docs.html"))
+	app.Get("/playground.html", htmlPage(webUI, "playground.html"))
+	app.Get("/code-viewer.html", htmlPage(webUI, "code-viewer.html"))
+	app.Get("/snippets.json", func(c *fiber.Ctx) error {
+		data, err := fs.ReadFile(webUI, "snippets.json")
+		if err != nil {
+			return fiber.ErrNotFound
+		}
+		c.Set(fiber.HeaderContentType, "application/json; charset=utf-8")
+		return c.Send(data)
+	})
+	// Fallback: any unmatched path → intro.html (SPA-style)
+	app.Use(htmlPage(webUI, "intro.html"))
 	return app
 }

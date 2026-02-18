@@ -1,5 +1,5 @@
 # ── Stage 1: Build ────────────────────────────────────────────────────────────
-FROM golang:1.25-alpine AS builder
+FROM golang:1.25.1-alpine AS builder
 
 # Install CA certificates and git (needed for go mod download)
 RUN apk add --no-cache ca-certificates git tzdata
