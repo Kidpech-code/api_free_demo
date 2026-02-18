@@ -230,6 +230,110 @@
       animation: slideUp .25s ease; display: none;
     }
     @keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
+
+    /* ── Code Snippet Drawer ─────────────────────────────────────────── */
+    .snippet-btn {
+      padding: 5px 13px; border-radius: 6px; font-size: 11px; font-weight: 700;
+      background: rgba(224,64,251,.12); border: 1px solid rgba(224,64,251,.25);
+      color: var(--accent-magenta); cursor: pointer; white-space: nowrap;
+      transition: background .15s, box-shadow .15s;
+      font-family: inherit;
+    }
+    .snippet-btn:hover { background: rgba(224,64,251,.22); box-shadow: 0 0 12px rgba(224,64,251,.25); }
+
+    .snippet-overlay {
+      position: fixed; inset: 0; z-index: 900;
+      background: rgba(3,4,14,.65); backdrop-filter: blur(4px);
+      display: none; align-items: flex-start; justify-content: flex-end;
+    }
+    .snippet-overlay.open { display: flex; }
+
+    .snippet-drawer {
+      width: min(520px, 98vw); height: 100vh;
+      background: rgba(6,9,28,.97); border-left: 1px solid var(--glass-border);
+      display: flex; flex-direction: column;
+      box-shadow: -12px 0 48px rgba(0,0,40,.7);
+      animation: drawerIn .22s ease;
+    }
+    @keyframes drawerIn { from{transform:translateX(100%)} to{transform:translateX(0)} }
+
+    .snippet-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 18px; border-bottom: 1px solid var(--glass-border);
+      min-height: 50px;
+    }
+    .snippet-title {
+      font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+      color: var(--accent-magenta); display: flex; align-items: center; gap: 8px;
+    }
+    .snippet-close {
+      width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--glass-border);
+      background: rgba(100,140,255,.06); color: var(--text-secondary); cursor: pointer;
+      font-size: 14px; display: flex; align-items: center; justify-content: center;
+      transition: background .15s;
+    }
+    .snippet-close:hover { background: rgba(255,82,82,.12); color: #ff8080; }
+
+    .snippet-lang-bar {
+      display: flex; gap: 5px; padding: 10px 18px; border-bottom: 1px solid var(--glass-border);
+      flex-wrap: wrap;
+    }
+    .lang-btn {
+      padding: 4px 11px; border-radius: 20px; font-size: 10px; font-weight: 700;
+      border: 1px solid var(--glass-border); background: rgba(100,140,255,.05);
+      color: var(--text-dim); cursor: pointer; transition: all .15s;
+      font-family: monospace;
+    }
+    .lang-btn:hover { background: rgba(100,140,255,.12); color: var(--text-secondary); }
+    .lang-btn.active {
+      background: rgba(224,64,251,.14); border-color: rgba(224,64,251,.35);
+      color: var(--accent-magenta);
+    }
+
+    .snippet-meta {
+      padding: 8px 18px; background: rgba(2,4,14,.5);
+      border-bottom: 1px solid var(--glass-border);
+      font-size: 10px; color: var(--text-dim); font-family: monospace;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .snippet-meta .method-tag { font-weight: 800; margin-right: 6px; }
+
+    .snippet-code-wrap {
+      flex: 1; overflow-y: auto; position: relative;
+      scrollbar-width: thin; scrollbar-color: rgba(100,140,255,.12) transparent;
+    }
+    .snippet-code-wrap::-webkit-scrollbar { width: 4px; }
+    .snippet-code-wrap::-webkit-scrollbar-thumb { background: rgba(100,140,255,.12); }
+
+    .snippet-code {
+      font-family: 'SF Mono','Cascadia Code','Fira Code',monospace;
+      font-size: 12px; line-height: 1.8; padding: 18px 20px;
+      color: #c0d0ff; white-space: pre; tab-size: 2;
+    }
+    /* snippet syntax colours */
+    .sc-kw   { color: #c792ea; }   /* keyword */
+    .sc-str  { color: #c3e88d; }   /* string */
+    .sc-num  { color: #f78c6c; }   /* number/bool */
+    .sc-var  { color: #82aaff; }   /* variable */
+    .sc-fn   { color: #82aaff; }   /* function name */
+    .sc-cmt  { color: #546e7a; font-style: italic; }  /* comment */
+    .sc-url  { color: #00e5ff; }   /* URL */
+    .sc-hdr  { color: var(--accent-orange); }  /* header key */
+    .sc-mth  { color: var(--accent-green); }   /* HTTP method */
+
+    .snippet-footer {
+      padding: 10px 18px; border-top: 1px solid var(--glass-border);
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    }
+    .snippet-copy-btn {
+      padding: 7px 20px; border-radius: 7px; font-size: 12px; font-weight: 700;
+      background: linear-gradient(135deg,var(--purple-mid),var(--accent-magenta));
+      color: #fff; border: none; cursor: pointer;
+      box-shadow: 0 2px 14px rgba(224,64,251,.3);
+      transition: opacity .15s; font-family: inherit;
+    }
+    .snippet-copy-btn:active { opacity: .75; }
+    .snippet-hint { font-size: 10px; color: var(--text-dim); }
   </style>
 </head>
 <body>
@@ -298,7 +402,10 @@
   <div class="req-panel">
     <div class="panel-header">
       <span>📤 Request</span>
-      <span id="reqDesc" style="font-size:10px;color:var(--accent-cyan);text-transform:none;letter-spacing:0;font-weight:500">เลือก endpoint จากซ้าย</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span id="reqDesc" style="font-size:10px;color:var(--accent-cyan);text-transform:none;letter-spacing:0;font-weight:500">เลือก endpoint จากซ้าย</span>
+        <button class="snippet-btn" onclick="openSnippetDrawer()">&#10022; Code Snippet</button>
+      </div>
     </div>
     <div class="url-row">
       <select class="method-select" id="methodSelect" onchange="onMethodChange()">
@@ -307,7 +414,7 @@
         <option value="PUT"    style="color:var(--accent-orange)">PUT</option>
         <option value="DELETE" style="color:#ff8080">DELETE</option>
       </select>
-      <input class="url-input" id="urlInput" value="http://localhost:8080/health" placeholder="URL"/>
+      <input class="url-input" id="urlInput" value="/health" placeholder="URL"/>
       <button class="btn-send" id="sendBtn" onclick="sendRequest()">▶ Send</button>
     </div>
     <div class="req-tabs">
@@ -363,8 +470,40 @@
 
 </div>
 
+<div class="snippet-overlay" id="snippetOverlay" onclick="closeSnippetDrawerOnOverlay(event)">
+  <div class="snippet-drawer" id="snippetDrawer">
+    <div class="snippet-header">
+      <div class="snippet-title">&#10022; Code Snippet</div>
+      <button class="snippet-close" onclick="closeSnippetDrawer()">✕</button>
+    </div>
+    <div class="snippet-lang-bar" id="snippetLangBar">
+      <button class="lang-btn active" data-lang="curl"       onclick="selectLang(this,'curl')">cURL</button>
+      <button class="lang-btn"        data-lang="js_fetch"   onclick="selectLang(this,'js_fetch')">JS Fetch</button>
+      <button class="lang-btn"        data-lang="js_axios"   onclick="selectLang(this,'js_axios')">Axios</button>
+      <button class="lang-btn"        data-lang="python"     onclick="selectLang(this,'python')">Python</button>
+      <button class="lang-btn"        data-lang="go"         onclick="selectLang(this,'go')">Go</button>
+      <button class="lang-btn"        data-lang="php"        onclick="selectLang(this,'php')">PHP</button>
+      <button class="lang-btn"        data-lang="ruby"       onclick="selectLang(this,'ruby')">Ruby</button>
+      <button class="lang-btn"        data-lang="java"       onclick="selectLang(this,'java')">Java</button>
+      <button class="lang-btn"        data-lang="kotlin"     onclick="selectLang(this,'kotlin')">Kotlin</button>
+      <button class="lang-btn"        data-lang="swift"      onclick="selectLang(this,'swift')">Swift</button>
+      <button class="lang-btn"        data-lang="dart"       onclick="selectLang(this,'dart')">Dart</button>
+      <button class="lang-btn"        data-lang="powershell" onclick="selectLang(this,'powershell')">PowerShell</button>
+    </div>
+    <div class="snippet-meta" id="snippetMeta"></div>
+    <div class="snippet-code-wrap">
+      <pre class="snippet-code" id="snippetCode"></pre>
+    </div>
+    <div class="snippet-footer">
+      <span class="snippet-hint">คัดลอกแล้ววางใช้ได้เลย</span>
+      <button class="snippet-copy-btn" onclick="copySnippet()">📋 Copy Code</button>
+    </div>
+  </div>
+</div>
+
 <script>
-const BASE = 'http://localhost:8080';
+// Auto-detect base URL: works on localhost AND production (freeapi.kidpech.app)
+const BASE = window.location.origin;
 
 const ENDPOINTS = {
   health:  { method:'GET',    url:BASE+'/health',                  body:'',                          desc:'Health check — ตรวจ Redis connection' },
@@ -411,7 +550,7 @@ async function fetchToken() {
       setTokenStatus(true);
       showToast(`✓ Token สำหรับ "${d.data.user_id}" ได้รับแล้ว`, false);
     }
-  } catch(e) { showToast('❌ ไม่สามารถเชื่อมต่อ API ที่ localhost:8080 — ตรวจสอบ server'); }
+  } catch(e) { showToast('❌ ไม่สามารถเชื่อมต่อ API ที่ ' + BASE + ' — ตรวจสอบ server'); }
 }
 
 function selectEndpoint(el, key) {
@@ -563,7 +702,7 @@ function setResResult(status, ms, data, headers, raw) {
 
 function setResError(msg) {
   document.getElementById('resInfoBar').innerHTML = '<span class="status-badge st-5xx">ERR</span><span class="res-time" style="color:var(--accent-red)">' + escapeHtml(msg) + '</span>';
-  document.getElementById('res-body').innerHTML = `<div class="empty-state"><div class="empty-icon">❌</div><div class="empty-txt"><strong style="color:var(--accent-red)">Network Error</strong><br/>${escapeHtml(msg)}<br/><br/>ตรวจสอบว่า API server (localhost:8080) กำลังทำงานอยู่</div></div>`;
+  document.getElementById('res-body').innerHTML = `<div class="empty-state"><div class="empty-icon">❌</div><div class="empty-txt"><strong style="color:var(--accent-red)">Network Error</strong><br/>${escapeHtml(msg)}<br/><br/>ตรวจสอบว่า API server ที่ <code>${BASE}</code> กำลังทำงานอยู่</div></div>`;
 }
 
 function syntaxHighlight(json) {
@@ -606,6 +745,395 @@ document.getElementById('urlInput').addEventListener('focus', function() {
   if (lastId && this.value.includes('<id>')) {
     this.value = this.value.replace('<id>', lastId);
   }
+});
+
+// ── Code Snippet Generator ────────────────────────────────────────────────────
+let _snippetLang = 'curl';
+
+function _getRequestContext() {
+  const method  = document.getElementById('methodSelect').value;
+  const url     = document.getElementById('urlInput').value.trim();
+  const body    = document.getElementById('bodyInput').value.trim();
+  const token   = document.getElementById('tokenInput').value.trim();
+  const extraHeaders = {};
+  document.querySelectorAll('#headersContainer .header-row').forEach(r => {
+    const k = r.querySelector('.header-key').value.trim();
+    const v = r.querySelector('.header-val').value.trim();
+    if (k && v && k.toLowerCase() !== 'content-type') extraHeaders[k] = v;
+  });
+  const hasBody = ['POST','PUT','PATCH'].includes(method) && body;
+  return { method, url, body, token, hasBody, extraHeaders };
+}
+
+function _esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function _hi(raw) {
+  // simple token coloriser — works on all generated snippets
+  return raw
+    // comments
+    .replace(/(#[^\n]*)/g, '<span class="sc-cmt">$1</span>')
+    .replace(/(\/\/[^\n]*)/g, '<span class="sc-cmt">$1</span>')
+    // strings (double-quote)
+    .replace(/"([^"\\]*(\\.[^"\\]*)*)"/g, (m)=>`<span class="sc-str">${m}</span>`)
+    // strings (single-quote) - must run before keywords
+    .replace(/'([^'\\]*(\\.[^'\\]*)*)'/g, (m)=>`<span class="sc-str">${m}</span>`)
+    // numbers / booleans
+    .replace(/\b(\d+\.?\d*|true|false|nil|null|None|True|False)\b/g,
+             '<span class="sc-num">$1</span>')
+    // keywords (conservative set)
+    .replace(/\b(var|let|const|async|await|func|function|return|if|else|import|from|package|class|public|static|void|new|throw|try|catch|def|for|while|do|in|end|require|use|namespace|throws|throws)\b/g,
+             '<span class="sc-kw">$1</span>');
+}
+
+const GENERATORS = {
+
+  curl({ method, url, body, token, hasBody, extraHeaders }) {
+    const lines = [`curl -s -X ${method} \\`];
+    lines.push(`  "${url}" \\`);
+    if (token) lines.push(`  -H "Authorization: Bearer ${token}" \\`);
+    if (hasBody) lines.push(`  -H "Content-Type: application/json" \\`);
+    Object.entries(extraHeaders).forEach(([k,v]) => lines.push(`  -H "${k}: ${v}" \\`));
+    if (hasBody) {
+      const escaped = body.replace(/'/g, `'\\''`);
+      lines.push(`  -d '${escaped}' \\`);
+    }
+    // remove trailing backslash from last line
+    lines[lines.length-1] = lines[lines.length-1].replace(/ \\$/, '');
+    return lines.join('\n');
+  },
+
+  js_fetch({ method, url, body, token, hasBody, extraHeaders }) {
+    const hdrs = {};
+    if (token) hdrs['Authorization'] = `Bearer ${token}`;
+    if (hasBody) hdrs['Content-Type'] = 'application/json';
+    Object.assign(hdrs, extraHeaders);
+    const hdrStr = JSON.stringify(hdrs, null, 2).replace(/^/gm, '    ').trim();
+    let opts = `  method: '${method}',\n  headers: ${hdrStr}`;
+    if (hasBody) opts += `,\n  body: JSON.stringify(${body})`;
+    return `async function callAPI() {
+  const res = await fetch('${url}', {
+${opts.split('\n').map(l => '  '+l).join('\n')}
+  });
+
+  if (!res.ok) throw new Error(\`HTTP \${res.status}\`);
+  const data = await res.json();
+  console.log(data);
+}
+
+callAPI();`;
+  },
+
+  js_axios({ method, url, body, token, hasBody, extraHeaders }) {
+    const hdrs = {};
+    if (token) hdrs['Authorization'] = `Bearer ${token}`;
+    if (hasBody) hdrs['Content-Type'] = 'application/json';
+    Object.assign(hdrs, extraHeaders);
+    const hdrStr = JSON.stringify(hdrs, null, 2).replace(/^/gm,'  ').trim();
+    const meth = method.toLowerCase();
+    let args = `'${url}'`;
+    if (hasBody) args += `, ${body}`;
+    return `import axios from 'axios';
+
+const headers = ${hdrStr};
+
+async function callAPI() {
+  try {
+    const { data } = await axios.${meth}(${args}, { headers });
+    console.log(data);
+  } catch (err) {
+    console.error(err.response?.data ?? err.message);
+  }
+}
+
+callAPI();`;
+  },
+
+  python({ method, url, body, token, hasBody, extraHeaders }) {
+    const hdrs = {};
+    if (token) hdrs['Authorization'] = `Bearer ${token}`;
+    if (hasBody) hdrs['Content-Type'] = 'application/json';
+    Object.assign(hdrs, extraHeaders);
+    const hdrLines = Object.entries(hdrs).map(([k,v]) => `    "${k}": "${v}",`).join('\n');
+    const bodyLine = hasBody ? `    json=${body},\n    ` : '';
+    return `import requests
+
+url = "${url}"
+headers = {
+${hdrLines}
+}
+
+resp = requests.${method.toLowerCase()}(
+    url,
+    ${bodyLine}headers=headers,
+    timeout=10,
+)
+resp.raise_for_status()
+print(resp.json())`;
+  },
+
+  go({ method, url, body, token, hasBody, extraHeaders }) {
+    const hdrLines = [];
+    if (token) hdrLines.push(`\treq.Header.Set("Authorization", "Bearer ${token}")`);
+    if (hasBody) hdrLines.push(`\treq.Header.Set("Content-Type", "application/json")`);
+    Object.entries(extraHeaders).forEach(([k,v]) => hdrLines.push(`\treq.Header.Set("${k}", "${v}")`));
+    const payloadBlock = hasBody
+      ? `\tpayload := strings.NewReader(\`${body}\`)\n`
+      : '';
+    const bodyArg = hasBody ? 'payload' : 'nil';
+    return `package main
+
+import (
+\t"fmt"
+\t"io"
+\t"net/http"${hasBody ? '\n\t"strings"' : ''}
+)
+
+func main() {
+${payloadBlock}\treq, _ := http.NewRequest("${method}", "${url}", ${bodyArg})
+${hdrLines.join('\n')}
+
+\tclient := &http.Client{}
+\tresp, err := client.Do(req)
+\tif err != nil {
+\t\tpanic(err)
+\t}
+\tdefer resp.Body.Close()
+\tbody, _ := io.ReadAll(resp.Body)
+\tfmt.Println(string(body))
+}`;
+  },
+
+  php({ method, url, body, token, hasBody, extraHeaders }) {
+    const hdrs = [];
+    if (token) hdrs.push(`"Authorization: Bearer ${token}"`);
+    if (hasBody) hdrs.push(`"Content-Type: application/json"`);
+    Object.entries(extraHeaders).forEach(([k,v]) => hdrs.push(`"${k}: ${v}"`));
+    const hdrArr = hdrs.length ? `[\n    ${hdrs.join(',\n    ')}\n]` : '[]';
+    const bodyLine = hasBody ? `\n'body'    => json_encode(${body}),` : '';
+    return `<?php
+
+$response = \\Illuminate\\Support\\Facades\\Http::withHeaders([
+    ${hdrs.join(",\n    ")}
+])->${method.toLowerCase()}('${url}'${hasBody ? `, json_decode('${body}', true)` : ''});
+
+echo $response->json();
+
+// ──────────────────────────────────────────
+// หรือใช้ cURL ตรงๆ:
+$ch = curl_init('${url}');
+curl_setopt_array($ch, [
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_CUSTOMREQUEST  => '${method}',
+    CURLOPT_HTTPHEADER     => ${hdrArr},${bodyLine}
+]);
+$res = curl_exec($ch);
+curl_close($ch);
+echo $res;`;
+  },
+
+  ruby({ method, url, body, token, hasBody, extraHeaders }) {
+    const hdrs = {};
+    if (token) hdrs['Authorization'] = `Bearer ${token}`;
+    if (hasBody) hdrs['Content-Type'] = 'application/json';
+    Object.assign(hdrs, extraHeaders);
+    const hdrLines = Object.entries(hdrs).map(([k,v]) => `  "${k}" => "${v}"`).join(",\n");
+    const bodyLine = hasBody ? `,\n  body: '${body}'` : '';
+    return `require 'net/http'
+require 'json'
+require 'uri'
+
+uri = URI.parse('${url}')
+http = Net::HTTP.new(uri.host, uri.port)
+http.use_ssl = uri.scheme == 'https'
+
+request = Net::HTTP::${method.charAt(0)+method.slice(1).toLowerCase()}.new(uri.request_uri)
+${Object.entries(hdrs).map(([k,v])=>`request["${k}"] = "${v}"`).join('\n')}
+${hasBody ? `request.body = '${body}'` : ''}
+
+response = http.request(request)
+puts JSON.parse(response.body)`;
+  },
+
+  java({ method, url, body, token, hasBody, extraHeaders }) {
+    const hdrLines = [];
+    if (token) hdrLines.push(`                .addHeader("Authorization", "Bearer ${token}")`);
+    if (hasBody) hdrLines.push(`                .addHeader("Content-Type", "application/json")`);
+    Object.entries(extraHeaders).forEach(([k,v])=>hdrLines.push(`                .addHeader("${k}", "${v}")`));
+    const bodyBlock = hasBody
+      ? `\n        RequestBody body = RequestBody.create(\n                "${body.replace(/"/g,'\\"')}",\n                MediaType.parse("application/json"));\n`
+      : '';
+    const methodCall = hasBody ? `.${method.toLowerCase()}(body)` : (method==='GET'?'.get()':`.method("${method}", null)`);
+    return `import okhttp3.*;
+import java.io.IOException;
+
+public class ApiClient {
+    public static void main(String[] args) throws IOException {
+        OkHttpClient client = new OkHttpClient();
+${bodyBlock}
+        Request request = new Request.Builder()
+                .url("${url}")
+${hdrLines.join('\n')}
+                ${methodCall}
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            System.out.println(response.body().string());
+        }
+    }
+}`;
+  },
+
+  kotlin({ method, url, body, token, hasBody, extraHeaders }) {
+    const hdrLines = [];
+    if (token) hdrLines.push(`        .addHeader("Authorization", "Bearer ${token}")`);
+    if (hasBody) hdrLines.push(`        .addHeader("Content-Type", "application/json")`);
+    Object.entries(extraHeaders).forEach(([k,v])=>hdrLines.push(`        .addHeader("${k}", "${v}")`));
+    const bodyBlock = hasBody
+      ? `\n    val body = "${body.replace(/"/g,'\\"')}".toRequestBody("application/json".toMediaType())\n`
+      : '';
+    const methodCall = hasBody ? `.${method.toLowerCase()}(body)` : (method==='GET'?'.get()':`.method("${method}", null)`);
+    return `import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
+
+fun main() {
+    val client = OkHttpClient()
+${bodyBlock}
+    val request = Request.Builder()
+        .url("${url}")
+${hdrLines.join('\n')}
+        ${methodCall}
+        .build()
+
+    client.newCall(request).execute().use { response ->
+        println(response.body?.string())
+    }
+}`;
+  },
+
+  swift({ method, url, body, token, hasBody, extraHeaders }) {
+    const hdrLines = [];
+    if (token) hdrLines.push(`request.setValue("Bearer ${token}", forHTTPHeaderField: "Authorization")`);
+    if (hasBody) hdrLines.push(`request.setValue("application/json", forHTTPHeaderField: "Content-Type")`);
+    Object.entries(extraHeaders).forEach(([k,v])=>hdrLines.push(`request.setValue("${v}", forHTTPHeaderField: "${k}")`));
+    return `import Foundation
+
+var request = URLRequest(url: URL(string: "${url}")!)
+request.httpMethod = "${method}"
+${hdrLines.join('\n')}
+${hasBody ? `request.httpBody = """\n${body}\n""".data(using: .utf8)` : ''}
+
+URLSession.shared.dataTask(with: request) { data, response, error in
+    if let data = data,
+       let json = try? JSONSerialization.jsonObject(with: data) {
+        print(json)
+    }
+}.resume()
+
+RunLoop.main.run(until: Date(timeIntervalSinceNow: 5))`;
+  },
+
+  dart({ method, url, body, token, hasBody, extraHeaders }) {
+    const hdrs = {};
+    if (token) hdrs['Authorization'] = `Bearer ${token}`;
+    if (hasBody) hdrs['Content-Type'] = 'application/json';
+    Object.assign(hdrs, extraHeaders);
+    const hdrObj = Object.entries(hdrs).map(([k,v])=>`  '${k}': '${v}'`).join(',\n');
+    const bodyLine = hasBody ? `,\n  body: jsonEncode(${body})` : '';
+    return `import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+void main() async {
+  final uri = Uri.parse('${url}');
+  final headers = {
+${hdrObj}
+  };
+
+  final response = await http.${method.toLowerCase()}(
+    uri,
+    headers: headers${bodyLine}
+  );
+
+  print(jsonDecode(response.body));
+}`;
+  },
+
+  powershell({ method, url, body, token, hasBody, extraHeaders }) {
+    const hdrs = {};
+    if (token) hdrs['Authorization'] = `Bearer ${token}`;
+    if (hasBody) hdrs['Content-Type'] = 'application/json';
+    Object.assign(hdrs, extraHeaders);
+    const hdrLines = Object.entries(hdrs).map(([k,v])=>`  "${k}" = "${v}"`).join("\n");
+    const bodyLine = hasBody ? `\n$body = '${body}'\n` : '';
+    return `$headers = @{
+${hdrLines}
+}
+${bodyLine}
+$response = Invoke-RestMethod \`
+  -Uri "${url}" \`
+  -Method ${method}${hasBody ? ` \`\n  -Body $body` : ''} \`
+  -Headers $headers
+
+$response | ConvertTo-Json -Depth 10`;
+  },
+};
+
+function openSnippetDrawer() {
+  const ctx = _getRequestContext();
+  const methodColors = { GET:'#00e676', POST:'#82b4ff', PUT:'#ff8c00', DELETE:'#ff5252' };
+  const col = methodColors[ctx.method] || '#c0d0ff';
+  document.getElementById('snippetMeta').innerHTML =
+    `<span class="method-tag" style="color:${col}">${ctx.method}</span>${_esc(ctx.url)}`;
+
+  document.getElementById('snippetOverlay').classList.add('open');
+  renderSnippet(ctx);
+}
+
+function closeSnippetDrawer() {
+  document.getElementById('snippetOverlay').classList.remove('open');
+}
+function closeSnippetDrawerOnOverlay(e) {
+  if (e.target === document.getElementById('snippetOverlay')) closeSnippetDrawer();
+}
+
+function selectLang(btn, lang) {
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  _snippetLang = lang;
+  renderSnippet(_getRequestContext());
+}
+
+function renderSnippet(ctx) {
+  const gen = GENERATORS[_snippetLang];
+  if (!gen) return;
+  const raw = gen(ctx);
+  document.getElementById('snippetCode').innerHTML = _hi(_esc(raw));
+}
+
+function copySnippet() {
+  const el = document.getElementById('snippetCode');
+  const text = el.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('✓ Code copied to clipboard!', false);
+  });
+}
+
+// Re-render snippet if drawer is open when request fields change
+['methodSelect','urlInput','bodyInput','tokenInput'].forEach(id => {
+  document.getElementById(id)?.addEventListener('input', () => {
+    if (document.getElementById('snippetOverlay').classList.contains('open')) {
+      const ctx = _getRequestContext();
+      const methodColors = { GET:'#00e676', POST:'#82b4ff', PUT:'#ff8c00', DELETE:'#ff5252' };
+      document.getElementById('snippetMeta').innerHTML =
+        `<span class="method-tag" style="color:${methodColors[ctx.method]||'#c0d0ff'}">${ctx.method}</span>${_esc(ctx.url)}`;
+      renderSnippet(ctx);
+    }
+  });
+});
+
+// Close drawer with Escape key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeSnippetDrawer();
 });
 </script>
 </body>
