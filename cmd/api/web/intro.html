@@ -293,6 +293,29 @@
       border-radius: 50%; animation: spin .7s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Responsive ─────────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .topnav { padding: 10px 16px; flex-wrap: wrap; height: auto; gap: 8px; }
+      .nav-links { display: none; }
+      .hero-section { padding: 48px 20px 40px; }
+      h1.hero-title { font-size: 32px; }
+      .hero-sub { font-size: 13px; }
+      .feature-pills { gap: 6px; }
+      .hero-actions { flex-direction: column; align-items: center; gap: 10px; }
+      .btn-hero-primary, .btn-hero-ghost { width: 100%; justify-content: center; }
+      .steps-grid { grid-template-columns: 1fr; gap: 14px; }
+      .section { padding: 40px 16px; }
+      .form-row { flex-direction: column; }
+      .tech-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+      .token-card { padding: 20px 16px; }
+      .token-info-row { flex-direction: column; gap: 6px; }
+    }
+    @media (max-width: 480px) {
+      h1.hero-title { font-size: 26px; }
+      .section-title { font-size: 20px; }
+      .tech-grid { grid-template-columns: 1fr 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -447,7 +470,7 @@
 </div>
 
 <script>
-  const API_BASE = 'http://localhost:8080';
+  const API_BASE = window.location.origin;
 
   async function requestToken() {
     const userId = document.getElementById('userIdInput').value.trim();
@@ -474,7 +497,7 @@
       document.getElementById('tokenValue').textContent = token;
       document.getElementById('infoUser').textContent   = json.data.user_id;
       document.getElementById('curlExample').textContent =
-        `curl -H "Authorization: Bearer ${token}" \\\n  http://localhost:8080/api/v1/products`;
+      `curl -H "Authorization: Bearer ${token}" \\\n  ${API_BASE}/api/v1/products`;
 
       // Save to sessionStorage for Playground to pick up
       sessionStorage.setItem('nova_token',   token);
