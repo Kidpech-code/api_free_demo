@@ -142,11 +142,20 @@ func NewRouter(
 		})
 	})
 
+	// ── GitHub OAuth Routes (dashboard protection) ───────────────────────
+	// Register these BEFORE the static Web UI routes.
+	ghHandler := handler.NewGitHubAuthHandler(cfg.GitHub, logger)
+	app.Get("/auth/github/login", ghHandler.Login)
+	app.Get("/auth/github/callback", ghHandler.Callback)
+	app.Get("/auth/github/logout", ghHandler.Logout)
+
 	// ── Web UI ────────────────────────────────────────────────────────────
 	// Files are compiled into the binary via go:embed (no volume needed).
 	// Each page has an explicit route; unknown paths fall back to intro.html.
 	app.Get("/", htmlPage(webUI, "intro.html"))
-	app.Get("/dashboard.html", htmlPage(webUI, "dashboard.html"))
+	app.Get("/login.html", htmlPage(webUI, "login.html"))
+	// /dashboard.html is protected — only the owner's GitHub account may access it.
+	app.Get("/dashboard.html", middleware.RequireGitHubSession(ghHandler.VerifySession), htmlPage(webUI, "dashboard.html"))
 	app.Get("/docs.html", htmlPage(webUI, "docs.html"))
 	app.Get("/playground.html", htmlPage(webUI, "playground.html"))
 	app.Get("/code-viewer.html", htmlPage(webUI, "code-viewer.html"))

@@ -15,6 +15,7 @@ type Config struct {
 	Redis  RedisConfig
 	JWT    JWTConfig
 	App    AppConfig
+	GitHub GitHubOAuthConfig
 }
 
 type ServerConfig struct {
@@ -46,6 +47,15 @@ type AppConfig struct {
 	Environment string
 	LogLevel    string
 	CORSOrigins []string // Allowed CORS origins; empty = allow all
+}
+
+// GitHubOAuthConfig holds credentials for GitHub OAuth login.
+// Used to protect the /dashboard.html page (admin-only access).
+type GitHubOAuthConfig struct {
+	ClientID      string // GITHUB_CLIENT_ID env var
+	ClientSecret  string // GITHUB_CLIENT_SECRET env var
+	AllowedLogin  string // GITHUB_ALLOWED_LOGIN env var — only this GitHub username may access the dashboard
+	SessionSecret string // SESSION_SECRET env var — used to sign the session cookie (min 32 chars)
 }
 
 // Load reads configuration from environment variables with defaults.
@@ -97,6 +107,12 @@ func Load() *Config {
 			Environment: env,
 			LogLevel:    getEnv("LOG_LEVEL", "info"),
 			CORSOrigins: corsOrigins,
+		},
+		GitHub: GitHubOAuthConfig{
+			ClientID:      os.Getenv("GITHUB_CLIENT_ID"),
+			ClientSecret:  os.Getenv("GITHUB_CLIENT_SECRET"),
+			AllowedLogin:  getEnv("GITHUB_ALLOWED_LOGIN", "Kidpech-code"),
+			SessionSecret: getEnv("SESSION_SECRET", "dashboard-session-secret-change-me"),
 		},
 	}
 }
