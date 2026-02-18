@@ -14,7 +14,7 @@ RUN go mod download
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
     go build -trimpath -ldflags="-s -w" \
-    -o /app/server ./cmd/api/main.go
+    -o /app/server ./cmd/api/
 
 # ── Stage 2: Runtime ──────────────────────────────────────────────────────────
 FROM scratch
