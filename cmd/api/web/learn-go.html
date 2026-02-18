@@ -1,0 +1,5289 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>No.1 · Learn Go</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg-deep:      #03040e;
+      --glass-bg:     rgba(12, 18, 48, 0.60);
+      --glass-border: rgba(100, 140, 255, 0.18);
+      --glass-shadow: rgba(0, 10, 60, 0.7);
+      --accent-cyan:  #00e5ff;
+      --accent-orange:#ff8c00;
+      --accent-magenta:#e040fb;
+      --accent-green: #00e676;
+      --accent-red:   #ff5252;
+      --accent-yellow:#ffd740;
+      --purple-mid:   #7c4dff;
+      --blue-mid:     #1a6bff;
+      --text-primary: #e8eeff;
+      --text-secondary:#8899cc;
+      --text-dim:     #4a5580;
+      --radius-lg:    18px;
+      --radius-md:    12px;
+      --radius-sm:    8px;
+    }
+    html { height: 100%; scroll-behavior: smooth; }
+    body {
+      min-height: 100%; font-family: 'Inter','Segoe UI',system-ui,sans-serif;
+      background: var(--bg-deep); color: var(--text-primary); line-height: 1.75;
+    }
+    .cosmos { position: fixed; inset: 0; z-index: 0; pointer-events:none;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 15%, rgba(72,52,180,.22) 0%,transparent 70%),
+        radial-gradient(ellipse 60% 50% at 80% 85%, rgba(0,120,180,.18) 0%,transparent 65%),
+        linear-gradient(160deg, #03040e 0%, #060918 60%, #04061a 100%);
+    }
+    .stars { position: fixed; inset: 0; z-index: 0; pointer-events:none;
+      background-image:
+        radial-gradient(1px 1px at 5% 8%,rgba(220,230,255,.65) 0%,transparent 100%),
+        radial-gradient(1.5px 1.5px at 70% 4%,rgba(255,255,255,.72) 0%,transparent 100%),
+        radial-gradient(1px 1px at 40% 18%,rgba(180,200,255,.50) 0%,transparent 100%),
+        radial-gradient(1px 1px at 90% 25%,rgba(200,220,255,.58) 0%,transparent 100%),
+        radial-gradient(1px 1px at 15% 60%,rgba(210,220,255,.44) 0%,transparent 100%),
+        radial-gradient(1px 1px at 60% 70%,rgba(220,230,255,.40) 0%,transparent 100%),
+        radial-gradient(1.5px 1.5px at 93% 80%,rgba(255,255,255,.62) 0%,transparent 100%);
+    }
+
+    /* ── Topnav ─────────────────────────────────────────── */
+    .topnav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 28px; height: 54px;
+      background: rgba(4,6,22,.92); border-bottom: 1px solid var(--glass-border);
+      backdrop-filter: blur(24px);
+    }
+    .logo { display: flex; align-items: center; gap: 9px; text-decoration: none; }
+    .logo-mark { width: 30px; height: 30px; border-radius: 7px; background: linear-gradient(135deg,var(--purple-mid),var(--accent-cyan)); display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 0 14px rgba(0,229,255,.28); }
+    .logo-text { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+    .logo-text span { color: var(--accent-cyan); }
+    .nav-links { display: flex; gap: 3px; margin-left: 20px; }
+    .nav-link { padding: 5px 12px; border-radius: 16px; font-size: 12px; font-weight: 500; color: var(--text-secondary); text-decoration: none; transition: background .15s,color .15s; white-space:nowrap; }
+    .nav-link:hover { background: rgba(100,140,255,.10); color: var(--text-primary); }
+    .nav-link.active { background: rgba(0,229,255,.10); color: var(--accent-cyan); border: 1px solid rgba(0,229,255,.20); }
+    .nav-spacer { flex: 1; }
+    .btn-sm { padding: 5px 14px; border-radius: 16px; font-size: 12px; font-weight: 600; text-decoration: none; transition: .15s; }
+    .btn-ghost { color: var(--text-secondary); border: 1px solid var(--glass-border); }
+    .btn-ghost:hover { color: var(--accent-cyan); border-color: var(--accent-cyan); }
+
+    /* ── Layout ─────────────────────────────────────────── */
+    .page-wrap { position: relative; z-index: 1; display: flex; min-height: calc(100vh - 54px); }
+    .sidebar {
+      position: sticky; top: 54px; height: calc(100vh - 54px);
+      width: 270px; min-width: 270px; overflow-y: auto;
+      padding: 20px 14px; background: rgba(4,6,22,.70);
+      border-right: 1px solid var(--glass-border); backdrop-filter: blur(16px);
+    }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 4px; }
+    .sidebar h3 {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .12em; color: var(--text-dim); margin: 18px 0 6px;
+    }
+    .sidebar h3:first-child { margin-top: 0; }
+    .sidebar a {
+      display: block; padding: 5px 10px; border-radius: 7px;
+      font-size: 12.5px; color: var(--text-secondary); text-decoration: none;
+      transition: .15s; margin-bottom: 1px;
+    }
+    .sidebar a:hover { background: rgba(100,140,255,.10); color: var(--text-primary); }
+    .sidebar a.active { background: rgba(0,229,255,.10); color: var(--accent-cyan); }
+
+    .main-content { flex: 1; padding: 40px 48px 80px; max-width: 900px; margin: 0 auto; }
+
+    /* ── Elements ────────────────────────────────────────── */
+    .section { margin-bottom: 64px; scroll-margin-top: 70px; }
+    .section h1 {
+      font-size: 32px; font-weight: 800; margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta));
+      background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .section h2 {
+      font-size: 22px; font-weight: 700; color: var(--accent-cyan);
+      margin: 40px 0 12px; padding-bottom: 6px;
+      border-bottom: 1px solid var(--glass-border);
+    }
+    .section h3 { font-size: 17px; font-weight: 600; color: var(--accent-orange); margin: 28px 0 8px; }
+    .section h4 { font-size: 15px; font-weight: 600; color: var(--accent-green); margin: 20px 0 6px; }
+    .section p { color: var(--text-secondary); margin-bottom: 14px; }
+    .section ul, .section ol { color: var(--text-secondary); margin: 0 0 16px 24px; }
+    .section li { margin-bottom: 6px; }
+    .section strong { color: var(--text-primary); }
+
+    .glass-card {
+      background: var(--glass-bg); border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md); padding: 24px; margin-bottom: 20px;
+      box-shadow: 0 8px 32px var(--glass-shadow);
+    }
+    .glass-card.highlight { border-left: 3px solid var(--accent-cyan); }
+    .glass-card.warn { border-left: 3px solid var(--accent-orange); }
+    .glass-card.success { border-left: 3px solid var(--accent-green); }
+    .glass-card.tip { border-left: 3px solid var(--accent-magenta); }
+
+    pre {
+      background: rgba(2,4,18,.80); border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm); padding: 16px 20px;
+      overflow-x: auto; margin-bottom: 16px;
+      font-family: 'SF Mono','Cascadia Code','Fira Code',monospace;
+      font-size: 13px; line-height: 1.65; color: var(--text-primary);
+    }
+    code {
+      font-family: 'SF Mono','Cascadia Code','Fira Code',monospace;
+      font-size: 12.5px;
+    }
+    :not(pre) > code {
+      background: rgba(100,140,255,.12); padding: 2px 7px; border-radius: 5px;
+      color: var(--accent-cyan); font-size: 12px;
+    }
+    .output {
+      background: rgba(0,230,118,.06); border: 1px solid rgba(0,230,118,.18);
+      border-radius: var(--radius-sm); padding: 12px 16px; margin: -8px 0 16px;
+      font-family: 'SF Mono',monospace; font-size: 12.5px; color: var(--accent-green);
+    }
+    .output::before {
+      content: '▶ Output:'; display: block; font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .1em; margin-bottom: 6px;
+      color: rgba(0,230,118,.5);
+    }
+    .analogy {
+      background: rgba(224,64,251,.06); border: 1px solid rgba(224,64,251,.18);
+      border-radius: var(--radius-sm); padding: 14px 18px; margin-bottom: 16px;
+      color: var(--accent-magenta); font-size: 13.5px;
+    }
+    .analogy::before {
+      content: '💡 เปรียบเทียบ:'; display: block; font-size: 11px; font-weight: 700;
+      margin-bottom: 4px; color: rgba(224,64,251,.6);
+    }
+
+    .hamburger {
+      display: none; background: none; border: none; cursor: pointer;
+      padding: 6px; color: var(--text-secondary);
+    }
+    .hamburger svg { width: 22px; height: 22px; }
+
+    /* ── Progress bar ────────────────────────────────── */
+    .progress-bar {
+      position: fixed; top: 54px; left: 0; right: 0; z-index: 99;
+      height: 3px; background: transparent;
+    }
+    .progress-bar .bar {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-magenta));
+      transition: width .1s;
+    }
+
+    /* ── Responsive ─────────────────────────────────── */
+    @media (max-width: 1024px) { .main-content { padding: 32px 24px 60px; } }
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .hamburger { display: block; }
+      .sidebar {
+        position: fixed; top: 54px; left: 0; z-index: 99;
+        width: 280px; height: calc(100vh - 54px);
+        transform: translateX(-100%); transition: transform .25s ease;
+      }
+      .sidebar.open { transform: translateX(0); }
+      .sidebar-overlay { display: none; position: fixed; inset: 0; top: 54px; z-index: 98; background: rgba(0,0,0,.5); }
+      .sidebar-overlay.show { display: block; }
+      .main-content { padding: 24px 16px 60px; }
+      .section h1 { font-size: 24px; }
+      .section h2 { font-size: 18px; }
+      pre { font-size: 11.5px; padding: 12px; }
+    }
+    @media (max-width: 480px) {
+      .topnav { padding: 10px 14px; }
+      .main-content { padding: 18px 12px 40px; }
+      .glass-card { padding: 16px; }
+    }
+
+    .scroll-top {
+      position: fixed; bottom: 24px; right: 24px; z-index: 90;
+      width: 42px; height: 42px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple-mid), var(--accent-cyan));
+      border: none; cursor: pointer; display: none;
+      align-items: center; justify-content: center;
+      box-shadow: 0 4px 20px rgba(0,229,255,.3);
+    }
+    .scroll-top.show { display: flex; }
+    .scroll-top svg { width: 20px; height: 20px; fill: #fff; }
+  </style>
+</head>
+<body>
+<div class="cosmos"></div>
+<div class="stars"></div>
+
+<!-- Topnav -->
+<nav class="topnav">
+  <a class="logo" href="intro.html">
+    <div class="logo-mark">🚀</div>
+    <div class="logo-text">No.1<span>API</span></div>
+  </a>
+  <button class="hamburger" id="menuBtn" aria-label="Toggle menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+  </button>
+  <div class="nav-links">
+    <a class="nav-link" href="intro.html">🏠 เริ่มต้น</a>
+    <a class="nav-link" href="docs.html">📖 Docs</a>
+    <a class="nav-link" href="playground.html">⚡ Playground</a>
+    <a class="nav-link" href="architecture.html">🏗️ Architecture</a>
+    <a class="nav-link active" href="learn-go.html">📚 Learn Go</a>
+  </div>
+  <div class="nav-spacer"></div>
+  <a class="btn-sm btn-ghost" href="dashboard.html">Dashboard →</a>
+</nav>
+
+<!-- Reading progress -->
+<div class="progress-bar"><div class="bar" id="progressBar"></div></div>
+
+<!-- Layout -->
+<div class="page-wrap">
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <aside class="sidebar" id="sidebar">
+    <h3>🟢 เริ่มต้น</h3>
+    <a href="#why-go">ทำไมต้อง Go?</a>
+    <a href="#install">ติดตั้ง Go</a>
+    <a href="#hello">Hello World แรก</a>
+    <a href="#variables">ตัวแปร & ชนิดข้อมูล</a>
+    <a href="#operators">Operators</a>
+    <a href="#control-flow">if / else / switch / for</a>
+    <a href="#functions">Functions</a>
+
+    <h3>🟡 กลาง</h3>
+    <a href="#arrays-slices">Arrays & Slices</a>
+    <a href="#maps">Maps</a>
+    <a href="#structs">Structs</a>
+    <a href="#pointers">Pointers</a>
+    <a href="#methods">Methods & Interfaces</a>
+    <a href="#errors">Error Handling</a>
+    <a href="#packages">Packages & Modules</a>
+    <a href="#generics">Generics</a>
+    <a href="#context">Context</a>
+
+    <h3>🔴 ขั้นสูง</h3>
+    <a href="#goroutines">Goroutines & Channels</a>
+    <a href="#concurrency-patterns">Concurrency Patterns</a>
+    <a href="#stdlib">Standard Library</a>
+    <a href="#testing">Testing</a>
+    <a href="#modern-go">Go Modern (1.21-1.24)</a>
+    <a href="#http-api">สร้าง HTTP API</a>
+    <a href="#database">Database & SQL</a>
+    <a href="#middleware">Middleware Pattern</a>
+    <a href="#design-patterns">Design Patterns</a>
+    <a href="#clean-arch">Clean Architecture</a>
+    <a href="#security">Security Patterns</a>
+    <a href="#enterprise">Enterprise Patterns</a>
+    <a href="#performance">Performance & Profiling</a>
+    <a href="#go-proverbs">Go Proverbs</a>
+    <a href="#next-steps">ก้าวต่อไป</a>
+  </aside>
+
+  <main class="main-content" id="content">
+
+<!-- ================================================================ -->
+<!--  PART 1: BEGINNER                                                -->
+<!-- ================================================================ -->
+
+<section class="section" id="why-go">
+  <h1>📚 สอน Go ตั้งแต่ศูนย์ — จนถึง Enterprise</h1>
+  <p>ยินดีต้อนรับเพื่อนๆ ทุกคนที่สนใจอยากเรียน Go! 🎉 ไม่ต้องมีพื้นฐานเขียนโปรแกรมมาก่อนเลย เราจะเริ่มจากศูนย์
+    แล้วค่อยๆ ไต่ระดับไปจนถึงระดับที่ใช้ในบริษัทระดับโลกอย่าง Google, Uber, Netflix กันเลย</p>
+
+  <h2>🤔 ทำไมต้อง Go?</h2>
+
+  <div class="glass-card highlight">
+    <h3>Go คืออะไร?</h3>
+    <p><strong>Go</strong> (หรือ <strong>Golang</strong>) คือภาษาโปรแกรมที่สร้างโดย <strong>Google</strong> ในปี 2009
+      โดยทีมที่ประกอบด้วยสุดยอดนักพัฒนาอย่าง Robert Griesemer, Rob Pike และ Ken Thompson
+      (คนหลังนี่คือคนสร้าง Unix + ภาษา C นะ!)</p>
+    <p>Go ถูกออกแบบมาเพื่อแก้ปัญหาที่ Google เจอจริงๆ: code compile ช้า, dependency management ยุ่ง, concurrent programming ซับซ้อน</p>
+  </div>
+
+  <h3>ข้อดีของ Go ที่ทำให้มันเป็นภาษาแรกที่ดี</h3>
+  <div class="glass-card">
+    <ul>
+      <li>🏎️ <strong>เร็วมาก</strong> — compile เป็น machine code ตรงๆ ไม่ต้องมี VM เหมือน Java/Python</li>
+      <li>📖 <strong>อ่านง่าย</strong> — syntax น้อย เรียนรู้ได้เร็ว (keyword แค่ 25 ตัว!)</li>
+      <li>⚡ <strong>Concurrency ในตัว</strong> — Goroutines ทำให้เขียน concurrent code ได้ง่ายมากๆ</li>
+      <li>📦 <strong>Binary เดียวจบ</strong> — compile แล้วได้ไฟล์เดียว copy ไปวางที่ไหนก็รันได้</li>
+      <li>🔧 <strong>เครื่องมือครบ</strong> — formatter, linter, test, benchmark มาในตัว</li>
+      <li>💰 <strong>เงินเดือนดี</strong> — Go developer เป็นที่ต้องการสูงมากในตลาด</li>
+      <li>🏢 <strong>ใช้ในบริษัทใหญ่ๆ</strong> — Google, Uber, Netflix, Docker, Kubernetes, Cloudflare</li>
+    </ul>
+  </div>
+
+  <div class="analogy">
+    ถ้า Python คือรถยนต์ automatic ที่ขับง่าย… Go คือรถ manual ที่ขับง่ายเกือบเท่า automatic แต่เร็วกว่า 10–50 เท่า!
+  </div>
+
+  <h3>Go เทียบกับภาษาอื่น</h3>
+  <table class="cmp-table">
+    <thead>
+      <tr><th>Feature</th><th>Go</th><th>Python</th><th>Java</th><th>Rust</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>ความเร็ว</td><td>⚡⚡⚡⚡</td><td>⚡</td><td>⚡⚡⚡</td><td>⚡⚡⚡⚡⚡</td></tr>
+      <tr><td>เรียนง่าย</td><td>⭐⭐⭐⭐</td><td>⭐⭐⭐⭐⭐</td><td>⭐⭐⭐</td><td>⭐⭐</td></tr>
+      <tr><td>Concurrency</td><td>ง่ายมาก (goroutine)</td><td>ยาก (GIL)</td><td>ปานกลาง (threads)</td><td>ดี (async)</td></tr>
+      <tr><td>Compile time</td><td>เร็วมาก (&lt;5 วิ)</td><td>ไม่ต้อง compile</td><td>ช้า</td><td>ช้ามาก</td></tr>
+      <tr><td>Deploy</td><td>Binary เดียว</td><td>ต้องมี Python runtime</td><td>ต้องมี JVM</td><td>Binary เดียว</td></tr>
+      <tr><td>Memory</td><td>มี GC (อัตโนมัติ)</td><td>มี GC</td><td>มี GC</td><td>ไม่มี GC (manual)</td></tr>
+    </tbody>
+  </table>
+  <style>
+    .cmp-table { width:100%; border-collapse:collapse; margin:16px 0 20px; font-size:13px; }
+    .cmp-table th { background:rgba(100,140,255,.12); color:var(--accent-cyan); text-align:left; padding:10px 14px; font-weight:600; border-bottom:2px solid var(--glass-border); }
+    .cmp-table td { padding:10px 14px; color:var(--text-secondary); border-bottom:1px solid rgba(100,140,255,.08); }
+    .cmp-table tr:hover td { background:rgba(100,140,255,.05); }
+  </style>
+
+  <h3>🆚 Go vs. Java & Spring — ทำไมโลกถึงหันมาใช้ Go?</h3>
+  <p>คำถามยอดฮิต: <strong>"ทำไมไม่ต้องใช้ Tomcat?", "Spring Boot ก็ดีอยู่แล้วไม่ใช่เหรอ?"</strong> — มาดูคำตอบให้หายสงสัย</p>
+
+  <div class="glass-card highlight">
+    <h4>1. Architecture: Native vs Virtual Machine</h4>
+    
+    <p><strong>Java (JVM):</strong></p>
+    <ul>
+        <li>ต้องการ Java Virtual Machine (JVM) เพื่อรันโค้ด (Write Once, Run Anywhere)</li>
+        <li>ต้อง warm up JVM ก่อนทำงานเต็มประสิทธิภาพ (JIT compilation)</li>
+        <li>เปลือง memory เริ่มต้น (JVM overhead 100MB+)</li>
+    </ul>
+
+    <p><strong>Go (Native):</strong></p>
+    <ul>
+        <li>Compile เป็น <strong>Binary Code</strong> (ภาษาเครื่อง Direct) สำหรับ OS นั้นๆ เลย</li>
+        <li><strong>ไม่ต้องมี VM</strong> หรือ Runtime ติดตั้งเพิ่มในเครื่อง server</li>
+        <li>Startup time เป็น <strong>milliseconds</strong> (เร็วมาก)</li>
+        <li>ใช้ memory น้อยมาก (เริ่มต้นแค่ 5-10MB สำหรับ web server) — ประหยัดค่า Cloud ไปเยอะ!</li>
+    </ul>
+  </div>
+
+  <div class="glass-card">
+    <h4>2. Web Server: Built-in vs External</h4>
+    
+    <p><strong>Java (Spring/Jakarta EE):</strong></p>
+    <ul>
+        <li>มักต้องรันบน <strong>Web Container</strong> หรือ Application Server (เช่น Tomcat, Jetty, WildFly)</li>
+        <li>Spring Boot Embedded Tomcat ช่วยให้ง่ายขึ้น แต่ข้างในก็ยังเป็น Tomcat ตัวใหญ่ๆ อยู่ดี</li>
+        <li>Configuration เยอะและซับซ้อน (xml, annotations, properties)</li>
+    </ul>
+
+    <p><strong>Go (net/http):</strong></p>
+    <ul>
+        <li>Go มี <strong>Production-Grade Web Server</strong> มาใน Standard Library (package <code>net/http</code>)</li>
+        <li>เขียนโค้ดแค่ไม่กี่บรรทัด ได้ HTTP Server ที่รองรับ HTTP/2, TLS, Timeouts พร้อมใช้งาน</li>
+        <li><strong>ไม่ต้องลงอะไรเพิ่ม!</strong> ตัว binary ที่ compile มาสามารถ listen port 80/443 ได้ด้วยตัวเอง</li>
+        <li>ประสิทธิภาพสูงมาก เทียบเท่า Nginx ในหลายกรณี</li>
+    </ul>
+    <pre>// โค้ดสร้าง Web Server ใน Go (รวมทุกอย่างในนี้แล้ว!)
+package main
+
+import (
+    "fmt"
+    "net/http"
+)
+
+func main() {
+    http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+        fmt.Fprint(w, "Hello from Go Native Server!")
+    })
+    
+    // ฟัง port 8080 ทันที — ไม่ต้องมี Tomcat/Nginx
+    http.ListenAndServe(":8080", nil)
+}</pre>
+  </div>
+
+  <div class="glass-card">
+    <h4>3. Thread Model: OS Threads vs Goroutines</h4>
+    
+    <p><strong>Java (Traditional Threads):</strong></p>
+    <ul>
+        <li>1 Java Thread = 1 OS Thread</li>
+        <li>กินแรม Thread ละ ~1MB (ถ้าเปิด 10,000 threads = 10GB RAM!)</li>
+        <li>Context Switch ช้า เพราะต้องผ่าน OS Kernel</li>
+        <li>แก้ปัญหาด้วย Thread Pool (จำกัดจำนวน Thread) ส่งผลต่อ performance เมื่อโหลดหนัก</li>
+        <li>(Java 21 เริ่มมี Virtual Threads เพื่อแก้ปัญหานี้ — แต่มาช้ากว่า Go 14 ปี)</li>
+    </ul>
+
+    <p><strong>Go (Goroutines):</strong></p>
+    <ul>
+        <li>Goroutine คือ <strong>"Lightweight Thread"</strong> ที่จัดการโดย Go Runtime (ไม่ใช่ OS)</li>
+        <li>กินแรมเริ่มต้นแค่ <strong>2KB</strong> (เล็กกว่า Java Thread 500 เท่า!)</li>
+        <li>สร้างได้เป็น <strong>แสน/ล้าน</strong> ตัวในเครื่องเดียว (C10K problem = เรื่องเล็กสำหรับ Go)</li>
+        <li>Go Runtime มี <strong>Scheduler</strong> ที่ฉลาดมาก สลับการทำงานของ Goroutines บน CPU core อัตโนมัติ (M:N Threading)</li>
+        <li>ผลลัพธ์: รองรับ Concurrent connections ได้มหาศาลโดยเครื่องไม่ค้าง</li>
+    </ul>
+  </div>
+
+  <div class="glass-card tip">
+    <h4>4. Deployment & DevOps Life</h4>
+    
+    <p>ใครที่เป็น DevOps จะรัก Go มากกว่า Java:</p>
+    
+    <table class="cmp-table" style="margin-top:10px;">
+        <tr>
+            <th>ขั้นตอน</th>
+            <th>Java App</th>
+            <th>Go App</th>
+        </tr>
+        <tr>
+            <td><strong>Artifact</strong></td>
+            <td>ไฟล์ .jar หรือ .war (+ dependencies อีกเป็นโหล)</td>
+            <td>ไฟล์ Binary เดี่ยวๆ 1 ไฟล์</td>
+        </tr>
+        <tr>
+            <td><strong>Environment</strong></td>
+            <td>ต้องลง JDK/JRE ให้ตรงเวอร์ชั่น, ตั้งค่า CLASSPATH, JAVA_OPTS</td>
+            <td>ไม่ต้องลงอะไรเลย (แค่ OS ตรงกันก็พอ)</td>
+        </tr>
+        <tr>
+            <td><strong>Docker Image</strong></td>
+            <td>Base Image ใหญ่ (OpenJDK ~500MB+), Build นาน</td>
+            <td>Base Image เล็กจิ๋ว (Scratch/Alpine ~10-20MB), Build เร็ว</td>
+        </tr>
+        <tr>
+            <td><strong>Cold Start</strong></td>
+            <td>ช้า (JVM startup + application context loading) — ไม่เหมาะกับ Serverless</td>
+            <td>เร็วมาก (Instant) — เหมาะกับ Serverless/Cloud Run สุดๆ</td>
+        </tr>
+    </table>
+  </div>
+
+  <div class="glass-card warn">
+    <h4>5. Design Philosophy: OOP vs Composition</h4>
+    
+    <p><strong>Java (Classic OOP):</strong></p>
+    <ul>
+        <li>เน้น <strong>Inheritance</strong> (Class A extends Class B)</li>
+        <li>Hierarchy ลึกและซับซ้อน (AbstractFactoryBuilderImpl...)</li>
+        <li>Design Patterns ถูกบังคับใช้ผ่าน Framework (Spring Beans, Dependency Injection Containers)</li>
+    </ul>
+
+    <p><strong>Go (Composition):</strong></p>
+    <ul>
+        <li><strong>ไม่มี Inheritance!</strong> (ไม่มี keyword <code>extends</code>)</li>
+        <li>เน้น <strong>Composition</strong> (เอา struct มาประกอบกัน)</li>
+        <li>Interface เป็นแบบ <strong>Implicit</strong> (ไม่ต้องประกาศ <code>implements</code> — แค่มี method ครบก็ใช้ได้เลย)</li>
+        <li>เน้นความเรียบง่าย (Simplicity) — Code Go จะหน้าตาเหมือนกันทั้งทีม อ่านง่าย ดูแลรักษาง่าย</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="section" id="install">
+  <h2>🛠️ ติดตั้ง Go & เตรียมเครื่องมือ</h2>
+
+  <h3>macOS</h3>
+  <div class="glass-card">
+    <pre># วิธีที่ 1: ใช้ Homebrew (แนะนำ)
+brew install go
+
+# วิธีที่ 2: โหลดจากเว็บ
+# ไปที่ https://go.dev/dl/ แล้วโหลด .pkg มาติดตั้ง</pre>
+  </div>
+
+  <h3>Windows</h3>
+  <div class="glass-card">
+    <pre># วิธีที่ 1: ใช้ winget
+winget install GoLang.Go
+
+# วิธีที่ 2: โหลดจากเว็บ
+# ไปที่ https://go.dev/dl/ แล้วโหลด .msi มาติดตั้ง</pre>
+  </div>
+
+  <h3>Linux</h3>
+  <div class="glass-card">
+    <pre># ดาวน์โหลดและติดตั้ง
+wget https://go.dev/dl/go1.23.0.linux-amd64.tar.gz
+sudo tar -C /usr/local -xzf go1.23.0.linux-amd64.tar.gz
+
+# เพิ่มลง PATH (ใส่ใน ~/.bashrc หรือ ~/.zshrc)
+export PATH=$PATH:/usr/local/go/bin</pre>
+  </div>
+
+  <h3>ตรวจสอบว่าติดตั้งสำเร็จ</h3>
+  <div class="glass-card">
+    <pre>go version</pre>
+    <div class="output">go version go1.23.0 darwin/arm64</div>
+    <p>ถ้าเห็นแบบนี้แสดงว่าโอเคแล้ว! 🎉</p>
+  </div>
+
+  <h3>Editor ที่แนะนำ</h3>
+  <div class="glass-card success">
+    <ul>
+      <li><strong>VS Code</strong> + extension "Go" — ดีที่สุดสำหรับมือใหม่ (autocomplete, format, lint ครบ)</li>
+      <li><strong>GoLand</strong> (JetBrains) — ดีมากแต่เสียเงิน (มี free สำหรับนักเรียน)</li>
+      <li><strong>Vim/Neovim</strong> + gopls — สำหรับสาย terminal</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="section" id="hello">
+  <h2>👋 Hello World — โปรแกรมแรกของเรา</h2>
+
+  <h3>สร้างโปรเจกต์</h3>
+  <div class="glass-card">
+    <pre># สร้างโฟลเดอร์
+mkdir hello-go
+cd hello-go
+
+# สร้าง Go module (คือรากของโปรเจกต์ Go)
+go mod init hello-go
+
+# สร้างไฟล์
+touch main.go</pre>
+  </div>
+
+  <h3>เขียน Hello World</h3>
+  <div class="glass-card highlight">
+    <pre>package main          // ← ทุกโปรแกรม Go ต้องเริ่มจาก package main
+
+import "fmt"          // ← import package "fmt" สำหรับ print ข้อความ
+
+func main() {         // ← func main() คือจุดเริ่มต้นของโปรแกรม
+    fmt.Println("สวัสดีชาวโลก! 🌍")
+}</pre>
+    <div class="output">สวัสดีชาวโลก! 🌍</div>
+  </div>
+
+  <h3>อธิบายทีละบรรทัด</h3>
+  <div class="glass-card">
+    <p><strong>บรรทัด 1: <code>package main</code></strong></p>
+    <p>ทุกไฟล์ Go ต้องบอกว่าตัวเองอยู่ใน "package" ไหน เปรียบเหมือนบอกว่าไฟล์นี้อยู่ในแฟ้มไหนนั่นแหละ
+      ถ้าเราอยากให้โปรแกรมรันได้ ต้องเป็น <code>package main</code></p>
+
+    <p><strong>บรรทัด 3: <code>import "fmt"</code></strong></p>
+    <p><code>fmt</code> ย่อมาจาก "format" — เป็น package มาตรฐานของ Go สำหรับ print ข้อความ
+      เหมือน <code>print()</code> ในPython หรือ <code>System.out.println()</code> ใน Java</p>
+
+    <p><strong>บรรทัด 5: <code>func main()</code></strong></p>
+    <p><code>func</code> คือการประกาศฟังก์ชัน, <code>main</code> คือชื่อฟังก์ชัน
+      Go จะเริ่มรันโปรแกรมจากฟังก์ชัน <code>main()</code> เสมอ
+      เหมือนประตูทางเข้าอาคาร — ต้องเข้าจากตรงนี้!</p>
+
+    <p><strong>บรรทัด 6: <code>fmt.Println("...")</code></strong></p>
+    <p><code>Println</code> = Print + Line = พิมพ์ข้อความแล้วขึ้นบรรทัดใหม่
+      สังเกตตัว P เป็นตัวใหญ่ — ใน Go <strong>ตัวอักษรแรกเป็นตัวใหญ่ = public (ใครก็เรียกได้)</strong></p>
+  </div>
+
+  <h3>รันโปรแกรม</h3>
+  <div class="glass-card">
+    <pre># วิธีที่ 1: รันตรงๆ (ไม่สร้าง binary)
+go run main.go
+
+# วิธีที่ 2: build เป็น binary แล้วรัน
+go build -o hello main.go
+./hello</pre>
+  </div>
+
+  <div class="analogy">
+    <code>go run</code> เหมือนกด play ดูหนังบน streaming<br>
+    <code>go build</code> เหมือนโหลดหนังมาเก็บไว้ในเครื่อง — ดูเมื่อไหร่ก็ได้ไม่ต้อง compile ใหม่
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="section" id="variables">
+  <h2>📦 ตัวแปร & ชนิดข้อมูล</h2>
+
+  <p>ตัวแปรคือ "กล่องเก็บของ" ที่มีชื่อ — เราเอาข้อมูลใส่กล่อง แล้วเรียกใช้ทีหลังได้</p>
+
+  <h3>การประกาศตัวแปร</h3>
+  <div class="glass-card">
+    <pre>package main
+
+import "fmt"
+
+func main() {
+    // วิธีที่ 1: var แบบเต็ม (ระบุชนิด)
+    var name string = "สมชาย"
+    var age int = 25
+
+    // วิธีที่ 2: var แบบให้ Go เดาชนิดเอง
+    var score = 95.5        // Go รู้ว่าเป็น float64
+
+    // วิธีที่ 3: := (short declaration) — ✨ นิยมที่สุด!
+    city := "กรุงเทพ"       // Go รู้ว่าเป็น string
+    isStudent := true         // Go รู้ว่าเป็น bool
+
+    // วิธีที่ 4: ประกาศหลายตัวพร้อมกัน
+    var (
+        x = 10
+        y = 20
+        z = 30
+    )
+
+    fmt.Println(name, age, score, city, isStudent, x, y, z)
+}</pre>
+  </div>
+
+  <div class="glass-card warn">
+    <h4>⚠️ กฎสำคัญของ Go</h4>
+    <ul>
+      <li><strong>ตัวแปรที่ประกาศแล้วต้องใช้</strong> — ถ้าประกาศแล้วไม่ใช้ Go จะ compile error! (ไม่ใช่ warning นะ ถึงขั้น error!</li>
+      <li><strong><code>:=</code> ใช้ได้เฉพาะในฟังก์ชัน</strong> — ข้างนอกฟังก์ชันต้องใช้ <code>var</code></li>
+      <li><strong>Go เป็น statically typed</strong> — ตัวแปรชนิดไหนก็ชนิดนั้น เปลี่ยนไม่ได้</li>
+    </ul>
+  </div>
+
+  <h3>ชนิดข้อมูลหลัก</h3>
+  <div class="glass-card">
+    <pre>// ── ตัวเลขจำนวนเต็ม (Integers) ─────────────────
+var a int = 42          // int ปกติ (ขนาดตาม OS: 32 หรือ 64 bit)
+var b int8 = 127        // -128 ถึง 127
+var c int16 = 32767     // -32768 ถึง 32767
+var d int32 = 2147483647
+var e int64 = 9223372036854775807
+var f uint = 42         // unsigned (ไม่มีค่าติดลบ) 0 ถึง ...
+
+// ── ตัวเลขทศนิยม (Floating Point) ────────────────
+var price float64 = 99.99     // ✨ ใช้ float64 เป็นหลัก
+var tiny float32 = 3.14       // ความแม่นน้อยกว่า ใช้น้อย
+
+// ── ข้อความ (String) ─────────────────────────────
+var greeting string = "สวัสดี"
+multiLine := `นี่คือข้อความ
+หลายบรรทัด
+ใช้ backtick`
+
+// ── จริง/เท็จ (Boolean) ──────────────────────────
+var isReady bool = true
+var isDone bool = false
+
+// ── อักขระ (Rune) ────────────────────────────────
+var letter rune = 'ก'    // rune = int32 = 1 ตัวอักษร Unicode</pre>
+  </div>
+
+  <div class="analogy">
+    ชนิดข้อมูลเหมือนขนาดกล่อง:<br>
+    <code>int8</code> = กล่องเล็ก (ใส่ได้ -128 ถึง 127)<br>
+    <code>int64</code> = กล่องใหญ่ (ใส่ได้เลข 9 ล้านล้าน+)<br>
+    <code>string</code> = กล่องสำหรับข้อความ (ยืดได้ตามต้องการ)
+  </div>
+
+  <h3>Zero Values — ค่าเริ่มต้นอัตโนมัติ</h3>
+  <div class="glass-card success">
+    <p>ใน Go ถ้าประกาศตัวแปรแต่ไม่กำหนดค่า มันจะมี <strong>"zero value"</strong> อัตโนมัติ (ไม่เป็น null/undefined!):</p>
+    <pre>var i int       // → 0
+var f float64   // → 0.0
+var s string    // → "" (string ว่าง)
+var b bool      // → false
+var p *int      // → nil (pointer เท่านั้นที่เป็น nil)</pre>
+    <p>นี่เป็นเหตุผลที่ Go ปลอดภัยกว่าหลายภาษา — ไม่มี "undefined behavior" จากตัวแปรที่ยังไม่ assign!</p>
+  </div>
+
+  <h3>ค่าคงที่ (Constants)</h3>
+  <div class="glass-card">
+    <pre>const Pi = 3.14159           // ค่าคงที่ — แก้ไขไม่ได้
+const AppName = "No.1 API"
+
+// หลายค่าพร้อมกัน
+const (
+    StatusActive  = "active"
+    StatusDeleted = "deleted"
+    MaxRetries    = 3
+)
+
+// iota — auto-increment constant (เริ่มจาก 0)
+const (
+    RoleUser  = iota   // 0
+    RoleAdmin          // 1
+    RoleSuper          // 2
+)
+
+// iota ขั้นสูง: ใช้กับ bit flags
+const (
+    FlagRead    = 1 << iota   // 1  (0001)
+    FlagWrite                  // 2  (0010)
+    FlagExecute                // 4  (0100)
+)
+// ใช้ bitwise OR เพื่อรวม permissions
+perms := FlagRead | FlagWrite   // 3  (0011)
+canWrite := perms&FlagWrite != 0  // true</pre>
+  </div>
+
+  <h3>Custom Types & Type Aliases</h3>
+  <div class="glass-card">
+    <pre>// ─── Custom Type: สร้างชนิดข้อมูลใหม่จาก base type ───
+type UserID string       // UserID เป็นชนิดใหม่ (ไม่ใช่ string ธรรมดา)
+type Temperature float64
+type Status int
+
+const (
+    StatusActive  Status = iota
+    StatusInactive
+    StatusBanned
+)
+
+func (s Status) String() string {
+    switch s {
+    case StatusActive:   return "active"
+    case StatusInactive: return "inactive"
+    case StatusBanned:   return "banned"
+    }
+    return "unknown"
+}
+
+// ─── ข้อดี: type safety — ป้องกันสับสน ───
+type Meter float64
+type Kilogram float64
+
+func calculateBMI(height Meter, weight Kilogram) float64 {
+    return float64(weight) / (float64(height) * float64(height))
+}
+
+// calculateBMI(70.0, 1.75) ← compile error! ต้องส่งถูกชนิด
+// calculateBMI(Meter(1.75), Kilogram(70)) ← ✅ ถูกต้อง
+
+// ─── Type Alias: ชื่อเล่น (เป็น type เดียวกัน) ───
+type ID = string   // ID กับ string ใช้แทนกันได้ 100%
+
+// ต่างจาก type definition:
+type UserID2 string   // UserID2 ≠ string (ต้อง convert)
+type AliasID = string // AliasID = string (ใช้แทนกันได้)</pre>
+  </div>
+
+  <h3>แปลงชนิดข้อมูล (Type Conversion)</h3>
+  <div class="glass-card">
+    <pre>// Go ไม่แปลงให้อัตโนมัติ — ต้องแปลงเอง (explicit)
+var i int = 42
+var f float64 = float64(i)       // int → float64
+var u uint = uint(f)              // float64 → uint
+
+// string ↔ ตัวเลข — ใช้ package strconv
+import "strconv"
+s := strconv.Itoa(42)            // int → string: "42"
+n, err := strconv.Atoi("42")      // string → int: 42</pre>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="section" id="operators">
+  <h2>🔣 Operators</h2>
+
+  <div class="glass-card">
+    <pre>// ── คณิตศาสตร์ ──────────────────────────────────
+a := 10 + 3   // 13  (บวก)
+b := 10 - 3   // 7   (ลบ)
+c := 10 * 3   // 30  (คูณ)
+d := 10 / 3   // 3   (หาร — int หารปัดทิ้ง!)
+e := 10 % 3   // 1   (เศษจากการหาร)
+
+// ⚠️ สำคัญ! int หาร int ได้ int (ปัดทิ้ง)
+fmt.Println(10 / 3)       // 3 (ไม่ใช่ 3.33!)
+fmt.Println(10.0 / 3.0)   // 3.3333... (float หาร float ได้ float)
+
+// ── เปรียบเทียบ ────────────────────────────────
+fmt.Println(5 == 5)   // true   (เท่ากัน)
+fmt.Println(5 != 3)   // true   (ไม่เท่ากัน)
+fmt.Println(5 > 3)    // true   (มากกว่า)
+fmt.Println(5 < 3)    // false  (น้อยกว่า)
+fmt.Println(5 >= 5)   // true   (มากกว่าหรือเท่ากับ)
+fmt.Println(5 <= 3)   // false  (น้อยกว่าหรือเท่ากับ)
+
+// ── ตรรกศาสตร์ (Logic) ─────────────────────────
+fmt.Println(true && true)    // true   (AND — ทั้งคู่ต้อง true)
+fmt.Println(true || false)   // true   (OR — ตัวใดตัวหนึ่ง true)
+fmt.Println(!true)           // false  (NOT — กลับค่า)
+
+// ── ย่อ (Shortcuts) ─────────────────────────────
+x := 10
+x += 5   // x = x + 5 → 15
+x -= 3   // x = x - 3 → 12
+x *= 2   // x = x * 2 → 24
+x /= 4   // x = x / 4 → 6
+x++      // x = x + 1 → 7  (⚠️ ใน Go x++ เป็น statement ไม่ใช่ expression!)
+x--      // x = x - 1 → 6</pre>
+  </div>
+
+  <div class="glass-card warn">
+    <h4>⚠️ ระวัง! x++ ใน Go ต่างจากภาษาอื่น</h4>
+    <pre>// ❌ ทำไม่ได้ใน Go!
+y := x++      // Error! x++ เป็น statement ไม่ส่งค่ากลับ
+fmt.Println(x++)  // Error!
+
+// ✅ ต้องทำแบบนี้
+x++
+fmt.Println(x)</pre>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="section" id="control-flow">
+  <h2>🔀 Control Flow — if / switch / for</h2>
+
+  <h3>if / else</h3>
+  <div class="glass-card">
+    <pre>age := 20
+
+if age >= 18 {
+    fmt.Println("เป็นผู้ใหญ่แล้ว 🎉")
+} else if age >= 13 {
+    fmt.Println("เป็นวัยรุ่น")
+} else {
+    fmt.Println("เป็นเด็ก")
+}
+
+// ✨ Go พิเศษ: if with init statement
+// ประกาศตัวแปรใน if ได้เลย — ใช้ได้แค่ใน block นี้
+if score := 85; score >= 80 {
+    fmt.Println("เก่งมาก! คะแนน:", score)
+}
+// fmt.Println(score) ← Error! score ไม่อยู่ใน scope แล้ว</pre>
+  </div>
+
+  <div class="glass-card warn">
+    <h4>⚠️ ข้อแตกต่างจากภาษาอื่น</h4>
+    <ul>
+      <li>ไม่ต้องใส่วงเล็บ <code>()</code> รอบเงื่อนไข → <code>if age >= 18</code> ไม่ใช่ <code>if (age >= 18)</code></li>
+      <li>วงเล็บปีกกา <code>{}</code> <strong>บังคับ</strong> ทุกครั้ง แม้มีแค่บรรทัดเดียว</li>
+      <li><code>{</code> ต้องอยู่บรรทัดเดียวกับ <code>if</code> (ขึ้นบรรทัดใหม่ไม่ได้!)</li>
+    </ul>
+  </div>
+
+  <h3>switch</h3>
+  <div class="glass-card">
+    <pre>day := "Monday"
+
+switch day {
+case "Monday":
+    fmt.Println("วันจันทร์ — เริ่มต้นสัปดาห์!")
+case "Friday":
+    fmt.Println("วันศุกร์ — ใกล้หยุดแล้ว!")
+case "Saturday", "Sunday":           // ← หลาย case รวมกันได้!
+    fmt.Println("วันหยุด! 🎉")
+default:
+    fmt.Println("วันธรรมดา")
+}
+
+// ✨ Go switch ไม่ต้อง break! (fallthrough ไม่เกิดอัตโนมัติ)
+// ถ้าอยากให้ fall ไป case ถัดไป ต้องใส่ fallthrough เอง
+
+// switch ไม่มีเงื่อนไข (แทน if/else if ยาวๆ ได้)
+score := 85
+switch {
+case score >= 90:
+    fmt.Println("A")
+case score >= 80:
+    fmt.Println("B")
+case score >= 70:
+    fmt.Println("C")
+default:
+    fmt.Println("F")
+}</pre>
+  </div>
+
+  <h3>for — Loop เดียวที่มี!</h3>
+  <div class="glass-card highlight">
+    <p>Go มี loop แค่ <code>for</code> ตัวเดียว — ไม่มี while, do-while เลย! แต่มันทำได้ทุกอย่าง:</p>
+    <pre>// แบบที่ 1: for ปกติ (เหมือน C)
+for i := 0; i < 5; i++ {
+    fmt.Println(i)   // 0, 1, 2, 3, 4
+}
+
+// แบบที่ 2: for เป็น while (ใส่แค่เงื่อนไข)
+count := 0
+for count < 5 {
+    fmt.Println(count)
+    count++
+}
+
+// แบบที่ 3: infinite loop (ไม่ใส่อะไรเลย)
+for {
+    fmt.Println("วนไปเรื่อยๆ...")
+    break   // ← ต้อง break ไม่งั้นวนตลอด!
+}
+
+// แบบที่ 4: for range — วน loop สมาชิก
+fruits := []string{"🍎", "🍌", "🍊"}
+for index, fruit := range fruits {
+    fmt.Printf("ตำแหน่ง %d: %s\n", index, fruit)
+}
+
+// ถ้าไม่ต้องการ index ใช้ _ (blank identifier)
+for _, fruit := range fruits {
+    fmt.Println(fruit)
+}
+
+// วน string — ได้ทีละตัวอักษร (rune)
+for i, ch := range "สวัสดี" {
+    fmt.Printf("byte %d: %c\n", i, ch)
+}</pre>
+  </div>
+
+  <h3>break & continue</h3>
+  <div class="glass-card">
+    <pre>for i := 0; i < 10; i++ {
+    if i == 3 {
+        continue   // ← ข้ามรอบนี้ ไปรอบถัดไป
+    }
+    if i == 7 {
+        break      // ← หยุด loop ทั้งหมด
+    }
+    fmt.Println(i)   // พิมพ์: 0, 1, 2, 4, 5, 6
+}</pre>
+  </div>
+
+  <h3>Labeled Loop — break/continue ข้าม loop ชั้นนอก</h3>
+  <div class="glass-card">
+    <pre>// ปัญหา: break ใน nested loop ออกแค่ loop ในสุด
+// Labeled loop: ตั้งชื่อ loop → break/continue ได้ถูกชั้น
+
+outer:   // ← label ของ loop ชั้นนอก
+    for i := 0; i < 3; i++ {
+        for j := 0; j < 3; j++ {
+            if i == 1 && j == 1 {
+                break outer   // ← หยุด loop ชั้นนอกเลย!
+            }
+            fmt.Printf("i=%d j=%d\n", i, j)
+        }
+    }
+// Output: i=0 j=0, i=0 j=1, i=0 j=2, i=1 j=0 → หยุด
+
+// ตัวอย่างจริง: หา item ใน 2D data
+search:
+    for _, row := range matrix {
+        for _, val := range row {
+            if val == target {
+                fmt.Println("Found!", val)
+                break search   // ← ออกจากทั้ง 2 loops
+            }
+        }
+    }</pre>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="section" id="functions">
+  <h2>🧩 Functions — ฟังก์ชัน</h2>
+
+  <p>ฟังก์ชันคือ "ก้อนโค้ด" ที่ทำงานอย่างหนึ่ง เราตั้งชื่อมัน แล้วเรียกใช้ซ้ำๆ ได้</p>
+
+  <div class="glass-card">
+    <pre>// ฟังก์ชันพื้นฐาน
+func greet(name string) {
+    fmt.Println("สวัสดี " + name + "!")
+}
+
+// ฟังก์ชันที่ return ค่า
+func add(a int, b int) int {
+    return a + b
+}
+
+// ย่อ parameter ชนิดเดียวกัน
+func add2(a, b int) int {
+    return a + b
+}
+
+// ✨ Return หลายค่า — จุดเด่นของ Go!
+func divide(a, b float64) (float64, error) {
+    if b == 0 {
+        return 0, fmt.Errorf("หารด้วยศูนย์ไม่ได้!")
+    }
+    return a / b, nil
+}
+
+func main() {
+    greet("เพื่อน")          // → สวัสดี เพื่อน!
+    sum := add(3, 5)          // → 8
+    
+    result, err := divide(10, 3)
+    if err != nil {
+        fmt.Println("Error:", err)
+    } else {
+        fmt.Println("ผลลัพธ์:", result)   // → 3.333...
+    }
+    
+    // ถ้าไม่สนใจค่าที่ return ใช้ _
+    _, err2 := divide(10, 0)
+    fmt.Println(err2)   // → หารด้วยศูนย์ไม่ได้!
+}</pre>
+  </div>
+
+  <div class="analogy">
+    ฟังก์ชันเหมือนเครื่องทำกาแฟ:<br>
+    — ใส่ "เมล็ดกาแฟ + น้ำ" (parameters)<br>
+    — กดปุ่ม (เรียกฟังก์ชัน)<br>
+    — ได้ "กาแฟ 1 แก้ว" กลับมา (return value)<br>
+    — บางเครื่องบอกด้วยว่า "error: น้ำไม่พอ" (return error ด้วย)
+  </div>
+
+  <h3>Named Return Values</h3>
+  <div class="glass-card">
+    <pre>// ตั้งชื่อค่า return ได้ — อ่านง่ายขึ้น + ใช้ "naked return" ได้
+func rectangleInfo(width, height float64) (area, perimeter float64) {
+    area = width * height
+    perimeter = 2 * (width + height)
+    return   // ← naked return — return area และ perimeter อัตโนมัติ
+}
+
+a, p := rectangleInfo(5, 3)
+fmt.Println("พื้นที่:", a, "เส้นรอบรูป:", p)   // 15, 16</pre>
+  </div>
+
+  <h3>Variadic Functions — รับหลาย argument ไม่จำกัด</h3>
+  <div class="glass-card">
+    <pre>// ... (สามจุด) หมายถึงรับ argument กี่ตัวก็ได้
+func sum(nums ...int) int {
+    total := 0
+    for _, n := range nums {
+        total += n
+    }
+    return total
+}
+
+fmt.Println(sum(1, 2, 3))           // → 6
+fmt.Println(sum(1, 2, 3, 4, 5))     // → 15
+
+// ส่ง slice เข้าไปก็ได้ ใช้ ...
+numbers := []int{10, 20, 30}
+fmt.Println(sum(numbers...))         // → 60</pre>
+  </div>
+
+  <h3>Anonymous Functions & Closures</h3>
+  <div class="glass-card">
+    <pre>// ฟังก์ชันไม่มีชื่อ — เก็บในตัวแปรได้
+double := func(x int) int {
+    return x * 2
+}
+fmt.Println(double(5))   // → 10
+
+// Closure — ฟังก์ชันที่ "จำ" ตัวแปรข้างนอก
+func counter() func() int {
+    count := 0
+    return func() int {
+        count++   // ← count ถูก "จำ" ไว้ แม้ counter() จบไปแล้ว
+        return count
+    }
+}
+
+c := counter()
+fmt.Println(c())   // → 1
+fmt.Println(c())   // → 2
+fmt.Println(c())   // → 3</pre>
+  </div>
+
+  <div class="analogy">
+    Closure เหมือนคนที่ถือสมุดนับของตัวเอง — ทุกครั้งที่เรียก มันนับต่อจากที่บันทึกไว้ ไม่เริ่มจากศูนย์ใหม่
+  </div>
+
+  <h3>defer — "ทำทีหลังก่อนออก"</h3>
+  <div class="glass-card">
+    <pre>func main() {
+    fmt.Println("เริ่ม")
+    defer fmt.Println("ทำก่อนจบ!")   // ← จะรันตอนฟังก์ชัน return
+    fmt.Println("กำลังทำงาน...")
+}
+// Output:
+// เริ่ม
+// กำลังทำงาน...
+// ทำก่อนจบ!
+
+// ใช้บ่อยมาก: ปิดไฟล์, ปิด database connection
+func readFile(path string) {
+    file, err := os.Open(path)
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer file.Close()   // ← ไม่ว่าจะเกิดอะไร ไฟล์จะถูกปิดเสมอ
+    
+    // ... อ่านไฟล์ตรงนี้
+}</pre>
+  </div>
+
+  <h3>Higher-Order Functions — ฟังก์ชันรับ/คืนฟังก์ชัน</h3>
+  <div class="glass-card">
+    <pre>// ─── Function Type: กำหนดชนิดของฟังก์ชัน ───
+type MathFunc func(int, int) int
+
+func apply(a, b int, fn MathFunc) int {
+    return fn(a, b)   // ← เรียกฟังก์ชันที่รับมา
+}
+
+add := func(x, y int) int { return x + y }
+mul := func(x, y int) int { return x * y }
+
+fmt.Println(apply(3, 4, add))   // → 7
+fmt.Println(apply(3, 4, mul))   // → 12
+
+// ─── ตัวอย่าง: filter slice ด้วยฟังก์ชัน ───
+func filter(nums []int, test func(int) bool) []int {
+    var result []int
+    for _, n := range nums {
+        if test(n) {
+            result = append(result, n)
+        }
+    }
+    return result
+}
+
+numbers := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+
+evens := filter(numbers, func(n int) bool { return n%2 == 0 })
+// → [2, 4, 6, 8, 10]
+
+bigNums := filter(numbers, func(n int) bool { return n > 5 })
+// → [6, 7, 8, 9, 10]
+
+// ─── Middleware Pattern: ฟังก์ชันคืนฟังก์ชัน ───
+type Handler func(string) string
+
+func withLogging(next Handler) Handler {
+    return func(input string) string {
+        fmt.Printf("→ input: %s\n", input)
+        result := next(input)
+        fmt.Printf("← output: %s\n", result)
+        return result
+    }
+}
+
+greet := func(name string) string { return "Hello, " + name }
+loggedGreet := withLogging(greet)
+loggedGreet("Go")   // → input: Go ← output: Hello, Go</pre>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!--  PART 2: INTERMEDIATE                                           -->
+<!-- ================================================================ -->
+
+<section class="section" id="arrays-slices">
+  <h2>📚 Arrays & Slices</h2>
+
+  <h3>Array — ขนาดคงที่</h3>
+  <div class="glass-card">
+    <pre>// Array = ตัวแปรที่เก็บข้อมูลหลายตัวในชนิดเดียวกัน ขนาดคงที่
+var scores [5]int                    // array ของ int ขนาด 5 (zero values: [0,0,0,0,0])
+scores[0] = 95
+scores[1] = 87
+
+grades := [3]string{"A", "B", "C"}  // ประกาศพร้อมค่า
+auto := [...]int{10, 20, 30, 40}    // ... = ให้ Go นับขนาดให้ → [4]int
+
+fmt.Println(len(grades))   // → 3 (ความยาว)</pre>
+  </div>
+
+  <div class="glass-card warn">
+    <h4>⚠️ Array ใน Go ไม่ค่อยใช้ตรงๆ!</h4>
+    <p>เพราะขนาดคงที่ เพิ่ม/ลดไม่ได้ + <code>[3]int</code> กับ <code>[4]int</code> เป็น<strong>คนละชนิดกัน</strong>!
+      ในชีวิตจริง 99% เราใช้ <strong>Slice</strong> แทน</p>
+  </div>
+
+  <h3>Slice — ขนาดยืดหยุ่น ✨</h3>
+  <div class="glass-card highlight">
+    <pre>// Slice = array ที่ขนาดเปลี่ยนได้ — ใช้งานจริงใช้อันนี้!
+fruits := []string{"🍎", "🍌", "🍊"}   // ← ไม่ใส่ตัวเลขใน [] = slice
+
+// เพิ่มสมาชิก
+fruits = append(fruits, "🍇")
+fruits = append(fruits, "🍓", "🥝")     // เพิ่มหลายตัวได้
+
+// ดึงจำนวน
+fmt.Println(len(fruits))   // → 6
+
+// เข้าถึงตำแหน่ง (0-indexed)
+fmt.Println(fruits[0])     // → 🍎
+fmt.Println(fruits[2])     // → 🍊
+
+// Slicing (ตัดส่วน)
+fmt.Println(fruits[1:3])   // → [🍌 🍊]  (index 1 ถึง 2)
+fmt.Println(fruits[:2])    // → [🍎 🍌]   (ตั้งแต่แรกถึง index 1)
+fmt.Println(fruits[3:])    // → [🍇 🍓 🥝] (ตั้งแต่ index 3 ถึงสุดท้าย)
+
+// สร้าง slice ว่าง
+empty := []int{}
+var empty2 []int             // nil slice (ยังไม่จองหน่วยความจำ)
+
+// สร้างด้วย make (กำหนด length + capacity)
+data := make([]int, 5)       // length=5, capacity=5
+data2 := make([]int, 0, 10)  // length=0, capacity=10 (จองไว้ 10 ตำแหน่ง)</pre>
+  </div>
+
+  <div class="analogy">
+    Array เหมือนกล่องลิ้นชัก 5 ช่อง — มี 5 ช่องตลอดไป เพิ่มช่องไม่ได้<br>
+    Slice เหมือนรถไฟ — เพิ่มขบวนได้เรื่อยๆ ตามต้องการ!
+  </div>
+
+  <h3>length vs capacity</h3>
+  <div class="glass-card">
+    <pre>// length = จำนวนสมาชิกปัจจุบัน
+// capacity = จำนวนที่จองไว้จริง (Behind the scenes)
+s := make([]int, 3, 5)
+fmt.Println(len(s))   // → 3  (มี 3 ตัว)
+fmt.Println(cap(s))   // → 5  (จองไว้ 5 ช่อง)
+
+// เมื่อ append เกิน capacity → Go จองใหม่ (ปกติ 2x เดิม)
+s = append(s, 4, 5, 6)
+fmt.Println(len(s))   // → 6
+fmt.Println(cap(s))   // → 10 (จองใหม่ 2x จาก 5)</pre>
+  </div>
+
+  <h3>ลบสมาชิกจาก Slice</h3>
+  <div class="glass-card">
+    <pre>// Go ไม่มี built-in delete สำหรับ slice — ต้องใช้ trick
+s := []string{"a", "b", "c", "d", "e"}
+
+// ลบ index 2 ("c")
+i := 2
+s = append(s[:i], s[i+1:]...)
+fmt.Println(s)   // → [a b d e]
+
+// Go 1.21+ มี slices package
+import "slices"
+s = slices.Delete(s, 1, 2)   // ลบ index 1 ถึง 1 → [a d e]</pre>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="section" id="maps">
+  <h2>🗺️ Maps — คู่ key-value</h2>
+
+  <p>Map เหมือนพจนานุกรม — มี "คำ" (key) กับ "ความหมาย" (value)</p>
+
+  <div class="glass-card">
+    <pre>// สร้าง map
+ages := map[string]int{
+    "สมชาย": 25,
+    "สมหญิง": 30,
+    "สมศรี": 28,
+}
+
+// อ่านค่า
+fmt.Println(ages["สมชาย"])   // → 25
+
+// เพิ่ม/แก้ไข
+ages["สมศักดิ์"] = 35      // เพิ่มคนใหม่
+ages["สมชาย"] = 26         // แก้อายุ
+
+// ลบ
+delete(ages, "สมศรี")
+
+// ตรวจสอบว่ามี key หรือเปล่า
+value, exists := ages["สมหญิง"]
+if exists {
+    fmt.Println("พบ:", value)
+} else {
+    fmt.Println("ไม่พบ")
+}
+
+// วน loop
+for name, age := range ages {
+    fmt.Printf("%s อายุ %d\n", name, age)
+}
+
+// นับจำนวน
+fmt.Println(len(ages))
+
+// สร้าง map ว่าง
+empty := map[string]int{}
+empty2 := make(map[string]int)      // ใช้ make ก็ได้</pre>
+  </div>
+
+  <div class="glass-card warn">
+    <h4>⚠️ Map ใน Go ไม่เรียงลำดับ!</h4>
+    <p>ทุกครั้งที่ <code>range</code> map ลำดับอาจเปลี่ยน! ถ้าต้องการเรียงลำดับ ต้องเอา key ออกมาเป็น slice แล้ว sort เอง</p>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="section" id="structs">
+  <h2>🏗️ Structs — สร้าง Type ของเราเอง</h2>
+
+  <p>Struct คือ "แม่แบบ" ที่รวมหลายฟิลด์ไว้ด้วยกัน — เหมือนสร้างชนิดข้อมูลใหม่ขึ้นมาเอง!</p>
+
+  <div class="glass-card highlight">
+    <pre>// ประกาศ struct
+type Person struct {
+    Name    string
+    Age     int
+    Email   string
+    IsAdmin bool
+}
+
+func main() {
+    // สร้าง instance — วิธีที่ 1: ระบุฟิลด์
+    p1 := Person{
+        Name:  "สมชาย",
+        Age:   25,
+        Email: "somchai@example.com",
+    }
+
+    // วิธีที่ 2: ตามลำดับ (ไม่แนะนำ — อ่านยาก)
+    p2 := Person{"สมหญิง", 30, "somying@example.com", true}
+
+    // วิธีที่ 3: zero value แล้วค่อย set
+    var p3 Person
+    p3.Name = "สมศรี"
+    p3.Age = 28
+
+    // เข้าถึงฟิลด์ด้วยจุด
+    fmt.Println(p1.Name)   // → สมชาย
+    fmt.Println(p2.Age)    // → 30
+
+    // แก้ไขฟิลด์
+    p1.Age = 26
+}</pre>
+  </div>
+
+  <div class="analogy">
+    Struct เหมือนแบบฟอร์มข้อมูล:<br>
+    <code>Person</code> = แบบฟอร์ม "ข้อมูลส่วนตัว"<br>
+    <code>Name, Age, Email</code> = ช่องที่ต้องกรอก<br>
+    <code>p1</code> = แบบฟอร์มที่กรอกแล้ว 1 ใบ
+  </div>
+
+  <h3>Struct + JSON (สำคัญมากสำหรับ API!)</h3>
+  <div class="glass-card success">
+    <pre>import "encoding/json"
+
+type Product struct {
+    ID    string  `json:"id"`           // ← json tag: บอกว่าใน JSON ใช้ชื่ออะไร
+    Name  string  `json:"name"`
+    Price float64 `json:"price"`
+    Stock int     `json:"stock,omitempty"`  // omitempty = ถ้าเป็น 0 ไม่ต้องส่ง
+}
+
+p := Product{ID: "001", Name: "Laptop", Price: 25000}
+
+// Struct → JSON (Marshal)
+jsonBytes, _ := json.Marshal(p)
+fmt.Println(string(jsonBytes))
+// → {"id":"001","name":"Laptop","price":25000}
+
+// JSON → Struct (Unmarshal)
+jsonStr := `{"id":"002","name":"Mouse","price":500}`
+var p2 Product
+json.Unmarshal([]byte(jsonStr), &p2)
+fmt.Println(p2.Name)   // → Mouse</pre>
+  </div>
+
+  <h3>Nested Structs (Struct ซ้อน Struct)</h3>
+  <div class="glass-card">
+    <pre>type Address struct {
+    Street  string
+    City    string
+    Country string
+}
+
+type Employee struct {
+    Name    string
+    Age     int
+    Address Address   // ← struct ซ้อน struct
+}
+
+emp := Employee{
+    Name: "สมชาย",
+    Age:  30,
+    Address: Address{
+        Street:  "ถนนสุขุมวิท",
+        City:    "กรุงเทพ",
+        Country: "Thailand",
+    },
+}
+fmt.Println(emp.Address.City)   // → กรุงเทพ</pre>
+  </div>
+
+  <h3>Embedding (Struct สืบทอด)</h3>
+  <div class="glass-card">
+    <pre>type Animal struct {
+    Name string
+    Legs int
+}
+
+type Dog struct {
+    Animal           // ← Embedding! ไม่ต้องตั้งชื่อฟิลด์
+    Breed  string
+}
+
+d := Dog{
+    Animal: Animal{Name: "บัดดี้", Legs: 4},
+    Breed:  "Golden Retriever",
+}
+
+// เข้าถึง field ของ Animal ได้ตรงๆ!
+fmt.Println(d.Name)    // → บัดดี้ (ไม่ต้อง d.Animal.Name)
+fmt.Println(d.Breed)   // → Golden Retriever</pre>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="section" id="pointers">
+  <h2>👉 Pointers — ชี้ไปที่ค่าจริง</h2>
+
+  <p>Pointer คือ "ที่อยู่" ของตัวแปรในหน่วยความจำ — แทนที่จะ copy ค่า เราส่ง "ที่อยู่" ไปแทน</p>
+
+  <div class="glass-card highlight">
+    <pre>// & = ขอที่อยู่ (address of)
+// * = ไปดูค่าที่อยู่นั้น (dereference)
+
+x := 42
+p := &x           // p เก็บที่อยู่ของ x
+
+fmt.Println(x)    // → 42      (ค่าของ x)
+fmt.Println(p)    // → 0xc0000b4008  (ที่อยู่ของ x)
+fmt.Println(*p)   // → 42      (ค่าที่ p ชี้ไป)
+
+*p = 100          // แก้ค่าผ่าน pointer
+fmt.Println(x)    // → 100     (x เปลี่ยนด้วย!)</pre>
+  </div>
+
+  <div class="analogy">
+    ลองนึกภาพ:<br>
+    <code>x</code> คือ "บ้าน" — ในบ้านมีของ (ค่า 42)<br>
+    <code>&x</code> คือ "ที่อยู่บ้าน" (เลขที่ 0xc0000b4008)<br>
+    <code>p</code> คือ "กระดาษจดที่อยู่" — เราเก็บที่อยู่บ้านไว้ในกระดาษ<br>
+    <code>*p</code> คือ "ไปที่บ้านตามที่อยู่แล้วดูของข้างใน"
+  </div>
+
+  <h3>ทำไมต้องใช้ Pointer?</h3>
+  <div class="glass-card">
+    <pre>// ❌ ไม่ใช้ pointer — ค่าถูก copy (แก้ไม่มีผล)
+func doubleWrong(n int) {
+    n = n * 2     // แก้ copy ของ n
+}
+
+x := 5
+doubleWrong(x)
+fmt.Println(x)    // → 5 (ยังเป็น 5! ไม่เปลี่ยน!)
+
+// ✅ ใช้ pointer — แก้ค่าจริง
+func doubleRight(n *int) {
+    *n = *n * 2   // แก้ค่าที่ n ชี้ไป
+}
+
+y := 5
+doubleRight(&y)
+fmt.Println(y)    // → 10 (เปลี่ยนแล้ว!)</pre>
+  </div>
+
+  <h3>Pointer กับ Struct</h3>
+  <div class="glass-card">
+    <pre>type User struct {
+    Name string
+    Age  int
+}
+
+// ส่ง pointer ของ struct — ไม่ต้อง copy ทั้ง struct
+func birthday(u *User) {
+    u.Age++        // ← Go อนุญาตให้ใช้ . ตรงๆ (ไม่ต้อง (*u).Age)
+}
+
+user := User{Name: "สมชาย", Age: 25}
+birthday(&user)
+fmt.Println(user.Age)   // → 26
+
+// สร้าง pointer ของ struct ด้วย &
+p := &User{Name: "สมหญิง", Age: 30}   // p คือ *User</pre>
+  </div>
+
+  <div class="glass-card tip">
+    <h4>💡 เมื่อไหร่ควรใช้ Pointer?</h4>
+    <ul>
+      <li><strong>ต้องแก้ค่าจริง</strong> ของตัวแปรที่ส่งเข้ามา</li>
+      <li><strong>Struct ใหญ่</strong> — ส่ง pointer เร็วกว่า copy ทั้ง struct</li>
+      <li><strong>ต้องการบอกว่า "ไม่มีค่า"</strong> — pointer เป็น nil ได้, value type ไม่ได้</li>
+    </ul>
+    <p>กฎง่ายๆ: <strong>ถ้า Struct → ใช้ pointer, ถ้า int/string เล็กๆ → ใช้ value</strong></p>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="section" id="methods">
+  <h2>🎭 Methods & Interfaces</h2>
+
+  <h3>Methods — ฟังก์ชันที่ "ติด" กับ Struct</h3>
+  <div class="glass-card">
+    <pre>type Rectangle struct {
+    Width  float64
+    Height float64
+}
+
+// Method = func + receiver (ตัวรับ)
+// (r Rectangle) คือ "receiver" — บอกว่า method นี้ติดกับ Rectangle
+func (r Rectangle) Area() float64 {
+    return r.Width * r.Height
+}
+
+func (r Rectangle) Perimeter() float64 {
+    return 2 * (r.Width + r.Height)
+}
+
+// Pointer receiver — แก้ค่าจริงได้
+func (r *Rectangle) Scale(factor float64) {
+    r.Width *= factor
+    r.Height *= factor
+}
+
+func main() {
+    rect := Rectangle{Width: 10, Height: 5}
+    fmt.Println(rect.Area())        // → 50
+    fmt.Println(rect.Perimeter())   // → 30
+    rect.Scale(2)
+    fmt.Println(rect.Area())        // → 200 (10*2 × 5*2)
+}</pre>
+  </div>
+
+  <h3>Interfaces — พลังที่แท้จริงของ Go</h3>
+  <div class="glass-card highlight">
+    <p>Interface คือ "สัญญา" ว่า type นี้ทำอะไรได้บ้าง — ไม่สนใจว่าข้างในเป็นอะไร</p>
+    <pre>// ประกาศ interface
+type Shape interface {
+    Area() float64
+    Perimeter() float64
+}
+
+// Rectangle implement Shape (ไม่ต้องประกาศ "implements" เลย!)
+type Rectangle struct { Width, Height float64 }
+func (r Rectangle) Area() float64 { return r.Width * r.Height }
+func (r Rectangle) Perimeter() float64 { return 2 * (r.Width + r.Height) }
+
+// Circle ก็ implement Shape ได้เหมือนกัน
+type Circle struct { Radius float64 }
+func (c Circle) Area() float64 { return 3.14159 * c.Radius * c.Radius }
+func (c Circle) Perimeter() float64 { return 2 * 3.14159 * c.Radius }
+
+// ฟังก์ชันที่รับ Shape → ใช้ได้กับทุก type ที่ implement Shape!
+func printInfo(s Shape) {
+    fmt.Printf("พื้นที่: %.2f, เส้นรอบรูป: %.2f\n", s.Area(), s.Perimeter())
+}
+
+func main() {
+    rect := Rectangle{Width: 10, Height: 5}
+    circ := Circle{Radius: 7}
+
+    printInfo(rect)   // → พื้นที่: 50.00, เส้นรอบรูป: 30.00
+    printInfo(circ)   // → พื้นที่: 153.94, เส้นรอบรูป: 43.98
+
+    // Slice ของ interface — เก็บหลาย type ได้!
+    shapes := []Shape{rect, circ}
+    for _, s := range shapes {
+        printInfo(s)
+    }
+}</pre>
+  </div>
+
+  <div class="analogy">
+    Interface เหมือน "ปลั๊กไฟ":<br>
+    — ปลั๊ก 3 ขา (interface) กำหนดว่า "ต้องมี 3 ขา"<br>
+    — พัดลม, ทีวี, ตู้เย็น (types) มี 3 ขาก็เสียบได้ทุกตัว<br>
+    — เราไม่สนหรอกว่าเครื่องใช้ไฟฟ้าอะไร ขอแค่มี 3 ขาก็พอ<br>
+    <strong>Go ใช้ "implicit implementation"</strong> = ไม่ต้องพูดว่า "implements" ถ้ามี method ครบ = ใช้ได้เลย!
+  </div>
+
+  <h3>Interface ที่ใช้บ่อย (Standard Library)</h3>
+  <div class="glass-card">
+    <pre>// Stringer — เทียบเท่า toString() ในภาษาอื่น
+type Stringer interface {
+    String() string
+}
+
+type Person struct { Name string; Age int }
+func (p Person) String() string {
+    return fmt.Sprintf("%s (อายุ %d)", p.Name, p.Age)
+}
+fmt.Println(Person{"สมชาย", 25})   // → สมชาย (อายุ 25)
+
+// error — interface ที่สำคัญที่สุดใน Go
+type error interface {
+    Error() string
+}
+
+// io.Reader & io.Writer — อ่าน/เขียนอะไรก็ได้
+type Reader interface {
+    Read(p []byte) (n int, err error)
+}
+type Writer interface {
+    Write(p []byte) (n int, err error)
+}</pre>
+  </div>
+
+  <h3>Empty Interface — <code>interface{}</code> / <code>any</code></h3>
+  <div class="glass-card">
+    <pre>// interface{} (หรือ any ใน Go 1.18+) = รับค่าอะไรก็ได้
+func printAnything(v any) {
+    fmt.Println(v)
+}
+
+printAnything(42)           // int
+printAnything("hello")      // string
+printAnything(true)         // bool
+
+// ใช้ Type assertion เพื่อดึงค่าจริงออกมา
+var val any = "สวัสดี"
+
+s, ok := val.(string)     // ลอง assert ว่าเป็น string
+if ok {
+    fmt.Println("เป็น string:", s)
+}
+
+// Type switch — เช็คหลายชนิดพร้อมกัน
+switch v := val.(type) {
+case string:
+    fmt.Println("string:", v)
+case int:
+    fmt.Println("int:", v)
+default:
+    fmt.Println("ไม่รู้จักชนิด")
+}</pre>
+  </div>
+
+  <h3>Interface Composition — ประกอบ interface เล็กๆ เข้าด้วยกัน</h3>
+  <div class="glass-card">
+    <pre>// ─── Go ชอบ interface เล็กๆ → compose เข้าด้วยกัน ───
+
+// interface เล็ก 1 method
+type Reader interface {
+    Read(p []byte) (n int, err error)
+}
+
+type Writer interface {
+    Write(p []byte) (n int, err error)
+}
+
+type Closer interface {
+    Close() error
+}
+
+// ─── compose ได้! ───
+type ReadWriter interface {
+    Reader
+    Writer
+}
+
+type ReadWriteCloser interface {
+    Reader
+    Writer
+    Closer
+}
+
+// ─── ตัวอย่างจริง: Repository Composition ───
+type ProductReader interface {
+    FindByID(ctx context.Context, id string) (*Product, error)
+    List(ctx context.Context, limit int) ([]Product, error)
+}
+
+type ProductWriter interface {
+    Create(ctx context.Context, p *Product) error
+    Update(ctx context.Context, p *Product) error
+    Delete(ctx context.Context, id string) error
+}
+
+// Full repository = อ่าน + เขียน
+type ProductRepository interface {
+    ProductReader
+    ProductWriter
+}
+
+// handler ที่อ่านอย่างเดียว → รับแค่ ProductReader
+func listHandler(repo ProductReader) { ... }
+// → test ง่ายกว่า เพราะ mock แค่ 2 methods</pre>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="section" id="errors">
+  <h2>❌ Error Handling — แบบ Go</h2>
+
+  <p>Go ไม่มี <code>try/catch</code> เหมือนภาษาอื่น! แทนที่ Go ใช้ <strong>error เป็นค่า return</strong>
+    — ฟังก์ชันที่อาจผิดพลาดจะ return error เป็นค่าสุดท้าย เราต้องเช็คเอง</p>
+
+  <div class="glass-card highlight">
+    <pre>// pattern พื้นฐาน: return error
+result, err := doSomething()
+if err != nil {          // ← เจอ pattern นี้ทุกที่ใน Go code!
+    // จัดการ error
+    log.Fatal(err)
+}
+// ใช้ result ตรงนี้</pre>
+  </div>
+
+  <div class="analogy">
+    Error handling ใน Go เหมือนส่งพัสดุ:<br>
+    — เปิดกล่องมาได้ 2 อย่าง: "ของ" + "ใบบอกปัญหา"<br>
+    — ถ้าใบบอกปัญหาเป็น nil = ไม่มีปัญหา ดูของได้เลย<br>
+    — ถ้าใบบอกปัญหาไม่ใช่ nil = มีปัญหา ต้องจัดการก่อน!<br>
+    ต่างจากภาษาอื่นที่ "โยน exception" ไปเรื่อยๆ — Go บังคับให้เราจัดการทันที ณ จุดเกิด
+  </div>
+
+  <h3>สร้าง Error เอง</h3>
+  <div class="glass-card">
+    <pre>import (
+    "errors"
+    "fmt"
+)
+
+// วิธีที่ 1: errors.New() — error ง่ายๆ
+func divide(a, b float64) (float64, error) {
+    if b == 0 {
+        return 0, errors.New("หารด้วยศูนย์ไม่ได้")
+    }
+    return a / b, nil
+}
+
+// วิธีที่ 2: fmt.Errorf() — error ที่มีข้อมูลเพิ่ม
+func findUser(id int) (*User, error) {
+    if id <= 0 {
+        return nil, fmt.Errorf("invalid user ID: %d", id)
+    }
+    // ... ค้นหาจากฐานข้อมูล
+    return nil, fmt.Errorf("user %d not found", id)
+}
+
+// วิธีที่ 3: Sentinel Errors — ประกาศเป็นตัวแปร global
+var (
+    ErrNotFound  = errors.New("not found")
+    ErrForbidden = errors.New("forbidden")
+)
+
+func getProduct(id string) (*Product, error) {
+    // ...
+    return nil, ErrNotFound
+}
+
+// เช็ค sentinel error ด้วย errors.Is()
+product, err := getProduct("abc")
+if errors.Is(err, ErrNotFound) {
+    fmt.Println("ไม่พบสินค้า")
+}</pre>
+  </div>
+
+  <h3>Custom Error Type</h3>
+  <div class="glass-card">
+    <pre>// สร้าง error type เอง — เพิ่มข้อมูลเพิ่มเติมได้
+type ValidationError struct {
+    Field   string
+    Message string
+}
+
+// implement error interface (มี method Error() string)
+func (e *ValidationError) Error() string {
+    return fmt.Sprintf("validation error: %s - %s", e.Field, e.Message)
+}
+
+func validateAge(age int) error {
+    if age < 0 {
+        return &ValidationError{Field: "age", Message: "ต้องไม่ติดลบ"}
+    }
+    if age > 150 {
+        return &ValidationError{Field: "age", Message: "มากเกินไป"}
+    }
+    return nil
+}
+
+// ดึง custom error ด้วย errors.As()
+err := validateAge(-5)
+var ve *ValidationError
+if errors.As(err, &ve) {
+    fmt.Println("Field:", ve.Field)      // → age
+    fmt.Println("Message:", ve.Message)  // → ต้องไม่ติดลบ
+}</pre>
+  </div>
+
+  <h3>Error Wrapping — ห่อ error เป็นชั้นๆ</h3>
+  <div class="glass-card">
+    <pre>// ใช้ %w ใน fmt.Errorf() เพื่อ wrap error
+func getUser(id int) (*User, error) {
+    user, err := db.FindByID(id)
+    if err != nil {
+        return nil, fmt.Errorf("getUser(%d): %w", id, err)
+        // error message: "getUser(123): connection refused"
+        // แต่ยัง Unwrap ได้ด้วย errors.Is()
+    }
+    return user, nil
+}
+
+// errors.Is() จะ unwrap ทุกชั้นเพื่อเช็ค
+err := getUser(123)
+if errors.Is(err, sql.ErrNoRows) {   // เช็คได้แม้ถูก wrap แล้ว!
+    fmt.Println("ไม่พบ user")
+}</pre>
+  </div>
+
+  <h3>errors.Join() — รวมหลาย errors (Go 1.20+)</h3>
+  <div class="glass-card">
+    <pre>// ─── รวมหลาย error เข้าด้วยกัน ───
+func validateProduct(p *Product) error {
+    var errs []error
+
+    if p.Name == "" {
+        errs = append(errs, errors.New("name is required"))
+    }
+    if p.Price < 0 {
+        errs = append(errs, errors.New("price must be positive"))
+    }
+    if p.SKU == "" {
+        errs = append(errs, errors.New("SKU is required"))
+    }
+
+    return errors.Join(errs...)   // ← รวม errors ทั้งหมด หรือ nil ถ้าไม่มี error
+}
+
+err := validateProduct(&Product{Price: -5})
+fmt.Println(err)
+// → "name is required\nprice must be positive\nSKU is required"
+
+// errors.Is() ยังทำงานได้กับ joined errors!
+if errors.Is(err, ErrNotFound) { ... }   // ✅ ตรวจทีละตัวให้</pre>
+  </div>
+
+  <h3>panic / recover — สำหรับกรณีร้ายแรง</h3>
+  <p><strong>กฎ:</strong> ใช้ <code>panic</code> เฉพาะเมื่อโปรแกรมทำต่อไม่ได้จริงๆ — ไม่ใช่แทน error ปกติ!</p>
+  <div class="glass-card warn">
+    <pre>// ─── panic: หยุดโปรแกรมทันที ───
+func mustLoadConfig(path string) *Config {
+    data, err := os.ReadFile(path)
+    if err != nil {
+        panic("cannot load config: " + err.Error())
+        // ← โปรแกรมหยุดทันที + แสดง stack trace
+        // ใช้เมื่อ: ถ้าไม่มี config โปรแกรมทำงานต่อไม่ได้
+    }
+    // ...
+}
+
+// ─── recover: จับ panic ไม่ให้ crash ───
+func safeOperation() {
+    defer func() {
+        if r := recover(); r != nil {
+            fmt.Println("recovered from panic:", r)
+            // log error, return gracefully
+        }
+    }()
+
+    // code ที่อาจ panic...
+    riskyFunction()
+}
+
+// ─── ใช้จริง: HTTP server ต้อง recover ไม่ให้ 1 request ทำให้ทั้ง server crash ───
+func RecoveryMiddleware() fiber.Handler {
+    return func(c *fiber.Ctx) error {
+        defer func() {
+            if r := recover(); r != nil {
+                // Log stack trace
+                log.Printf("PANIC: %v\n%s", r, debug.Stack())
+
+                // ส่ง 500 กลับ แทนที่จะ crash
+                c.Status(500).JSON(fiber.Map{
+                    "error": "internal server error",
+                })
+            }
+        }()
+        return c.Next()
+    }
+}
+
+// ─── เมื่อไหร่ใช้ panic vs error? ───
+// panic: เริ่มต้นโปรแกรมไม่ได้ (no config, no DB)
+// panic: programmer error (index out of range, nil pointer)
+// error: ทุกกรณีอื่น — network fail, validation fail, not found
+// กฎ: "Don't panic!" — ใช้ error return เป็นค่า default เสมอ</pre>
+  </div>
+
+  <div class="glass-card tip">
+    <h4>💡 Error Handling Summary</h4>
+    <table>
+      <thead><tr><th>วิธี</th><th>ใช้เมื่อ</th><th>ตัวอย่าง</th></tr></thead>
+      <tbody>
+        <tr><td><code>errors.New()</code></td><td>Error ง่ายๆ</td><td>"not found"</td></tr>
+        <tr><td><code>fmt.Errorf()</code></td><td>Error + ข้อมูลเพิ่ม</td><td>"user %d not found"</td></tr>
+        <tr><td>Sentinel Error</td><td>Error ที่เช็คด้วย errors.Is()</td><td>ErrNotFound, io.EOF</td></tr>
+        <tr><td>Custom Error Type</td><td>Error + metadata</td><td>ValidationError{Field, Message}</td></tr>
+        <tr><td><code>%w</code> Wrapping</td><td>เพิ่ม context ให้ error</td><td>fmt.Errorf("getUser: %w", err)</td></tr>
+        <tr><td><code>errors.Join()</code></td><td>รวมหลาย errors</td><td>Validation ที่เจอหลายปัญหา</td></tr>
+        <tr><td><code>panic/recover</code></td><td>ร้ายแรงจริงๆ เท่านั้น</td><td>ไม่มี config, programmer error</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="section" id="packages">
+  <h2>📦 Packages & Modules</h2>
+
+  <h3>Package คืออะไร?</h3>
+  <div class="glass-card">
+    <p>Package คือ "โฟลเดอร์" ที่รวม Go files ที่เกี่ยวข้องกันไว้ด้วยกัน ทุกไฟล์ในโฟลเดอร์เดียวกันต้องเป็น package เดียวกัน</p>
+    <pre>my-project/
+├── go.mod               ← Module root (ชื่อ module)
+├── main.go              ← package main
+└── calculator/
+    ├── math.go          ← package calculator
+    └── math_test.go     ← package calculator</pre>
+  </div>
+
+  <h3>Public vs Private</h3>
+  <div class="glass-card highlight">
+    <p>กฎง่ายมาก: <strong>ตัวอักษรแรกเป็นตัวใหญ่ = public, ตัวเล็ก = private</strong></p>
+    <pre>// calculator/math.go
+package calculator
+
+// Add — ตัว A ใหญ่ = public → ใครก็ import มาใช้ได้
+func Add(a, b int) int {
+    return a + b
+}
+
+// multiply — ตัว m เล็ก = private → ใช้ได้แค่ใน package calculator
+func multiply(a, b int) int {
+    return a * b
+}
+
+// MaxValue — public
+const MaxValue = 1000
+
+// defaultTimeout — private
+const defaultTimeout = 30</pre>
+  </div>
+
+  <h3>Go Modules</h3>
+  <div class="glass-card">
+    <pre># สร้าง module ใหม่
+go mod init github.com/username/myproject
+
+# เพิ่ม dependency
+go get github.com/gofiber/fiber/v2
+
+# ลบ dependency ที่ไม่ใช้
+go mod tidy
+
+# ดู dependencies ทั้งหมด
+go list -m all</pre>
+    <p><code>go.mod</code> จะจัดการ dependencies ให้ — คล้ายกับ <code>package.json</code> ใน Node.js หรือ <code>requirements.txt</code> ใน Python</p>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="section" id="generics">
+  <h2>🧬 Generics — เขียนโค้ดที่ใช้ได้กับหลาย Type</h2>
+
+  <p>ก่อน Go 1.18 ถ้าเราอยากเขียนฟังก์ชันหาค่าสูงสุดของ int กับ float64 ต้องเขียน 2 ฟังก์ชัน
+    ตอนนี้ Generics แก้ปัญหานี้ — เขียนครั้งเดียว ใช้ได้กับทุก type!</p>
+
+  <h3>ปัญหาก่อนมี Generics</h3>
+  <div class="glass-card warn">
+    <pre>// ❌ ก่อน Generics: ต้องเขียนซ้ำทุก type
+func MaxInt(a, b int) int {
+    if a > b { return a }
+    return b
+}
+
+func MaxFloat(a, b float64) float64 {
+    if a > b { return a }
+    return b
+}
+
+func MaxString(a, b string) string {
+    if a > b { return a }
+    return b
+}
+// ซ้ำซ้อนมาก! 😫</pre>
+  </div>
+
+  <h3>แก้ด้วย Generics</h3>
+  <div class="glass-card highlight">
+    <pre>// ✅ Generics: เขียนครั้งเดียว ใช้ได้กับทุก type!
+// [T comparable] คือ "type parameter" — T แทน type อะไรก็ได้ที่เปรียบเทียบได้
+func Max[T int | float64 | string](a, b T) T {
+    if a > b {
+        return a
+    }
+    return b
+}
+
+fmt.Println(Max(10, 20))         // → 20 (int)
+fmt.Println(Max(3.14, 2.71))     // → 3.14 (float64)
+fmt.Println(Max("abc", "xyz"))   // → xyz (string)</pre>
+  </div>
+
+  <div class="analogy">
+    Generics เหมือน "แม่พิมพ์ขนมที่ปรับรูปทรงได้":<br>
+    — แม่พิมพ์ 1 อัน แต่ใส่แป้ง (int) ก็ได้ ใส่ช็อกโกแลต (float64) ก็ได้ ใส่วุ้น (string) ก็ได้<br>
+    — ไม่ต้องซื้อแม่พิมพ์แยกสำหรับแต่ละแป้ง!
+  </div>
+
+  <h3>Type Constraints — จำกัดว่ารับ Type ไหนได้บ้าง</h3>
+  <div class="glass-card">
+    <pre>import "golang.org/x/exp/constraints"   // หรือ cmp ใน Go 1.21+
+
+// วิธีที่ 1: ระบุ type ตรงๆ ด้วย | (union)
+func Add[T int | float64](a, b T) T {
+    return a + b
+}
+
+// วิธีที่ 2: สร้าง interface เป็น constraint
+type Number interface {
+    int | int8 | int16 | int32 | int64 |
+    float32 | float64
+}
+
+func Sum[T Number](nums []T) T {
+    var total T
+    for _, n := range nums {
+        total += n
+    }
+    return total
+}
+
+fmt.Println(Sum([]int{1, 2, 3, 4, 5}))           // → 15
+fmt.Println(Sum([]float64{1.5, 2.5, 3.0}))       // → 7.0
+
+// วิธีที่ 3: ใช้ built-in constraints
+// comparable   = เปรียบเทียบ == != ได้
+// any          = อะไรก็ได้
+// cmp.Ordered  = เปรียบเทียบ <> ได้ (Go 1.21+)
+
+import "cmp"
+
+func Max2[T cmp.Ordered](a, b T) T {
+    if a > b { return a }
+    return b
+}</pre>
+  </div>
+
+  <h3>Generic Structs — โครงสร้างที่ยืดหยุ่น</h3>
+  <div class="glass-card success">
+    <pre>// Stack ที่ใช้ได้กับทุก type!
+type Stack[T any] struct {
+    items []T
+}
+
+func (s *Stack[T]) Push(item T) {
+    s.items = append(s.items, item)
+}
+
+func (s *Stack[T]) Pop() (T, bool) {
+    if len(s.items) == 0 {
+        var zero T      // zero value ของ type T
+        return zero, false
+    }
+    top := s.items[len(s.items)-1]
+    s.items = s.items[:len(s.items)-1]
+    return top, true
+}
+
+func (s *Stack[T]) Len() int { return len(s.items) }
+
+// ใช้งาน
+intStack := &Stack[int]{}
+intStack.Push(10)
+intStack.Push(20)
+val, ok := intStack.Pop()   // → 20, true
+
+strStack := &Stack[string]{}
+strStack.Push("hello")
+strStack.Push("world")</pre>
+  </div>
+
+  <h3>Generic Map/Filter/Reduce — Functional Programming</h3>
+  <div class="glass-card">
+    <pre>// Map — แปลงทุกสมาชิก
+func Map[T any, U any](slice []T, fn func(T) U) []U {
+    result := make([]U, len(slice))
+    for i, v := range slice {
+        result[i] = fn(v)
+    }
+    return result
+}
+
+// Filter — กรองเฉพาะที่ต้องการ
+func Filter[T any](slice []T, fn func(T) bool) []T {
+    var result []T
+    for _, v := range slice {
+        if fn(v) {
+            result = append(result, v)
+        }
+    }
+    return result
+}
+
+// ใช้งาน
+nums := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+
+doubled := Map(nums, func(n int) int { return n * 2 })
+// → [2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
+
+evens := Filter(nums, func(n int) bool { return n%2 == 0 })
+// → [2, 4, 6, 8, 10]
+
+// แปลง int → string
+strs := Map(nums, func(n int) string {
+    return fmt.Sprintf("#%d", n)
+})
+// → ["#1", "#2", "#3", ...]</pre>
+  </div>
+
+  <div class="glass-card tip">
+    <h4>💡 เมื่อไหร่ควรใช้ Generics?</h4>
+    <ul>
+      <li><strong>ใช้เมื่อ:</strong> ฟังก์ชัน/struct ที่ทำงานเหมือนกันแต่ต่าง type (เช่น Sort, Stack, Cache)</li>
+      <li><strong>ไม่ควรใช้เมื่อ:</strong> แค่ type เดียว หรือ interface ธรรมดาก็พอ</li>
+      <li><strong>Go Proverb:</strong> "A little copying is better than a little dependency" — ถ้า copy 2-3 บรรทัดจบ ไม่ต้อง generic ก็ได้</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="section" id="context">
+  <h2>⏱️ Context — ควบคุมอายุงานและส่งข้อมูลข้าม Layer</h2>
+
+  <p>Context เป็นหนึ่งใน concept ที่ <strong>สำคัญที่สุดใน Go</strong> สำหรับ backend developer
+    ถ้าไม่เข้าใจ context จะเขียน production Go ไม่ได้เลย!</p>
+
+  <h3>Context คืออะไร?</h3>
+  <div class="glass-card highlight">
+    <p>Context ทำ 3 อย่าง:</p>
+    <ol>
+      <li><strong>กำหนด deadline/timeout</strong> — "งานนี้ต้องเสร็จใน 5 วินาที ไม่งั้นยกเลิก"</li>
+      <li><strong>ยกเลิกงาน (cancellation)</strong> — "เลิกทำเดี๋ยวนี้! user ปิดหน้าเว็บแล้ว"</li>
+      <li><strong>ส่งข้อมูลข้าม layer</strong> — "ฝาก request ID ไว้ให้ทุก layer อ่านได้"</li>
+    </ol>
+  </div>
+
+  <div class="analogy">
+    Context เหมือน "ใบงาน" ที่หัวหน้าเขียนให้ลูกน้อง:<br>
+    — "ทำงานนี้ให้เสร็จภายในบ่ายสอง" (deadline)<br>
+    — "ถ้าฉันโทรบอกหยุด ให้หยุดทันที" (cancellation)<br>
+    — "เลขที่ใบงาน: #1234" (ข้อมูลแนบ)
+  </div>
+
+  <h3>สร้าง Context</h3>
+  <div class="glass-card">
+    <pre>import "context"
+
+// 1. context.Background() — root context (ใช้ใน main หรือ init)
+ctx := context.Background()
+
+// 2. context.TODO() — ยังไม่แน่ใจว่าจะใช้ context อะไร (placeholder)
+ctx := context.TODO()
+
+// 3. context.WithTimeout — มี deadline อัตโนมัติ
+ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+defer cancel()   // ⚠️ ต้อง defer cancel() เสมอ! ไม่งั้น memory leak!
+
+// 4. context.WithCancel — ยกเลิกด้วย manual
+ctx, cancel := context.WithCancel(context.Background())
+// ... เมื่อต้องการยกเลิก:
+cancel()
+
+// 5. context.WithValue — แนบข้อมูล
+type contextKey string
+const userIDKey contextKey = "user_id"
+ctx = context.WithValue(ctx, userIDKey, "abc-123")</pre>
+  </div>
+
+  <h3>ตัวอย่างจริง: API Handler → Usecase → Database</h3>
+  <div class="glass-card success">
+    <pre>// Handler: สร้าง context ที่มี timeout 10 วินาที
+func (h *Handler) GetUser(c *fiber.Ctx) error {
+    // Fiber จะ cancel context เมื่อ client ปิด connection
+    ctx := c.Context()
+
+    user, err := h.usecase.GetUser(ctx, c.Params("id"))
+    if err != nil {
+        if errors.Is(err, context.DeadlineExceeded) {
+            return c.Status(504).JSON(fiber.Map{"error": "timeout"})
+        }
+        if errors.Is(err, context.Canceled) {
+            return c.Status(499).JSON(fiber.Map{"error": "client closed"})
+        }
+        return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+    }
+    return c.JSON(user)
+}
+
+// Usecase: ส่ง context ต่อไปยัง repository
+func (uc *userUsecase) GetUser(ctx context.Context, id string) (*User, error) {
+    // เช็คว่า context ถูกยกเลิกหรือยัง
+    select {
+    case <-ctx.Done():
+        return nil, ctx.Err()   // → context.DeadlineExceeded หรือ context.Canceled
+    default:
+    }
+    return uc.repo.FindByID(ctx, id)
+}
+
+// Repository: ส่ง context ให้ database query
+func (r *repo) FindByID(ctx context.Context, id string) (*User, error) {
+    // database/sql จะยกเลิก query ถ้า context หมดอายุ!
+    row := r.db.QueryRowContext(ctx, "SELECT * FROM users WHERE id=$1", id)
+    // ...
+}</pre>
+  </div>
+
+  <h3>Context กับ HTTP Client — ยกเลิก request ที่ช้า</h3>
+  <div class="glass-card">
+    <pre>func fetchWithTimeout(url string) (string, error) {
+    // ต้องเสร็จใน 3 วินาที!
+    ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+    defer cancel()
+
+    req, _ := http.NewRequestWithContext(ctx, "GET", url, nil)
+    resp, err := http.DefaultClient.Do(req)
+    if err != nil {
+        if errors.Is(err, context.DeadlineExceeded) {
+            return "", fmt.Errorf("request timeout after 3s")
+        }
+        return "", err
+    }
+    defer resp.Body.Close()
+
+    body, _ := io.ReadAll(resp.Body)
+    return string(body), nil
+}</pre>
+  </div>
+
+  <div class="glass-card warn">
+    <h4>⚠️ กฎเหล็กของ Context</h4>
+    <ul>
+      <li><strong>context เป็น parameter แรกเสมอ:</strong> <code>func DoSomething(ctx context.Context, ...)</code></li>
+      <li><strong>ไม่เก็บ context ใน struct:</strong> ส่งผ่าน function parameter เท่านั้น</li>
+      <li><strong>defer cancel() เสมอ:</strong> ทุกครั้งที่สร้าง WithTimeout/WithCancel/WithDeadline</li>
+      <li><strong>ใช้ context.WithValue น้อยๆ:</strong> ส่ง request-scoped data เท่านั้น (เช่น request ID, user ID)</li>
+      <li><strong>ไม่ส่ง nil context:</strong> ถ้ายังไม่มี ใช้ <code>context.TODO()</code></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!--  PART 3: ADVANCED                                               -->
+<!-- ================================================================ -->
+
+<section class="section" id="goroutines">
+  <h2>🚀 Goroutines & Channels — Concurrent Programming</h2>
+
+  <p>นี่คือ <strong>จุดเด่นที่สุดของ Go</strong> — ทำงานหลายอย่างพร้อมกันได้ง่ายมากๆ</p>
+
+  <h3>Goroutine คืออะไร?</h3>
+  <div class="glass-card highlight">
+    <p>Goroutine คือ "lightweight thread" ที่ Go จัดการให้ — ใช้ memory แค่ ~2-8 KB (thread ปกติใช้ ~1-8 MB!)
+      สร้างได้ล้านตัวในโปรแกรมเดียว</p>
+    <pre>// สร้าง goroutine: แค่ใส่คำว่า "go" หน้าฟังก์ชัน!
+func sayHello(name string) {
+    fmt.Println("สวัสดี", name)
+}
+
+func main() {
+    go sayHello("สมชาย")    // ← goroutine! ทำงานพร้อมกัน
+    go sayHello("สมหญิง")   // ← goroutine อีกตัว!
+    go sayHello("สมศรี")    // ← อีกตัว!
+
+    time.Sleep(time.Second)  // รอให้ goroutines ทำงานเสร็จ
+    // (ในชีวิตจริงไม่ใช้ Sleep ใช้ WaitGroup หรือ Channel แทน)
+}</pre>
+  </div>
+
+  <div class="analogy">
+    Goroutine เหมือนจ้างพนักงานเพิ่ม:<br>
+    — ถ้าไม่มี goroutine: เราทำคนเดียว → ทำทีละงาน<br>
+    — มี goroutine: จ้างพนักงาน 1000 คน → ทำพร้อมกันได้!<br>
+    — แต่ต้องมีวิธีส่งงานกลับมาให้เรา → นั่นคือ Channel!
+  </div>
+
+  <h3>sync.WaitGroup — รอให้ทุก goroutine เสร็จ</h3>
+  <div class="glass-card">
+    <pre>import "sync"
+
+func worker(id int, wg *sync.WaitGroup) {
+    defer wg.Done()   // ← บอกว่า "เสร็จแล้ว" ตอน function จบ
+    fmt.Printf("Worker %d: เริ่มทำงาน\n", id)
+    time.Sleep(time.Second)
+    fmt.Printf("Worker %d: เสร็จแล้ว\n", id)
+}
+
+func main() {
+    var wg sync.WaitGroup
+
+    for i := 1; i <= 5; i++ {
+        wg.Add(1)       // ← บอกว่า "มีงานเพิ่ม 1 ชิ้น"
+        go worker(i, &wg)
+    }
+
+    wg.Wait()           // ← รอจนทุก worker Done()
+    fmt.Println("ทุกคนเสร็จหมดแล้ว!")
+}</pre>
+  </div>
+
+  <h3>Channels — สื่อสารระหว่าง Goroutines</h3>
+  <div class="glass-card highlight">
+    <pre>// Channel = ท่อที่ส่งข้อมูลระหว่าง goroutines
+ch := make(chan string)   // สร้าง channel สำหรับ string
+
+// ส่งค่าเข้า channel (ใน goroutine)
+go func() {
+    ch <- "สวัสดีจาก goroutine!"   // ← ส่งด้วย <-
+}()
+
+// รับค่าจาก channel
+msg := <-ch                          // ← รับด้วย <-
+fmt.Println(msg)                     // → สวัสดีจาก goroutine!
+
+// Buffered channel — ส่งได้โดยไม่ต้องรอคนรับ (มี buffer)
+ch2 := make(chan int, 3)   // buffer size 3
+ch2 <- 1
+ch2 <- 2
+ch2 <- 3
+// ch2 <- 4  ← จะ block ถ้า buffer เต็ม!</pre>
+  </div>
+
+  <h3>ตัวอย่างจริง: ดึงข้อมูลหลายเว็บพร้อมกัน</h3>
+  <div class="glass-card success">
+    <pre>func fetchURL(url string, ch chan&lt;- string) {
+    resp, err := http.Get(url)
+    if err != nil {
+        ch <- fmt.Sprintf("❌ %s: %v", url, err)
+        return
+    }
+    defer resp.Body.Close()
+    ch <- fmt.Sprintf("✅ %s: %d", url, resp.StatusCode)
+}
+
+func main() {
+    urls := []string{
+        "https://google.com",
+        "https://github.com",
+        "https://go.dev",
+    }
+
+    ch := make(chan string, len(urls))
+
+    for _, url := range urls {
+        go fetchURL(url, ch)   // ดึงทุก URL พร้อมกัน!
+    }
+
+    // รับผลลัพธ์
+    for range urls {
+        fmt.Println(<-ch)
+    }
+    // ใช้เวลาแค่ ~นานเท่า URL ที่ช้าที่สุด (ไม่ใช่รวมทุก URL)
+}</pre>
+  </div>
+
+  <h3>select — เลือกจากหลาย Channel</h3>
+  <div class="glass-card">
+    <pre>// select = switch สำหรับ channels
+ch1 := make(chan string)
+ch2 := make(chan string)
+
+go func() { time.Sleep(1 * time.Second); ch1 <- "ข้อมูลจาก ch1" }()
+go func() { time.Sleep(2 * time.Second); ch2 <- "ข้อมูลจาก ch2" }()
+
+// รอ channel ไหนพร้อมก่อน ก็ทำอันนั้น
+select {
+case msg := <-ch1:
+    fmt.Println(msg)
+case msg := <-ch2:
+    fmt.Println(msg)
+case <-time.After(3 * time.Second):
+    fmt.Println("Timeout!")
+}</pre>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="section" id="concurrency-patterns">
+  <h2>🔄 Concurrency Patterns ขั้นสูง</h2>
+
+  <p>Goroutines + Channels คือพื้นฐาน แต่ในโลกจริงเราต้องจัดการ concurrency ที่ซับซ้อนกว่านั้น
+    มาดู patterns ที่ใช้ใน production กัน!</p>
+
+  <h3>sync.Mutex — ล็อคข้อมูลที่ใช้ร่วมกัน</h3>
+  <div class="glass-card highlight">
+    <pre>import "sync"
+
+// ❌ Race condition! หลาย goroutine แก้ตัวแปรเดียวกัน
+// counter := 0
+// for i := 0; i < 1000; i++ {
+//     go func() { counter++ }()   // อ่าน-แก้-เขียน ชนกัน!
+// }
+
+// ✅ ใช้ Mutex ล็อค
+type SafeCounter struct {
+    mu    sync.Mutex
+    count int
+}
+
+func (c *SafeCounter) Inc() {
+    c.mu.Lock()       // ← ล็อค: ใครเข้ามาก่อนได้ทำ คนอื่นรอ
+    c.count++
+    c.mu.Unlock()     // ← ปลดล็อค: คนถัดไปเข้าได้
+}
+
+func (c *SafeCounter) Value() int {
+    c.mu.Lock()
+    defer c.mu.Unlock()   // ← defer unlock ปลอดภัยกว่า
+    return c.count
+}
+
+counter := &SafeCounter{}
+var wg sync.WaitGroup
+for i := 0; i < 1000; i++ {
+    wg.Add(1)
+    go func() {
+        defer wg.Done()
+        counter.Inc()
+    }()
+}
+wg.Wait()
+fmt.Println(counter.Value())   // → 1000 ✅ ถูกต้องทุกครั้ง!</pre>
+  </div>
+
+  <div class="analogy">
+    Mutex เหมือนห้องน้ำ single ที่มีกุญแจ:<br>
+    — Lock() = เข้าไปแล้วล็อคประตู (คนอื่นต้องรอ)<br>
+    — Unlock() = ออกมาแล้วปลดล็อค (คนถัดไปเข้าได้)<br>
+    — ถ้าลืม Unlock() = deadlock! คนอื่นรอจนตาย
+  </div>
+
+  <h3>sync.RWMutex — อ่านพร้อมกันได้ เขียนทีละคน</h3>
+  <div class="glass-card">
+    <pre>// RWMutex = หลายคนอ่านพร้อมกันได้ แต่เขียนต้องทีละคน
+type Cache struct {
+    mu   sync.RWMutex
+    data map[string]string
+}
+
+func (c *Cache) Get(key string) (string, bool) {
+    c.mu.RLock()           // ← Read Lock — หลายคนอ่านพร้อมกันได้
+    defer c.mu.RUnlock()
+    val, ok := c.data[key]
+    return val, ok
+}
+
+func (c *Cache) Set(key, value string) {
+    c.mu.Lock()            // ← Write Lock — ต้องรอจนไม่มีใครอ่าน
+    defer c.mu.Unlock()
+    c.data[key] = value
+}
+
+// ใช้เมื่อ: อ่านบ่อยกว่าเขียนมาก (เช่น cache, config)
+// ถ้าอ่าน/เขียนเท่าๆ กัน ใช้ Mutex ธรรมดาก็พอ</pre>
+  </div>
+
+  <h3>sync.Once — ทำแค่ครั้งเดียวตลอดกาล</h3>
+  <div class="glass-card">
+    <pre>var (
+    instance *Database
+    once     sync.Once
+)
+
+// GetDB — Singleton pattern ด้วย sync.Once
+func GetDB() *Database {
+    once.Do(func() {
+        // ไม่ว่าจะเรียก GetDB() กี่ครั้ง กี่ goroutine
+        // ฟังก์ชันนี้ทำงานแค่ !! ครั้งเดียว !!
+        fmt.Println("Connecting to database...")
+        instance = &Database{url: os.Getenv("DB_URL")}
+        instance.Connect()
+    })
+    return instance
+}
+
+// ปลอดภัย 100% แม้จะเรียกจาก 1000 goroutines พร้อมกัน</pre>
+  </div>
+
+  <h3>errgroup — Goroutines + Error Handling</h3>
+  <div class="glass-card success">
+    <pre>import "golang.org/x/sync/errgroup"
+
+// ✨ errgroup = WaitGroup + Error handling + Context cancellation
+func fetchAllData(ctx context.Context) (*Dashboard, error) {
+    g, ctx := errgroup.WithContext(ctx)
+
+    var users []User
+    var products []Product
+    var orders []Order
+
+    // ดึง 3 อย่างพร้อมกัน — ถ้าอันไหน error ก็ cancel ทุกอัน!
+    g.Go(func() error {
+        var err error
+        users, err = fetchUsers(ctx)
+        return err
+    })
+
+    g.Go(func() error {
+        var err error
+        products, err = fetchProducts(ctx)
+        return err
+    })
+
+    g.Go(func() error {
+        var err error
+        orders, err = fetchOrders(ctx)
+        return err
+    })
+
+    // รอทุก goroutine เสร็จ + เก็บ error แรกที่เกิด
+    if err := g.Wait(); err != nil {
+        return nil, fmt.Errorf("fetch dashboard: %w", err)
+    }
+
+    return &Dashboard{users, products, orders}, nil
+}</pre>
+  </div>
+
+  <h3>Worker Pool — จำกัดงานที่ทำพร้อมกัน</h3>
+  <div class="glass-card">
+    <pre>// ปัญหา: มี URL 10000 ตัว ส่ง request ทีเดียว → server crash!
+// แก้: จำกัดให้ทำพร้อมกันแค่ 10 ตัว
+
+func WorkerPool(urls []string, maxWorkers int) []Result {
+    jobs := make(chan string, len(urls))
+    results := make(chan Result, len(urls))
+
+    // สร้าง worker goroutines (จำนวนจำกัด)
+    for w := 0; w < maxWorkers; w++ {
+        go func() {
+            for url := range jobs {        // รอรับงานจาก channel
+                resp := fetchURL(url)
+                results <- resp
+            }
+        }()
+    }
+
+    // ส่งงานเข้า channel
+    for _, url := range urls {
+        jobs <- url
+    }
+    close(jobs)   // ปิด channel → worker จะออกจาก range loop
+
+    // เก็บผลลัพธ์
+    var allResults []Result
+    for range urls {
+        allResults = append(allResults, <-results)
+    }
+    return allResults
+}
+
+// ✨ วิธีง่ายกว่า ด้วย Semaphore pattern
+func fetchAllWithLimit(ctx context.Context, urls []string, limit int) {
+    sem := make(chan struct{}, limit)   // semaphore
+
+    for _, url := range urls {
+        sem <- struct{}{}   // ← กันที่ (ถ้าเต็ม limit จะ block)
+        go func(u string) {
+            defer func() { <-sem }()   // ← คืนที่
+            fetchURL(u)
+        }(url)
+    }
+}</pre>
+  </div>
+
+  <h3>Fan-Out / Fan-In Pattern</h3>
+  <div class="glass-card">
+    <pre>// Fan-Out: กระจายงาน 1 input → หลาย goroutine
+// Fan-In:  รวมผลจากหลาย goroutine → 1 channel
+
+func fanIn(channels ...&lt;-chan string) &lt;-chan string {
+    merged := make(chan string)
+    var wg sync.WaitGroup
+
+    for _, ch := range channels {
+        wg.Add(1)
+        go func(c &lt;-chan string) {
+            defer wg.Done()
+            for msg := range c {
+                merged <- msg
+            }
+        }(ch)
+    }
+
+    go func() {
+        wg.Wait()
+        close(merged)
+    }()
+
+    return merged
+}
+
+// Fan-Out: สร้างหลาย worker
+ch1 := processData(data[:100])    // worker 1
+ch2 := processData(data[100:200]) // worker 2
+ch3 := processData(data[200:])    // worker 3
+
+// Fan-In: รวมผลลัพธ์
+for result := range fanIn(ch1, ch2, ch3) {
+    fmt.Println(result)
+}</pre>
+  </div>
+
+  <div class="glass-card tip">
+    <h4>💡 เลือก Pattern ไหนดี?</h4>
+    <ul>
+      <li><strong>sync.Mutex:</strong> ปกป้อง shared state ง่ายๆ (counter, map)</li>
+      <li><strong>sync.RWMutex:</strong> อ่านบ่อยกว่าเขียน (cache, config)</li>
+      <li><strong>Channel:</strong> ส่งข้อมูลระหว่าง goroutines (pipeline, message passing)</li>
+      <li><strong>errgroup:</strong> ทำหลายงานพร้อมกัน + error handling</li>
+      <li><strong>Worker Pool:</strong> จำกัดจำนวน concurrent operations</li>
+      <li><strong>Go Proverb:</strong> "Share memory by communicating, don't communicate by sharing memory"</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="section" id="stdlib">
+  <h2>📚 Standard Library ที่ใช้บ่อย</h2>
+
+  <div class="glass-card">
+    <h3>fmt — จัด format และ print</h3>
+    <pre>name := "สมชาย"
+age := 25
+score := 95.5
+
+fmt.Println("สวัสดี")                         // print + ขึ้นบรรทัดใหม่
+fmt.Printf("ชื่อ: %s อายุ: %d\n", name, age)  // format print
+fmt.Printf("คะแนน: %.1f%%\n", score)         // 95.5%
+s := fmt.Sprintf("ข้อมูล: %s (%d)", name, age) // return string (ไม่ print)
+
+// Format verbs ที่ใช้บ่อย:
+// %s = string      %d = int         %f = float
+// %v = ค่าทั่วไป    %+v = struct+field names   %#v = Go syntax
+// %T = ชนิดข้อมูล   %t = bool        %p = pointer
+// %02d = pad 0 → 01, 02, ...   %.2f = ทศนิยม 2 ตำแหน่ง</pre>
+  </div>
+
+  <div class="glass-card">
+    <h3>strings — จัดการข้อความ</h3>
+    <pre>import "strings"
+
+s := "Hello, Go World!"
+
+strings.Contains(s, "Go")          // true
+strings.HasPrefix(s, "Hello")      // true
+strings.HasSuffix(s, "World!")     // true
+strings.ToUpper(s)                  // "HELLO, GO WORLD!"
+strings.ToLower(s)                  // "hello, go world!"
+strings.Replace(s, "Go", "Gopher", 1)  // "Hello, Gopher World!"
+strings.Split("a,b,c", ",")        // ["a", "b", "c"]
+strings.Join([]string{"a","b"}, "-") // "a-b"
+strings.TrimSpace("  hello  ")     // "hello"
+strings.Count(s, "l")              // 2</pre>
+  </div>
+
+  <div class="glass-card">
+    <h3>strconv — แปลงชนิดข้อมูล</h3>
+    <pre>import "strconv"
+
+// int ↔ string
+s := strconv.Itoa(42)              // "42"
+n, err := strconv.Atoi("42")       // 42, nil
+
+// float ↔ string
+f, _ := strconv.ParseFloat("3.14", 64)   // 3.14
+s2 := strconv.FormatFloat(3.14, 'f', 2, 64)  // "3.14"
+
+// bool ↔ string
+b, _ := strconv.ParseBool("true")  // true
+s3 := strconv.FormatBool(true)     // "true"</pre>
+  </div>
+
+  <div class="glass-card">
+    <h3>time — วันเวลา</h3>
+    <pre>import "time"
+
+now := time.Now()                        // เวลาปัจจุบัน
+fmt.Println(now.Format("2006-01-02 15:04:05"))  // ⚠️ ใช้ reference time!
+
+// Go ใช้ "reference time" แทน format codes:
+// 2006 = ปี, 01 = เดือน, 02 = วัน, 15 = ชั่วโมง, 04 = นาที, 05 = วินาที
+// (จำง่าย: 1 2 3 4 5 6 → Mon Jan 2 15:04:05 2006)
+
+dur := 5 * time.Second
+time.Sleep(dur)                          // หยุดรอ 5 วินาที
+
+start := time.Now()
+// ... ทำงาน ...
+elapsed := time.Since(start)
+fmt.Println("ใช้เวลา:", elapsed)</pre>
+  </div>
+
+  <div class="glass-card">
+    <h3>os & io — ไฟล์ & I/O</h3>
+    <pre>import (
+    "os"
+    "io"
+    "bufio"
+)
+
+// เขียนไฟล์
+os.WriteFile("hello.txt", []byte("สวัสดี"), 0644)
+
+// อ่านไฟล์ทั้งหมด
+data, _ := os.ReadFile("hello.txt")
+fmt.Println(string(data))
+
+// อ่านทีละบรรทัด
+file, _ := os.Open("hello.txt")
+defer file.Close()
+scanner := bufio.NewScanner(file)
+for scanner.Scan() {
+    fmt.Println(scanner.Text())
+}
+
+// Environment variables
+port := os.Getenv("PORT")
+if port == "" {
+    port = "8080"
+}</pre>
+  </div>
+
+  <div class="glass-card">
+    <h3>encoding/json — JSON (สำคัญมากสำหรับ API!)</h3>
+    <pre>import "encoding/json"
+
+type User struct {
+    Name  string `json:"name"`
+    Email string `json:"email"`
+    Age   int    `json:"age,omitempty"`
+}
+
+// Struct → JSON (Marshal)
+user := User{Name: "สมชาย", Email: "s@test.com", Age: 25}
+jsonBytes, _ := json.Marshal(user)
+// → {"name":"สมชาย","email":"s@test.com","age":25}
+
+// Pretty print
+pretty, _ := json.MarshalIndent(user, "", "  ")
+fmt.Println(string(pretty))
+
+// JSON → Struct (Unmarshal)
+jsonStr := `{"name":"สมหญิง","email":"sy@test.com"}`
+var u2 User
+json.Unmarshal([]byte(jsonStr), &u2)
+fmt.Println(u2.Name)   // → สมหญิง
+fmt.Println(u2.Age)    // → 0 (zero value เพราะ JSON ไม่มี age)
+
+// JSON → map (ไม่รู้โครงสร้างล่วงหน้า)
+var result map[string]any
+json.Unmarshal([]byte(jsonStr), &result)
+fmt.Println(result["name"])   // → สมหญิง</pre>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="section" id="testing">
+  <h2>🧪 Testing — ทดสอบ Code</h2>
+
+  <p>Go มีระบบ testing ในตัว — ไม่ต้องลง library เพิ่ม!</p>
+
+  <h3>Unit Test พื้นฐาน</h3>
+  <div class="glass-card">
+    <pre>// calculator.go
+package calculator
+
+func Add(a, b int) int { return a + b }
+func Multiply(a, b int) int { return a * b }
+
+// calculator_test.go  ← ไฟล์ test ต้องลงท้ายด้วย _test.go
+package calculator
+
+import "testing"
+
+// ฟังก์ชัน test ต้องขึ้นต้นด้วย Test
+func TestAdd(t *testing.T) {
+    result := Add(2, 3)
+    if result != 5 {
+        t.Errorf("Add(2, 3) = %d; want 5", result)
+    }
+}
+
+// ✨ Table-Driven Tests — แนวทางที่ Go ชุมชนนิยมมาก!
+func TestMultiply(t *testing.T) {
+    tests := []struct {
+        name     string
+        a, b     int
+        expected int
+    }{
+        {"positive", 3, 4, 12},
+        {"zero", 5, 0, 0},
+        {"negative", -2, 3, -6},
+        {"both negative", -2, -3, 6},
+    }
+
+    for _, tt := range tests {
+        t.Run(tt.name, func(t *testing.T) {
+            result := Multiply(tt.a, tt.b)
+            if result != tt.expected {
+                t.Errorf("Multiply(%d, %d) = %d; want %d",
+                    tt.a, tt.b, result, tt.expected)
+            }
+        })
+    }
+}</pre>
+  </div>
+
+  <h3>รัน Tests</h3>
+  <div class="glass-card">
+    <pre># รัน test ทั้งหมด
+go test ./...
+
+# รัน test ใน package เดียว
+go test ./calculator/
+
+# Verbose — เห็นทุก test case
+go test -v ./...
+
+# รัน test เฉพาะชื่อ
+go test -run TestMultiply ./...
+
+# ดู coverage
+go test -cover ./...
+
+# สร้าง coverage report
+go test -coverprofile=coverage.out ./...
+go tool cover -html=coverage.out</pre>
+  </div>
+
+  <h3>Benchmark</h3>
+  <div class="glass-card">
+    <pre>// ฟังก์ชัน benchmark ขึ้นต้นด้วย Benchmark
+func BenchmarkAdd(b *testing.B) {
+    for i := 0; i < b.N; i++ {   // b.N = จำนวนรอบที่ Go กำหนดให้
+        Add(100, 200)
+    }
+}
+
+// รัน: go test -bench=. ./...</pre>
+    <div class="output">BenchmarkAdd-10    1000000000    0.3150 ns/op</div>
+  </div>
+
+  <h3>Mock Testing — ทดสอบโดยไม่ต้องพึ่ง Database จริง</h3>
+  <div class="glass-card">
+    <pre>// ─── หลักการ: ใช้ interface → สร้าง mock implementation สำหรับ test ───
+
+// Interface ที่ usecase ต้องการ
+type UserRepository interface {
+    FindByID(ctx context.Context, id string) (*User, error)
+}
+
+// ─── Production: ใช้ database จริง ───
+type postgresRepo struct { db *sql.DB }
+func (r *postgresRepo) FindByID(ctx context.Context, id string) (*User, error) {
+    // query จาก PostgreSQL จริง...
+}
+
+// ─── Test: ใช้ mock ───
+type mockRepo struct {
+    users map[string]*User
+    err   error   // กำหนดได้ว่าจะให้ return error หรือไม่
+}
+
+func (m *mockRepo) FindByID(ctx context.Context, id string) (*User, error) {
+    if m.err != nil {
+        return nil, m.err
+    }
+    user, ok := m.users[id]
+    if !ok {
+        return nil, ErrNotFound
+    }
+    return user, nil
+}
+
+// ─── Test case ───
+func TestGetUser_Success(t *testing.T) {
+    repo := &mockRepo{
+        users: map[string]*User{
+            "123": {ID: "123", Name: "สมชาย"},
+        },
+    }
+    uc := NewUserUsecase(repo)   // inject mock
+
+    user, err := uc.GetByID(context.Background(), "123")
+    if err != nil {
+        t.Fatalf("unexpected error: %v", err)
+    }
+    if user.Name != "สมชาย" {
+        t.Errorf("got %s, want สมชาย", user.Name)
+    }
+}
+
+func TestGetUser_NotFound(t *testing.T) {
+    repo := &mockRepo{users: map[string]*User{}}
+    uc := NewUserUsecase(repo)
+
+    _, err := uc.GetByID(context.Background(), "999")
+    if !errors.Is(err, ErrNotFound) {
+        t.Errorf("got %v, want ErrNotFound", err)
+    }
+}
+
+func TestGetUser_DatabaseError(t *testing.T) {
+    repo := &mockRepo{err: errors.New("connection refused")}
+    uc := NewUserUsecase(repo)
+
+    _, err := uc.GetByID(context.Background(), "123")
+    if err == nil {
+        t.Error("expected error but got nil")
+    }
+}
+
+// 💡 ไม่ต้อง database จริง! test รันได้ทุกที่ ทุกเวลา ใน milliseconds</pre>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="section" id="modern-go">
+  <h2>🆕 Go Modern — ฟีเจอร์ใหม่ล่าสุด (1.21-1.24)</h2>
+
+  <p>Go อัปเดตทุก 6 เดือน — มาดูของใหม่ๆ ที่ทำให้เขียนโค้ดง่ายและดีขึ้น!</p>
+
+  <h3>Go 1.21: slices & maps packages</h3>
+  <div class="glass-card highlight">
+    <pre>import (
+    "slices"
+    "maps"
+)
+
+// ──── slices package ────────────────────────
+nums := []int{5, 3, 8, 1, 9, 2}
+
+// Sort (in-place)
+slices.Sort(nums)                     // → [1, 2, 3, 5, 8, 9]
+
+// Sort ด้วยเงื่อนไข custom
+slices.SortFunc(nums, func(a, b int) int {
+    return b - a   // เรียงจากมากไปน้อย
+})
+
+// ค้นหาแบบ binary search
+idx, found := slices.BinarySearch(nums, 5)
+
+// Contains — มีสมาชิกนี้ไหม?
+slices.Contains(nums, 3)              // → true
+
+// Min / Max
+slices.Min(nums)                      // → 1
+slices.Max(nums)                      // → 9
+
+// Reverse — กลับลำดับ
+slices.Reverse(nums)
+
+// Compact — ลบตัวซ้ำที่อยู่ติดกัน (ต้อง Sort ก่อน)
+sorted := []int{1, 1, 2, 2, 3}
+unique := slices.Compact(sorted)      // → [1, 2, 3]
+
+// Index — หาตำแหน่ง
+slices.Index([]string{"a","b","c"}, "b")   // → 1
+
+// ──── maps package ──────────────────────────
+m := map[string]int{"a": 1, "b": 2, "c": 3}
+
+// Keys & Values
+keys := maps.Keys(m)                  // → ["a", "b", "c"]
+vals := maps.Values(m)                // → [1, 2, 3]
+
+// Clone — สำเนา map
+m2 := maps.Clone(m)
+
+// Equal — เปรียบเทียบ
+maps.Equal(m, m2)                     // → true
+
+// DeleteFunc — ลบตามเงื่อนไข
+maps.DeleteFunc(m, func(k string, v int) bool {
+    return v < 2   // ลบ entry ที่ value < 2
+})</pre>
+  </div>
+
+  <h3>Go 1.21: min, max, clear built-in</h3>
+  <div class="glass-card">
+    <pre>// ก่อน Go 1.21: ต้องเขียนฟังก์ชันเอง
+// ตั้งแต่ Go 1.21: เป็น built-in function!
+
+a := min(3, 5, 1, 8)     // → 1  (หาค่าน้อยสุด)
+b := max(3, 5, 1, 8)     // → 8  (หาค่ามากสุด)
+
+// ใช้กับ string ก็ได้!
+s := min("apple", "banana", "cherry")   // → "apple"
+
+// clear — ล้าง map หรือ slice
+m := map[string]int{"a": 1, "b": 2}
+clear(m)     // m เป็น map ว่าง (len = 0)
+
+s := []int{1, 2, 3}
+clear(s)     // s เป็น [0, 0, 0] (set เป็น zero values)</pre>
+  </div>
+
+  <h3>Go 1.22: range over int + for loop variable fix</h3>
+  <div class="glass-card success">
+    <pre>// ✨ range over int — วน loop ง่ายขึ้น!
+
+// ก่อน Go 1.22:
+for i := 0; i < 5; i++ { ... }
+
+// Go 1.22+:
+for i := range 5 {
+    fmt.Println(i)   // 0, 1, 2, 3, 4
+}
+
+// ✨ loop variable fix — แก้ bug ที่เจ็บปวดที่สุดใน Go!
+// ก่อน Go 1.22: ทุก goroutine จะเห็นค่า i สุดท้ายเหมือนกัน!
+for i := range 5 {
+    go func() {
+        fmt.Println(i)   // Go 1.22+: ถูกต้อง! แต่ละ goroutine เห็นค่า i ของตัวเอง
+    }()
+}</pre>
+  </div>
+
+  <h3>Go 1.22: net/http Enhanced Routing</h3>
+  <div class="glass-card">
+    <pre>// ก่อน Go 1.22: net/http routing แย่มาก ต้องพึ่ง library เช่น chi, gorilla
+// Go 1.22+: มี method matching + path params ในตัว!
+
+mux := http.NewServeMux()
+
+// ✨ ระบุ HTTP method ได้!
+mux.HandleFunc("GET /users", listUsers)
+mux.HandleFunc("POST /users", createUser)
+
+// ✨ Path parameters ด้วย {name}!
+mux.HandleFunc("GET /users/{id}", func(w http.ResponseWriter, r *http.Request) {
+    id := r.PathValue("id")   // ← ดึง path parameter
+    fmt.Fprintf(w, "User ID: %s", id)
+})
+
+mux.HandleFunc("DELETE /users/{id}", deleteUser)
+
+// ✨ Wildcard ด้วย {path...}
+mux.HandleFunc("GET /files/{path...}", func(w http.ResponseWriter, r *http.Request) {
+    fullPath := r.PathValue("path")   // "images/logo.png"
+    // ...
+})
+
+http.ListenAndServe(":8080", mux)</pre>
+  </div>
+
+  <h3>Go 1.23: range over func (Iterators)</h3>
+  <div class="glass-card highlight">
+    <pre>// ✨ Iterator pattern — สร้าง "ตัววน" ที่ for range เรียกใช้ได้!
+// iter.Seq[V] = func(yield func(V) bool) — ส่งค่าทีละตัวด้วย yield
+
+// สร้าง iterator ที่ส่งเลข Fibonacci
+func Fibonacci() iter.Seq[int] {
+    return func(yield func(int) bool) {
+        a, b := 0, 1
+        for {
+            if !yield(a) {   // ← yield ส่งค่าออกไป, return false = หยุด
+                return
+            }
+            a, b = b, a+b
+        }
+    }
+}
+
+// ใช้กับ for range ได้เลย!
+for n := range Fibonacci() {
+    if n > 100 { break }
+    fmt.Println(n)   // 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89
+}
+
+// iter.Seq2[K, V] — ส่งคู่ key-value
+func Enumerate[T any](s []T) iter.Seq2[int, T] {
+    return func(yield func(int, T) bool) {
+        for i, v := range s {
+            if !yield(i, v) { return }
+        }
+    }
+}
+
+for i, fruit := range Enumerate([]string{"🍎", "🍌", "🍊"}) {
+    fmt.Printf("%d: %s\n", i, fruit)
+}
+
+// ✨ slices/maps ก็มี iterator functions:
+// slices.All(s)       → iter.Seq2[int, T]
+// slices.Values(s)    → iter.Seq[T]
+// slices.Backward(s)  → iter.Seq2[int, T] (reverse)
+// maps.All(m)         → iter.Seq2[K, V]
+// maps.Keys(m)        → iter.Seq[K]
+// maps.Values(m)      → iter.Seq[V]</pre>
+  </div>
+
+  <h3>Go 1.24: Weak Pointers & Swiss Table Map</h3>
+  <div class="glass-card">
+    <pre>// Go 1.24 (2025):
+// ✨ weak package — Weak Pointer สำหรับ cache
+import "weak"
+
+// Weak pointer: GC จะเก็บกวาด object ได้ถ้าไม่มี strong reference เหลือ
+// เหมาะสำหรับ cache ที่ไม่อยากให้ memory leak
+ptr := weak.Make(&myObject)
+
+// ดึงค่า — ถ้า GC เก็บไปแล้วจะได้ nil
+if strong := ptr.Value(); strong != nil {
+    // ใช้ strong ได้
+} else {
+    // object ถูก GC เก็บไปแล้ว ต้องสร้างใหม่
+}
+
+// ✨ Swiss Table map implementation
+// Go 1.24 เปลี่ยน internal ของ map เป็น Swiss Table
+// → เร็วขึ้น 20-50% สำหรับ operations กับ map!
+// ไม่ต้องเปลี่ยน code — เร็วขึ้นเฉยๆ
+
+// ✨ go tool — unified tool
+// go tool vet, go tool pprof, go tool trace ทำงานได้โดยไม่ต้อง install แยก</pre>
+  </div>
+
+  <div class="glass-card tip">
+    <h4>💡 สรุปฟีเจอร์สำคัญแต่ละเวอร์ชัน</h4>
+    <table class="cmp-table">
+      <thead><tr><th>Version</th><th>ฟีเจอร์เด่น</th><th>ต้องรู้</th></tr></thead>
+      <tbody>
+        <tr><td><strong>1.18</strong></td><td>Generics, Fuzzing</td><td>⭐⭐⭐⭐⭐</td></tr>
+        <tr><td><strong>1.21</strong></td><td>slices/maps pkg, min/max/clear, slog</td><td>⭐⭐⭐⭐⭐</td></tr>
+        <tr><td><strong>1.22</strong></td><td>range int, enhanced routing, loop var fix</td><td>⭐⭐⭐⭐</td></tr>
+        <tr><td><strong>1.23</strong></td><td>range over func, iterators</td><td>⭐⭐⭐⭐</td></tr>
+        <tr><td><strong>1.24</strong></td><td>weak pointers, Swiss Table, go tool</td><td>⭐⭐⭐</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="section" id="http-api">
+  <h2>🌐 สร้าง HTTP API</h2>
+
+  <h3>วิธีที่ 1: net/http (Standard Library)</h3>
+  <div class="glass-card">
+    <pre>package main
+
+import (
+    "encoding/json"
+    "fmt"
+    "log"
+    "net/http"
+)
+
+type Response struct {
+    Message string `json:"message"`
+    Status  int    `json:"status"`
+}
+
+func helloHandler(w http.ResponseWriter, r *http.Request) {
+    // ตั้ง Content-Type
+    w.Header().Set("Content-Type", "application/json")
+
+    // สร้าง response
+    resp := Response{Message: "สวัสดี!", Status: 200}
+    json.NewEncoder(w).Encode(resp)
+}
+
+func main() {
+    http.HandleFunc("/hello", helloHandler)
+
+    fmt.Println("Server running on :8080")
+    log.Fatal(http.ListenAndServe(":8080", nil))
+}
+// ทดสอบ: curl http://localhost:8080/hello</pre>
+  </div>
+
+  <h3>วิธีที่ 2: Fiber (แนะนำสำหรับ production)</h3>
+  <div class="glass-card highlight">
+    <pre>package main
+
+import (
+    "github.com/gofiber/fiber/v2"
+)
+
+func main() {
+    app := fiber.New()
+
+    // GET /hello
+    app.Get("/hello", func(c *fiber.Ctx) error {
+        return c.JSON(fiber.Map{
+            "message": "สวัสดี!",
+            "status":  200,
+        })
+    })
+
+    // GET /users/:id
+    app.Get("/users/:id", func(c *fiber.Ctx) error {
+        id := c.Params("id")
+        return c.JSON(fiber.Map{
+            "user_id": id,
+            "name":    "สมชาย",
+        })
+    })
+
+    // POST /products (รับ JSON body)
+    app.Post("/products", func(c *fiber.Ctx) error {
+        type CreateRequest struct {
+            Name  string  `json:"name"`
+            Price float64 `json:"price"`
+        }
+
+        var req CreateRequest
+        if err := c.BodyParser(&req); err != nil {
+            return c.Status(400).JSON(fiber.Map{
+                "error": "Invalid JSON",
+            })
+        }
+
+        return c.Status(201).JSON(fiber.Map{
+            "message": "สร้างสำเร็จ",
+            "product": req,
+        })
+    })
+
+    app.Listen(":8080")
+}</pre>
+  </div>
+
+  <h3>RESTful API Design</h3>
+  <div class="glass-card">
+    <table class="cmp-table">
+      <thead>
+        <tr><th>Method</th><th>Path</th><th>Action</th><th>ตัวอย่าง</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>GET</strong></td><td>/products</td><td>ดูรายการทั้งหมด</td><td>ดูสินค้าทั้งหมด</td></tr>
+        <tr><td><strong>GET</strong></td><td>/products/:id</td><td>ดูรายการเดียว</td><td>ดูสินค้า ID "abc"</td></tr>
+        <tr><td><strong>POST</strong></td><td>/products</td><td>สร้างใหม่</td><td>สร้างสินค้าใหม่</td></tr>
+        <tr><td><strong>PUT</strong></td><td>/products/:id</td><td>แก้ไข</td><td>แก้สินค้า ID "abc"</td></tr>
+        <tr><td><strong>DELETE</strong></td><td>/products/:id</td><td>ลบ</td><td>ลบสินค้า ID "abc"</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="section" id="database">
+  <h2>🗄️ Database & SQL ใน Go</h2>
+  <p>Go มี package <code>database/sql</code> ในตัว ที่ออกแบบมาดีมาก — รองรับ connection pooling, prepared statements, transactions พร้อมใช้</p>
+
+  <h3>1. เชื่อมต่อ Database</h3>
+  <div class="glass-card highlight">
+    <pre>import (
+    "database/sql"
+    _ "github.com/lib/pq"   // PostgreSQL driver (import เพื่อ register)
+)
+
+func main() {
+    // sql.Open() ไม่ได้เชื่อมต่อจริง — แค่สร้าง pool
+    db, err := sql.Open("postgres",
+        "postgres://user:pass@localhost:5432/mydb?sslmode=disable",
+    )
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer db.Close()
+
+    // Ping() เชื่อมต่อจริง — เช็คว่า database พร้อมใช้
+    if err := db.Ping(); err != nil {
+        log.Fatal("database not reachable:", err)
+    }
+
+    // ⚙️ ตั้งค่า Connection Pool
+    db.SetMaxOpenConns(25)                  // connection สูงสุดที่เปิดพร้อมกัน
+    db.SetMaxIdleConns(5)                   // connection ว่างที่เก็บไว้
+    db.SetConnMaxLifetime(5 * time.Minute)  // อายุสูงสุดของ connection
+    db.SetConnMaxIdleTime(1 * time.Minute)  // เวลา idle สูงสุดก่อนปิด
+
+    fmt.Println("✅ connected to database")
+}</pre>
+  </div>
+
+  <div class="analogy">
+    Connection Pool เหมือนร้านอาหาร:<br>
+    — MaxOpenConns = จำนวนโต๊ะทั้งหมด (25 โต๊ะ)<br>
+    — MaxIdleConns = โต๊ะที่จัดไว้แม้ยังไม่มีลูกค้า (5 โต๊ะ)<br>
+    — ลูกค้า (query) มา → ถ้ามีโต๊ะว่าง ก็นั่งเลย ไม่ต้องรอจัดโต๊ะใหม่<br>
+    — ถ้าโต๊ะเต็ม → รอคิว จนกว่าจะมีโต๊ะว่าง
+  </div>
+
+  <h3>2. CRUD Operations</h3>
+  <div class="glass-card">
+    <pre>// ─── Model ───
+type Product struct {
+    ID        string    `json:"id"`
+    Name      string    `json:"name"`
+    Price     float64   `json:"price"`
+    CreatedAt time.Time `json:"created_at"`
+}
+
+// ─── CREATE ───
+func CreateProduct(db *sql.DB, p *Product) error {
+    query := `
+        INSERT INTO products (id, name, price, created_at)
+        VALUES ($1, $2, $3, $4)`
+
+    _, err := db.ExecContext(ctx, query,
+        p.ID, p.Name, p.Price, time.Now(),
+    )
+    return err
+    // ExecContext → ใช้กับ INSERT, UPDATE, DELETE (ไม่มี rows คืน)
+}
+
+// ─── READ (Single) ───
+func GetProduct(db *sql.DB, id string) (*Product, error) {
+    query := `SELECT id, name, price, created_at FROM products WHERE id = $1`
+
+    var p Product
+    err := db.QueryRowContext(ctx, query, id).Scan(
+        &p.ID, &p.Name, &p.Price, &p.CreatedAt,
+    )
+    if err == sql.ErrNoRows {
+        return nil, fmt.Errorf("product %s not found", id)
+    }
+    return &p, err
+    // QueryRowContext → ใช้กับ SELECT ที่ได้ 1 row
+}
+
+// ─── READ (Multiple) ───
+func ListProducts(db *sql.DB, limit int) ([]Product, error) {
+    query := `SELECT id, name, price, created_at FROM products 
+              ORDER BY created_at DESC LIMIT $1`
+
+    rows, err := db.QueryContext(ctx, query, limit)
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()   // ← สำคัญมาก! ต้อง Close ทุกครั้ง
+
+    var products []Product
+    for rows.Next() {
+        var p Product
+        if err := rows.Scan(&p.ID, &p.Name, &p.Price, &p.CreatedAt); err != nil {
+            return nil, err
+        }
+        products = append(products, p)
+    }
+
+    // ตรวจ error ที่อาจเกิดระหว่าง iteration
+    if err := rows.Err(); err != nil {
+        return nil, err
+    }
+
+    return products, nil
+    // QueryContext → ใช้กับ SELECT ที่ได้หลาย rows
+}
+
+// ─── UPDATE ───
+func UpdateProduct(db *sql.DB, id, name string, price float64) error {
+    query := `UPDATE products SET name = $1, price = $2 WHERE id = $3`
+
+    result, err := db.ExecContext(ctx, query, name, price, id)
+    if err != nil {
+        return err
+    }
+
+    // ตรวจว่าอัปเดตจริงหรือเปล่า
+    affected, _ := result.RowsAffected()
+    if affected == 0 {
+        return fmt.Errorf("product %s not found", id)
+    }
+    return nil
+}
+
+// ─── DELETE ───
+func DeleteProduct(db *sql.DB, id string) error {
+    query := `DELETE FROM products WHERE id = $1`
+    result, err := db.ExecContext(ctx, query, id)
+    if err != nil {
+        return err
+    }
+    affected, _ := result.RowsAffected()
+    if affected == 0 {
+        return fmt.Errorf("product %s not found", id)
+    }
+    return nil
+}</pre>
+  </div>
+
+  <div class="glass-card warn">
+    <h4>⚠️ SQL Injection — อย่าทำแบบนี้!</h4>
+    <pre>// ❌ อันตราย! SQL Injection
+query := "SELECT * FROM users WHERE name = '" + userInput + "'"
+// ถ้า userInput = "'; DROP TABLE users; --"
+// → SELECT * FROM users WHERE name = ''; DROP TABLE users; --'
+
+// ✅ ใช้ parameterized query เสมอ!
+query := "SELECT * FROM users WHERE name = $1"
+db.QueryRow(query, userInput)   // ← driver จัดการ escape ให้</pre>
+  </div>
+
+  <h3>3. Transactions</h3>
+  <p>Transaction = กลุ่มของ operations ที่ต้อง "สำเร็จหมด" หรือ "ล้มเหลวหมด" (Atomicity)</p>
+  <div class="glass-card highlight">
+    <pre>// ─── ตัวอย่าง: โอนเงินระหว่างบัญชี ───
+func Transfer(db *sql.DB, from, to string, amount float64) error {
+    // เริ่ม transaction
+    tx, err := db.BeginTx(ctx, nil)
+    if err != nil {
+        return err
+    }
+
+    // defer Rollback — ถ้า Commit สำเร็จ Rollback จะไม่ทำอะไร
+    defer tx.Rollback()
+
+    // Step 1: หักเงินจากบัญชีต้นทาง
+    result, err := tx.ExecContext(ctx,
+        "UPDATE accounts SET balance = balance - $1 WHERE id = $2 AND balance >= $1",
+        amount, from,
+    )
+    if err != nil {
+        return fmt.Errorf("debit failed: %w", err)
+    }
+    affected, _ := result.RowsAffected()
+    if affected == 0 {
+        return errors.New("insufficient balance or account not found")
+    }
+
+    // Step 2: เพิ่มเงินในบัญชีปลายทาง
+    _, err = tx.ExecContext(ctx,
+        "UPDATE accounts SET balance = balance + $1 WHERE id = $2",
+        amount, to,
+    )
+    if err != nil {
+        return fmt.Errorf("credit failed: %w", err)
+        // → Rollback จะถูกเรียกอัตโนมัติ (defer)
+        // → Step 1 ก็ถูก undo ด้วย!
+    }
+
+    // Step 3: บันทึก history
+    _, err = tx.ExecContext(ctx,
+        "INSERT INTO transfers (from_id, to_id, amount, ts) VALUES ($1, $2, $3, $4)",
+        from, to, amount, time.Now(),
+    )
+    if err != nil {
+        return fmt.Errorf("log failed: %w", err)
+    }
+
+    // ทุกอย่างสำเร็จ → Commit
+    return tx.Commit()
+    // ถ้า Commit สำเร็จ: ทั้ง 3 operations ถูกบันทึกถาวร
+    // ถ้า Commit ล้มเหลว: ทั้ง 3 operations ถูก rollback หมด
+}</pre>
+  </div>
+
+  <div class="analogy">
+    Transaction เหมือนการเซ็นสัญญา:<br>
+    — ร่างสัญญา (BEGIN) → เขียนเงื่อนไขทีละข้อ → เซ็น (COMMIT)<br>
+    — ถ้าข้อไหนไม่ตกลง → ฉีกทิ้งทั้งฉบับ (ROLLBACK)<br>
+    — จะไม่มีสัญญาที่ทำได้แค่ครึ่งเดียว
+  </div>
+
+  <h3>4. Prepared Statements</h3>
+  <p>ถ้า query เดิมถูกเรียกซ้ำบ่อยๆ — ใช้ Prepared Statement เพื่อ performance</p>
+  <div class="glass-card">
+    <pre>// Prepared Statement = compile query ครั้งเดียว ใช้ซ้ำได้
+stmt, err := db.PrepareContext(ctx,
+    "SELECT id, name, price FROM products WHERE price > $1 AND name LIKE $2",
+)
+if err != nil {
+    log.Fatal(err)
+}
+defer stmt.Close()
+
+// ใช้ซ้ำได้หลายครั้ง — DB ไม่ต้อง parse query ใหม่
+rows1, _ := stmt.QueryContext(ctx, 100, "%phone%")    // price > 100, name มี "phone"
+rows2, _ := stmt.QueryContext(ctx, 500, "%laptop%")   // price > 500, name มี "laptop"
+rows3, _ := stmt.QueryContext(ctx, 0, "%")             // ทุกสินค้า
+
+// 💡 เหมาะกับ query ใน loop หรือ high-traffic endpoint</pre>
+  </div>
+
+  <h3>5. Repository Pattern กับ Database</h3>
+  <div class="glass-card">
+    <pre>// ─── Domain Layer: กำหนด Interface ───
+type ProductRepository interface {
+    Create(ctx context.Context, p *Product) error
+    FindByID(ctx context.Context, id string) (*Product, error)
+    List(ctx context.Context, limit, offset int) ([]Product, error)
+    Update(ctx context.Context, p *Product) error
+    Delete(ctx context.Context, id string) error
+}
+
+// ─── Infrastructure Layer: Implement ด้วย PostgreSQL ───
+type postgresProductRepo struct {
+    db *sql.DB
+}
+
+func NewPostgresProductRepo(db *sql.DB) ProductRepository {
+    return &postgresProductRepo{db: db}
+}
+
+func (r *postgresProductRepo) FindByID(ctx context.Context, id string) (*Product, error) {
+    var p Product
+    err := r.db.QueryRowContext(ctx,
+        "SELECT id, name, price, created_at FROM products WHERE id = $1", id,
+    ).Scan(&p.ID, &p.Name, &p.Price, &p.CreatedAt)
+
+    if err == sql.ErrNoRows {
+        return nil, ErrNotFound
+    }
+    return &p, err
+}
+
+// ─── Infrastructure Layer: Implement ด้วย Redis (Cache) ───
+type redisProductRepo struct {
+    rdb *redis.Client
+    ttl time.Duration
+}
+
+func (r *redisProductRepo) FindByID(ctx context.Context, id string) (*Product, error) {
+    data, err := r.rdb.Get(ctx, "product:"+id).Bytes()
+    if err == redis.Nil {
+        return nil, ErrNotFound
+    }
+    var p Product
+    json.Unmarshal(data, &p)
+    return &p, nil
+}
+
+// ─── Usecase: ใช้ทั้ง cache + database ───
+type productUsecase struct {
+    repo  ProductRepository   // database (primary)
+    cache ProductRepository   // redis (cache)
+}
+
+func (uc *productUsecase) GetByID(ctx context.Context, id string) (*Product, error) {
+    // 1. ดูใน cache ก่อน
+    p, err := uc.cache.FindByID(ctx, id)
+    if err == nil {
+        return p, nil   // cache hit! 🎯
+    }
+
+    // 2. ไม่มีใน cache → ดูใน database
+    p, err = uc.repo.FindByID(ctx, id)
+    if err != nil {
+        return nil, err
+    }
+
+    // 3. เก็บลง cache สำหรับครั้งถัดไป
+    uc.cache.Create(ctx, p)
+
+    return p, nil
+}</pre>
+  </div>
+
+  <div class="glass-card tip">
+    <h4>💡 database/sql สรุป</h4>
+    <table>
+      <thead><tr><th>Method</th><th>ใช้เมื่อ</th><th>Return</th></tr></thead>
+      <tbody>
+        <tr><td><code>ExecContext()</code></td><td>INSERT / UPDATE / DELETE</td><td>Result (RowsAffected)</td></tr>
+        <tr><td><code>QueryRowContext()</code></td><td>SELECT 1 row</td><td>*Row → .Scan()</td></tr>
+        <tr><td><code>QueryContext()</code></td><td>SELECT หลาย rows</td><td>*Rows → .Next() loop</td></tr>
+        <tr><td><code>PrepareContext()</code></td><td>Query ซ้ำบ่อย</td><td>*Stmt (reusable)</td></tr>
+        <tr><td><code>BeginTx()</code></td><td>Transaction</td><td>*Tx → .Commit/.Rollback</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="section" id="middleware">
+  <h2>🔗 Middleware Pattern</h2>
+  <p>Middleware คือ "ฟังก์ชันที่ทำงานก่อน/หลัง handler" — ใช้สำหรับ logging, auth, rate limiting ฯลฯ</p>
+
+  <div class="glass-card highlight">
+    <pre>// Middleware = ฟังก์ชันที่ทำงานระหว่างทาง
+// Request → [Middleware 1] → [Middleware 2] → [Handler] → Response
+
+// ตัวอย่าง: Logger Middleware
+func LoggerMiddleware() fiber.Handler {
+    return func(c *fiber.Ctx) error {
+        start := time.Now()
+
+        // ทำงานก่อน handler
+        fmt.Printf("→ %s %s\n", c.Method(), c.Path())
+
+        // เรียก handler ถัดไป
+        err := c.Next()
+
+        // ทำงานหลัง handler
+        fmt.Printf("← %d %s (%s)\n",
+            c.Response().StatusCode(),
+            c.Path(),
+            time.Since(start),
+        )
+
+        return err
+    }
+}
+
+// ตัวอย่าง: Auth Middleware
+func AuthMiddleware(secret string) fiber.Handler {
+    return func(c *fiber.Ctx) error {
+        token := c.Get("Authorization")
+        if token == "" {
+            return c.Status(401).JSON(fiber.Map{
+                "error": "missing token",
+            })
+        }
+        // ตรวจสอบ token...
+        return c.Next()   // ← ผ่านได้ ไปต่อ
+    }
+}
+
+// ใช้งาน
+app := fiber.New()
+app.Use(LoggerMiddleware())   // ← ใช้กับทุก route
+
+api := app.Group("/api")
+api.Use(AuthMiddleware("mysecret"))  // ← ใช้กับ /api/* เท่านั้น
+api.Get("/products", productHandler)</pre>
+  </div>
+
+  <div class="analogy">
+    Middleware เหมือนด่านตรวจบน highway:<br>
+    — ด่าน 1: ตรวจบัตร (Auth) → ไม่มีบัตรก็กลับไป<br>
+    — ด่าน 2: จด license plate (Logger) → จดแล้วปล่อยผ่าน<br>
+    — ด่าน 3: เช็คน้ำหนัก (Rate Limit) → หนักเกินไม่ให้ผ่าน<br>
+    ทุกรถ (request) ต้องผ่านด่านเดียวกัน → ไม่ต้องเช็คซ้ำในแต่ละจุดหมาย (handler)
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="section" id="design-patterns">
+  <h2>🎨 Design Patterns ใน Go</h2>
+  <p>Go ไม่มี class หรือ inheritance แต่มี patterns ที่ทรงพลังไม่แพ้ภาษาอื่น — แถมเรียบง่ายกว่าด้วย</p>
+
+  <h3>1. Functional Options Pattern</h3>
+  <p><strong>ปัญหา:</strong> ฟังก์ชันที่ต้องรับ config มากมาย ถ้าใช้ parameters ปกติจะวุ่นวาย</p>
+  <div class="glass-card highlight">
+    <pre>// ❌ ปัญหา: parameters เยอะ อ่านยาก ลำดับผิดได้
+server := NewServer("0.0.0.0", 8080, true, 30*time.Second, 100, nil, true)
+
+// ✅ Functional Options: อ่านง่าย ไม่สนลำดับ ขยายได้ง่าย
+server := NewServer(
+    WithHost("0.0.0.0"),
+    WithPort(8080),
+    WithTLS(true),
+    WithTimeout(30 * time.Second),
+    WithMaxConnections(100),
+)
+
+// ─── วิธีสร้าง Functional Options Pattern ───
+
+// 1. สร้าง struct สำหรับ config
+type Server struct {
+    host           string
+    port           int
+    timeout        time.Duration
+    maxConnections int
+    tls            bool
+    logger         *log.Logger
+}
+
+// 2. สร้าง Option type (ฟังก์ชันที่แก้ Server)
+type Option func(*Server)
+
+// 3. สร้างฟังก์ชัน With... สำหรับแต่ละ option
+func WithHost(host string) Option {
+    return func(s *Server) {
+        s.host = host       // ← closure จำค่า host ไว้
+    }
+}
+
+func WithPort(port int) Option {
+    return func(s *Server) {
+        s.port = port
+    }
+}
+
+func WithTimeout(t time.Duration) Option {
+    return func(s *Server) {
+        s.timeout = t
+    }
+}
+
+func WithMaxConnections(max int) Option {
+    return func(s *Server) {
+        s.maxConnections = max
+    }
+}
+
+func WithTLS(enabled bool) Option {
+    return func(s *Server) {
+        s.tls = enabled
+    }
+}
+
+func WithLogger(l *log.Logger) Option {
+    return func(s *Server) {
+        s.logger = l
+    }
+}
+
+// 4. Constructor รับ ...Option (variadic)
+func NewServer(opts ...Option) *Server {
+    // ค่า default — ไม่ส่ง option ก็ใช้ได้เลย
+    s := &Server{
+        host:           "localhost",
+        port:           8080,
+        timeout:        30 * time.Second,
+        maxConnections: 100,
+        tls:            false,
+        logger:         log.Default(),
+    }
+
+    // apply ทุก option ที่ส่งมา
+    for _, opt := range opts {
+        opt(s)   // ← เรียก option function กับ server
+    }
+
+    return s
+}
+
+// ─── การใช้งาน ───
+
+// ใช้ค่า default ทั้งหมด
+s1 := NewServer()
+
+// custom บางอย่าง
+s2 := NewServer(
+    WithPort(9090),
+    WithTLS(true),
+)
+
+// custom ทุกอย่าง
+s3 := NewServer(
+    WithHost("0.0.0.0"),
+    WithPort(443),
+    WithTLS(true),
+    WithTimeout(60*time.Second),
+    WithMaxConnections(1000),
+    WithLogger(myLogger),
+)</pre>
+  </div>
+
+  <div class="analogy">
+    Functional Options เหมือนสั่งกาแฟ:<br>
+    — สั่ง "กาแฟ" → ได้ค่า default (เอสเพรสโซ ร้อน ไม่หวาน)<br>
+    — สั่ง "กาแฟ + น้ำแข็ง + นม" → customize ได้ ไม่ต้องบอกทุกอย่าง<br>
+    — เพิ่ม option ใหม่ "วิปครีม" → เพิ่มฟังก์ชัน WithWhipCream() ได้เลย ไม่กระทบ code เดิม
+  </div>
+
+  <h3>2. Builder Pattern</h3>
+  <p><strong>ใช้เมื่อ:</strong> ต้องสร้าง object ที่มีขั้นตอนซับซ้อน หรือต้อง validate ก่อนสร้าง</p>
+  <div class="glass-card">
+    <pre>// Builder Pattern — เหมาะกับ object ที่ต้อง validate
+type QueryBuilder struct {
+    table      string
+    conditions []string
+    orderBy    string
+    limit      int
+    err        error      // เก็บ error ไว้ตรวจตอน Build()
+}
+
+func NewQuery(table string) *QueryBuilder {
+    return &QueryBuilder{table: table, limit: -1}
+}
+
+func (q *QueryBuilder) Where(condition string) *QueryBuilder {
+    if condition == "" {
+        q.err = errors.New("condition cannot be empty")
+        return q   // ← return ตัวเอง เพื่อ chain ต่อได้
+    }
+    q.conditions = append(q.conditions, condition)
+    return q
+}
+
+func (q *QueryBuilder) OrderBy(field string) *QueryBuilder {
+    q.orderBy = field
+    return q
+}
+
+func (q *QueryBuilder) Limit(n int) *QueryBuilder {
+    if n < 0 {
+        q.err = fmt.Errorf("limit must be >= 0, got %d", n)
+        return q
+    }
+    q.limit = n
+    return q
+}
+
+// Build() สร้าง SQL string จริง + ตรวจ error
+func (q *QueryBuilder) Build() (string, error) {
+    if q.err != nil {
+        return "", q.err   // fail early ถ้ามี error
+    }
+    if q.table == "" {
+        return "", errors.New("table is required")
+    }
+
+    sql := "SELECT * FROM " + q.table
+
+    if len(q.conditions) > 0 {
+        sql += " WHERE " + strings.Join(q.conditions, " AND ")
+    }
+    if q.orderBy != "" {
+        sql += " ORDER BY " + q.orderBy
+    }
+    if q.limit >= 0 {
+        sql += fmt.Sprintf(" LIMIT %d", q.limit)
+    }
+
+    return sql, nil
+}
+
+// ─── ใช้งาน: chain methods ───
+query, err := NewQuery("users").
+    Where("age >= 18").
+    Where("active = true").
+    OrderBy("created_at DESC").
+    Limit(10).
+    Build()
+// → "SELECT * FROM users WHERE age >= 18 AND active = true ORDER BY created_at DESC LIMIT 10"</pre>
+  </div>
+
+  <h3>3. Strategy Pattern (ผ่าน Interface)</h3>
+  <p><strong>ใช้เมื่อ:</strong> มีหลายวิธีทำสิ่งเดียวกัน ต้องเลือกวิธีตอน runtime — Go ใช้ interface แทน class hierarchy</p>
+  <div class="glass-card">
+    <pre>// ─── ตัวอย่าง: ระบบแจ้งเตือน (Notification System) ───
+
+// Strategy interface — กำหนดว่า "แจ้งเตือน" ต้องทำอะไรบ้าง
+type Notifier interface {
+    Send(to, message string) error
+}
+
+// Strategy 1: ส่งอีเมล
+type EmailNotifier struct {
+    SMTPHost string
+    From     string
+}
+
+func (n *EmailNotifier) Send(to, message string) error {
+    fmt.Printf("📧 Email to %s: %s (via %s)\n", to, message, n.SMTPHost)
+    // ส่ง SMTP จริง...
+    return nil
+}
+
+// Strategy 2: ส่ง Slack
+type SlackNotifier struct {
+    WebhookURL string
+}
+
+func (n *SlackNotifier) Send(to, message string) error {
+    fmt.Printf("💬 Slack to %s: %s\n", to, message)
+    // POST to webhook จริง...
+    return nil
+}
+
+// Strategy 3: ส่ง LINE
+type LineNotifier struct {
+    ChannelToken string
+}
+
+func (n *LineNotifier) Send(to, message string) error {
+    fmt.Printf("📱 LINE to %s: %s\n", to, message)
+    return nil
+}
+
+// Service ที่ใช้ Strategy — ไม่สนว่าส่งทางไหน
+type AlertService struct {
+    notifier Notifier   // ← รับ interface ไม่ผูกกับ implementation
+}
+
+func NewAlertService(n Notifier) *AlertService {
+    return &AlertService{notifier: n}
+}
+
+func (s *AlertService) Alert(userID, msg string) error {
+    // business logic...
+    return s.notifier.Send(userID, msg)
+}
+
+// ─── เลือก strategy ตอน runtime ───
+func main() {
+    var notifier Notifier
+
+    switch os.Getenv("NOTIFY_METHOD") {
+    case "email":
+        notifier = &EmailNotifier{SMTPHost: "smtp.gmail.com", From: "no-reply@app.com"}
+    case "slack":
+        notifier = &SlackNotifier{WebhookURL: os.Getenv("SLACK_WEBHOOK")}
+    case "line":
+        notifier = &LineNotifier{ChannelToken: os.Getenv("LINE_TOKEN")}
+    default:
+        notifier = &EmailNotifier{SMTPHost: "localhost", From: "dev@localhost"}
+    }
+
+    service := NewAlertService(notifier)
+    service.Alert("user-123", "Server CPU > 90%!")
+}</pre>
+  </div>
+
+  <h3>4. Factory Pattern</h3>
+  <p><strong>ใช้เมื่อ:</strong> ต้องสร้าง object ตาม condition โดยไม่อยากให้ caller รู้ implementation details</p>
+  <div class="glass-card">
+    <pre>// ─── ตัวอย่าง: สร้าง Database Connection ตาม config ───
+
+// interface ที่ทุก database ต้อง implement
+type Database interface {
+    Connect() error
+    Query(sql string) ([]Row, error)
+    Close() error
+}
+
+// Factory function — สร้าง Database ตามชื่อ
+func NewDatabase(driver string, dsn string) (Database, error) {
+    switch driver {
+    case "postgres":
+        return &PostgresDB{dsn: dsn}, nil
+    case "mysql":
+        return &MySQLDB{dsn: dsn}, nil
+    case "sqlite":
+        return &SQLiteDB{path: dsn}, nil
+    default:
+        return nil, fmt.Errorf("unsupported database driver: %s", driver)
+    }
+}
+
+// ─── ใช้ Factory ร่วมกับ config ───
+func main() {
+    driver := os.Getenv("DB_DRIVER")   // "postgres"
+    dsn := os.Getenv("DB_DSN")         // "postgres://user:pass@localhost/mydb"
+
+    db, err := NewDatabase(driver, dsn)
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer db.Close()
+
+    // ใช้งานผ่าน interface — ไม่สนว่าข้างในเป็น Postgres หรือ MySQL
+    rows, _ := db.Query("SELECT * FROM users")
+}</pre>
+  </div>
+
+  <h3>5. Singleton Pattern (ด้วย sync.Once)</h3>
+  <p><strong>ใช้เมื่อ:</strong> ต้องการ object เพียงตัวเดียวในทั้งระบบ เช่น database pool, logger, config</p>
+  <div class="glass-card">
+    <pre>// ─── Singleton ด้วย sync.Once (Thread-safe!) ───
+var (
+    dbInstance *Database
+    dbOnce     sync.Once
+)
+
+func GetDB() *Database {
+    dbOnce.Do(func() {
+        // ฟังก์ชันนี้ จะถูกเรียกแค่ครั้งเดียว
+        // ไม่ว่าจะมี goroutine กี่ตัวเรียก GetDB() พร้อมกัน
+        fmt.Println("Connecting to database...")
+        dbInstance = &Database{
+            pool: sql.Open("postgres", os.Getenv("DB_DSN")),
+        }
+    })
+    return dbInstance   // ← ครั้งถัดไป return instance เดิมเลย
+}
+
+// ─── เรียกใช้ได้จากทุกที่ ───
+func handler1() {
+    db := GetDB()   // ← ถ้าเป็นครั้งแรก → สร้าง connection
+    // ...
+}
+
+func handler2() {
+    db := GetDB()   // ← ครั้งที่สอง → ได้ instance เดิม (ไม่สร้างใหม่)
+    // ...
+}</pre>
+  </div>
+
+  <h3>6. Observer Pattern (Event Emitter)</h3>
+  <p><strong>ใช้เมื่อ:</strong> ต้องการแจ้งหลาย component เมื่อเกิดเหตุการณ์ — decouple ผู้ส่งกับผู้รับ</p>
+  <div class="glass-card">
+    <pre>// ─── Event Bus สำหรับ decouple components ───
+
+type EventHandler func(data interface{})
+
+type EventBus struct {
+    mu       sync.RWMutex
+    handlers map[string][]EventHandler
+}
+
+func NewEventBus() *EventBus {
+    return &EventBus{
+        handlers: make(map[string][]EventHandler),
+    }
+}
+
+// Subscribe — ลงทะเบียนรับ event
+func (eb *EventBus) Subscribe(event string, handler EventHandler) {
+    eb.mu.Lock()
+    defer eb.mu.Unlock()
+    eb.handlers[event] = append(eb.handlers[event], handler)
+}
+
+// Publish — ส่ง event ให้ทุกคนที่ลงทะเบียน
+func (eb *EventBus) Publish(event string, data interface{}) {
+    eb.mu.RLock()
+    defer eb.mu.RUnlock()
+
+    for _, handler := range eb.handlers[event] {
+        go handler(data)   // ← แต่ละ handler ทำงานใน goroutine แยก
+    }
+}
+
+// ─── ตัวอย่างการใช้: ระบบ e-commerce ───
+bus := NewEventBus()
+
+// Component 1: ส่งอีเมลยืนยัน
+bus.Subscribe("order.created", func(data interface{}) {
+    order := data.(*Order)
+    sendConfirmationEmail(order.Email, order.ID)
+})
+
+// Component 2: อัปเดต stock
+bus.Subscribe("order.created", func(data interface{}) {
+    order := data.(*Order)
+    reduceStock(order.Items)
+})
+
+// Component 3: ส่ง analytics
+bus.Subscribe("order.created", func(data interface{}) {
+    order := data.(*Order)
+    trackPurchase(order.UserID, order.Total)
+})
+
+// เมื่อมี order ใหม่ → ทุก subscriber ได้รับแจ้ง
+bus.Publish("order.created", newOrder)
+// → ส่งอีเมล, ลด stock, track analytics พร้อมกัน!</pre>
+  </div>
+
+  <div class="glass-card tip">
+    <h4>💡 เลือก Pattern ไหนดี?</h4>
+    <table>
+      <thead><tr><th>Pattern</th><th>ใช้เมื่อ</th><th>ตัวอย่าง</th></tr></thead>
+      <tbody>
+        <tr><td>Functional Options</td><td>Config ซับซ้อน มีค่า default</td><td>Server, Client, Logger config</td></tr>
+        <tr><td>Builder</td><td>สร้าง object ทีละขั้น + validate</td><td>SQL Query, Request builder</td></tr>
+        <tr><td>Strategy</td><td>เลือกวิธีการทำงานตอน runtime</td><td>Payment, Notification, Storage</td></tr>
+        <tr><td>Factory</td><td>สร้าง object ตามเงื่อนไข</td><td>DB driver, Parser, Handler</td></tr>
+        <tr><td>Singleton</td><td>ต้องการ instance เดียว</td><td>DB pool, Logger, Config</td></tr>
+        <tr><td>Observer</td><td>หลาย component ต้องรู้เหตุการณ์</td><td>Event system, Webhook</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="section" id="clean-arch">
+  <h2>🧅 Clean Architecture</h2>
+  <p>เมื่อโปรเจกต์เริ่มใหญ่ เราต้องจัดโครงสร้างให้ดี — Clean Architecture คือคำตอบ</p>
+
+  <div class="glass-card highlight">
+    <h3>หลักการ: Dependency ไหลเข้าข้างใน</h3>
+    <pre>Delivery (HTTP Handler)
+    ↓ depends on
+Usecase (Business Logic)
+    ↓ depends on
+Domain (Entities + Interfaces)
+    ↑ implemented by
+Infrastructure (DB, Cache, External APIs)</pre>
+    <p><strong>Domain ไม่ depend on อะไรเลย!</strong> มันคือแก่นของระบบ
+      Infrastructure implement interface ที่ Domain กำหนด</p>
+  </div>
+
+  <h3>ตัวอย่าง: โปรเจกต์จริง</h3>
+  <div class="glass-card">
+    <pre>my-api/
+├── cmd/api/main.go                  ← Wire ทุกอย่าง
+│
+├── internal/
+│   ├── domain/
+│   │   ├── model/user.go            ← Entity: type User struct
+│   │   ├── repository/user_repo.go  ← Interface: UserRepository
+│   │   └── usecase/user_uc.go       ← Interface: UserUsecase
+│   │
+│   ├── usecase/
+│   │   └── user_usecase.go          ← Business logic (implement UserUsecase)
+│   │
+│   ├── infrastructure/
+│   │   └── repository/
+│   │       └── postgres_user.go     ← Database (implement UserRepository)
+│   │
+│   └── delivery/http/
+│       ├── router.go
+│       └── handler/user_handler.go  ← HTTP handler
+│
+└── pkg/response/response.go         ← Shared utilities</pre>
+  </div>
+
+  <h3>Data Flow ตัวอย่าง: GET /users/:id</h3>
+  <div class="glass-card">
+    <pre>// 1. Handler รับ HTTP request
+func (h *UserHandler) GetByID(c *fiber.Ctx) error {
+    id := c.Params("id")
+    user, err := h.usecase.GetByID(c.Context(), id)  // → ส่งต่อให้ usecase
+    if err != nil { return response.Err(c, 404, err.Error()) }
+    return response.OK(c, user)
+}
+
+// 2. Usecase ทำ business logic
+func (uc *userUsecase) GetByID(ctx context.Context, id string) (*model.User, error) {
+    if id == "" { return nil, errors.New("id is required") }  // validation
+    return uc.repo.FindByID(ctx, id)  // → ส่งต่อให้ repository
+}
+
+// 3. Repository ดึงข้อมูลจาก DB
+func (r *postgresUserRepo) FindByID(ctx context.Context, id string) (*model.User, error) {
+    var user model.User
+    err := r.db.QueryRow(ctx, "SELECT * FROM users WHERE id=$1", id).Scan(&user)
+    return &user, err
+}</pre>
+  </div>
+
+  <div class="glass-card tip">
+    <h4>💡 ทำไมต้องแยกเยอะขนาดนี้?</h4>
+    <ul>
+      <li><strong>เปลี่ยน DB ได้</strong> — อยากย้ายจาก PostgreSQL ไป MongoDB? สร้าง <code>mongo_user.go</code> ใหม่ โดยไม่แก้ usecase เลย</li>
+      <li><strong>Test ง่าย</strong> — test usecase โดย mock repository interface ได้</li>
+      <li><strong>ทำงานเป็นทีม</strong> — คนละคนแก้คนละ layer ไม่ conflict กัน</li>
+      <li><strong>อ่านง่าย</strong> — รู้ทันทีว่า business logic อยู่ไหน (usecase), data access อยู่ไหน (repository)</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="section" id="security">
+  <h2>🔒 Security Patterns ใน Go</h2>
+  <p>ความปลอดภัยคือสิ่งที่ต้องคิดตั้งแต่เริ่ม — ไม่ใช่เพิ่มทีหลัง Go มีเครื่องมือที่ดีมากสำหรับเรื่องนี้</p>
+
+  <h3>1. JWT (JSON Web Token) Deep Dive</h3>
+  <p>JWT เป็นวิธียืนยันตัวตนที่นิยมที่สุดใน REST API — client ส่ง token มากับทุก request</p>
+  <div class="glass-card highlight">
+    <pre>// ─── JWT Flow ───
+// 1. Client ส่ง username/password → Server
+// 2. Server ตรวจสอบ → สร้าง JWT token → ส่งกลับ
+// 3. Client เก็บ token → ส่งมากับทุก request (Authorization header)
+// 4. Server ตรวจ token → ถ้าถูกต้องก็ให้ผ่าน
+
+import "github.com/golang-jwt/jwt/v5"
+
+// ─── สร้าง Token ───
+type Claims struct {
+    UserID string `json:"user_id"`
+    Role   string `json:"role"`
+    jwt.RegisteredClaims
+}
+
+func GenerateToken(userID, role, secret string) (string, error) {
+    claims := Claims{
+        UserID: userID,
+        Role:   role,
+        RegisteredClaims: jwt.RegisteredClaims{
+            ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+            IssuedAt:  jwt.NewNumericDate(time.Now()),
+            Issuer:    "my-api",
+            Subject:   userID,
+        },
+    }
+
+    token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+    return token.SignedString([]byte(secret))
+}
+
+// ─── ตรวจสอบ Token ───
+func ValidateToken(tokenStr, secret string) (*Claims, error) {
+    token, err := jwt.ParseWithClaims(tokenStr, &Claims{},
+        func(token *jwt.Token) (interface{}, error) {
+            // ตรวจว่าใช้ algorithm ที่ถูกต้อง (ป้องกัน alg switch attack)
+            if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+                return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+            }
+            return []byte(secret), nil
+        },
+    )
+
+    if err != nil {
+        return nil, fmt.Errorf("invalid token: %w", err)
+    }
+
+    claims, ok := token.Claims.(*Claims)
+    if !ok || !token.Valid {
+        return nil, errors.New("invalid token claims")
+    }
+
+    return claims, nil
+}
+
+// ─── Auth Middleware ───
+func JWTMiddleware(secret string) fiber.Handler {
+    return func(c *fiber.Ctx) error {
+        // ดึง token จาก Authorization header
+        auth := c.Get("Authorization")
+        if auth == "" {
+            return c.Status(401).JSON(fiber.Map{"error": "missing token"})
+        }
+
+        // ตัดคำว่า "Bearer " ออก
+        tokenStr := strings.TrimPrefix(auth, "Bearer ")
+        if tokenStr == auth {
+            return c.Status(401).JSON(fiber.Map{"error": "invalid format, use: Bearer TOKEN"})
+        }
+
+        // ตรวจ token
+        claims, err := ValidateToken(tokenStr, secret)
+        if err != nil {
+            return c.Status(401).JSON(fiber.Map{"error": err.Error()})
+        }
+
+        // เก็บ claims ใน context สำหรับ handler ถัดไป
+        c.Locals("user_id", claims.UserID)
+        c.Locals("role", claims.Role)
+
+        return c.Next()
+    }
+}</pre>
+  </div>
+
+  <h3>2. Password Hashing (bcrypt)</h3>
+  <p><strong>กฎเหล็ก:</strong> อย่าเก็บ password เป็น plaintext — ใช้ bcrypt เสมอ!</p>
+  <div class="glass-card">
+    <pre>import "golang.org/x/crypto/bcrypt"
+
+// ─── Hash password ก่อนเก็บลง database ───
+func HashPassword(password string) (string, error) {
+    // bcrypt.DefaultCost = 10 (ปรับเพิ่มได้ถ้า hardware แรง)
+    bytes, err := bcrypt.GenerateFromPassword(
+        []byte(password),
+        bcrypt.DefaultCost,
+    )
+    return string(bytes), err
+}
+
+// ─── ตรวจสอบ password ตอน login ───
+func CheckPassword(password, hash string) bool {
+    err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+    return err == nil
+}
+
+// ─── ใช้งานจริง ───
+
+// Register: hash ก่อนเก็บ
+func (uc *authUsecase) Register(email, password string) error {
+    hash, err := HashPassword(password)
+    if err != nil {
+        return err
+    }
+    return uc.repo.CreateUser(ctx, &User{
+        Email:    email,
+        Password: hash,   // ← เก็บ hash ไม่ใช่ plaintext!
+    })
+}
+
+// Login: เปรียบเทียบ hash
+func (uc *authUsecase) Login(email, password string) (string, error) {
+    user, err := uc.repo.FindByEmail(ctx, email)
+    if err != nil {
+        return "", errors.New("invalid credentials")
+    }
+
+    if !CheckPassword(password, user.Password) {
+        return "", errors.New("invalid credentials")
+        // ← ไม่บอกว่า "password ผิด" → ป้องกัน user enumeration
+    }
+
+    return GenerateToken(user.ID, user.Role, uc.jwtSecret)
+}</pre>
+  </div>
+
+  <div class="glass-card warn">
+    <h4>⚠️ อย่าทำแบบนี้!</h4>
+    <pre>// ❌ เก็บ password ตรงๆ
+db.Exec("INSERT INTO users (password) VALUES ($1)", password)
+
+// ❌ ใช้ MD5/SHA256 hash (crack ได้ง่ายด้วย rainbow table)
+hash := sha256.Sum256([]byte(password))
+
+// ❌ บอก error ละเอียดเกินไป (user enumeration attack)
+if userNotFound { return "email not found" }
+if wrongPassword { return "password incorrect" }
+
+// ✅ ใช้ bcrypt + บอก error แบบรวม
+if !valid { return "invalid credentials" }</pre>
+  </div>
+
+  <h3>3. Input Validation</h3>
+  <p>อย่าเชื่อข้อมูลจาก client — validate ทุกอย่างฝั่ง server เสมอ!</p>
+  <div class="glass-card">
+    <pre>import "github.com/go-playground/validator/v10"
+
+// ─── สร้าง validator ───
+var validate = validator.New()
+
+// ─── กำหนด validation rules ด้วย struct tags ───
+type CreateProductRequest struct {
+    Name  string  `json:"name"  validate:"required,min=2,max=100"`
+    Price float64 `json:"price" validate:"required,gt=0,lt=1000000"`
+    SKU   string  `json:"sku"   validate:"required,alphanum,len=8"`
+    Email string  `json:"email" validate:"omitempty,email"`
+    URL   string  `json:"url"   validate:"omitempty,url"`
+}
+
+// ─── Validate ใน handler ───
+func CreateProductHandler(c *fiber.Ctx) error {
+    var req CreateProductRequest
+    if err := c.BodyParser(&req); err != nil {
+        return c.Status(400).JSON(fiber.Map{
+            "error": "invalid JSON body",
+        })
+    }
+
+    // Validate ทั้ง struct
+    if err := validate.Struct(req); err != nil {
+        // แปลง error ให้อ่านง่าย
+        var errors []string
+        for _, e := range err.(validator.ValidationErrors) {
+            switch e.Tag() {
+            case "required":
+                errors = append(errors, fmt.Sprintf("%s is required", e.Field()))
+            case "min":
+                errors = append(errors, fmt.Sprintf("%s must be at least %s chars", e.Field(), e.Param()))
+            case "gt":
+                errors = append(errors, fmt.Sprintf("%s must be greater than %s", e.Field(), e.Param()))
+            default:
+                errors = append(errors, fmt.Sprintf("%s failed %s validation", e.Field(), e.Tag()))
+            }
+        }
+        return c.Status(422).JSON(fiber.Map{
+            "error":   "validation failed",
+            "details": errors,
+        })
+    }
+
+    // ผ่าน validation → ดำเนินการต่อ
+    // ...
+}
+
+// ─── Custom Validation ───
+validate.RegisterValidation("thai_phone", func(fl validator.FieldLevel) bool {
+    phone := fl.Field().String()
+    matched, _ := regexp.MatchString(`^0[689]\d{8}$`, phone)
+    return matched
+})
+
+type ContactForm struct {
+    Phone string `validate:"required,thai_phone"`
+}</pre>
+  </div>
+
+  <h3>4. CORS (Cross-Origin Resource Sharing)</h3>
+  <div class="glass-card">
+    <pre>// CORS = กฎที่ browser ใช้ตรวจสอบว่า frontend ของ domain อื่น
+// สามารถเรียก API ของเราได้หรือไม่
+
+import "github.com/gofiber/fiber/v2/middleware/cors"
+
+app.Use(cors.New(cors.Config{
+    // ✅ กำหนด origins ที่อนุญาต (อย่าใช้ * ใน production!)
+    AllowOrigins: "https://myapp.com, https://admin.myapp.com",
+    
+    // HTTP methods ที่อนุญาต
+    AllowMethods: "GET,POST,PUT,DELETE,PATCH,OPTIONS",
+    
+    // Headers ที่อนุญาต
+    AllowHeaders: "Origin, Content-Type, Accept, Authorization",
+    
+    // อนุญาตให้ส่ง cookies/credentials
+    AllowCredentials: true,
+    
+    // Cache preflight response (ลดจำนวน OPTIONS requests)
+    MaxAge: 3600,   // 1 ชั่วโมง
+}))</pre>
+  </div>
+
+  <h3>5. Rate Limiting Strategies</h3>
+  <div class="glass-card">
+    <pre>// ─── Strategy 1: Fixed Window ───
+// หลักการ: นับ request ในช่วงเวลาตายตัว (เช่น ต่อนาที)
+// ข้อดี: ง่าย ใช้ memory น้อย
+// ข้อเสีย: burst ได้ที่ขอบ window (เช่น 100 req ตอนวินาทีที่ 59 + 100 req ตอนวินาทีที่ 0)
+
+// ─── Strategy 2: Sliding Window ───
+// หลักการ: ใช้ timestamp ของแต่ละ request → นับแค่ช่วง 60 วินาทีล่าสุด
+// ข้อดี: แม่นยำกว่า Fixed Window
+// ข้อเสีย: ใช้ memory มากกว่า
+
+// ─── Strategy 3: Token Bucket ───
+// หลักการ: มีถัง tokens → แต่ละ request ใช้ 1 token → tokens เติมตาม rate
+// ข้อดี: อนุญาต burst ได้ในขอบเขต — เหมาะกับ real-world traffic
+// ข้อเสีย: ซับซ้อนกว่า
+
+// ─── ตัวอย่าง: Token Bucket ด้วย Go ───
+type TokenBucket struct {
+    mu         sync.Mutex
+    tokens     float64
+    maxTokens  float64
+    refillRate float64       // tokens ต่อวินาที
+    lastRefill time.Time
+}
+
+func NewTokenBucket(maxTokens, refillRate float64) *TokenBucket {
+    return &TokenBucket{
+        tokens:     maxTokens,
+        maxTokens:  maxTokens,
+        refillRate: refillRate,
+        lastRefill: time.Now(),
+    }
+}
+
+func (tb *TokenBucket) Allow() bool {
+    tb.mu.Lock()
+    defer tb.mu.Unlock()
+
+    // เติม tokens ตามเวลาที่ผ่านไป
+    now := time.Now()
+    elapsed := now.Sub(tb.lastRefill).Seconds()
+    tb.tokens += elapsed * tb.refillRate
+    if tb.tokens > tb.maxTokens {
+        tb.tokens = tb.maxTokens   // ไม่เกินถัง
+    }
+    tb.lastRefill = now
+
+    // ตรวจว่ามี token เหลือไหม
+    if tb.tokens >= 1 {
+        tb.tokens--
+        return true    // ← ผ่าน
+    }
+    return false       // ← rate limited!
+}
+
+// ─── สร้าง middleware ───
+
+// เก็บ bucket ของแต่ละ user
+var buckets sync.Map   // map[userID]*TokenBucket
+
+func RateLimitMiddleware() fiber.Handler {
+    return func(c *fiber.Ctx) error {
+        userID := c.IP()   // หรือ c.Locals("user_id")
+
+        // ดึง/สร้าง bucket ของ user นี้
+        val, _ := buckets.LoadOrStore(userID,
+            NewTokenBucket(10, 1),   // 10 burst, 1 req/sec refill
+        )
+        bucket := val.(*TokenBucket)
+
+        if !bucket.Allow() {
+            return c.Status(429).JSON(fiber.Map{
+                "error": "rate limit exceeded, try again later",
+            })
+        }
+
+        return c.Next()
+    }
+}</pre>
+  </div>
+
+  <div class="glass-card tip">
+    <h4>💡 Security Checklist สำหรับ Go API</h4>
+    <ul>
+      <li>✅ ใช้ HTTPS เสมอ (TLS termination ที่ load balancer)</li>
+      <li>✅ Hash passwords ด้วย bcrypt (ไม่ใช่ MD5/SHA)</li>
+      <li>✅ ใช้ parameterized queries (ป้องกัน SQL injection)</li>
+      <li>✅ Validate input ทั้งหมดฝั่ง server</li>
+      <li>✅ ตั้ง CORS อย่างเข้มงวด (ไม่ใช้ wildcard * ใน production)</li>
+      <li>✅ ใช้ Rate Limiting (ป้องกัน brute force / DDoS)</li>
+      <li>✅ ตรวจ JWT algorithm (ป้องกัน alg=none attack)</li>
+      <li>✅ ไม่ส่ง error details ใน production (เช่น stack trace)</li>
+      <li>✅ ใช้ Helmet headers (X-Frame-Options, HSTS, etc.)</li>
+      <li>✅ เก็บ secrets ใน environment variables (ไม่ hard-code)</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="section" id="enterprise">
+  <h2>🏢 Enterprise Patterns</h2>
+
+  <p>ถ้าอยากทำงานในบริษัทใหญ่ๆ ต้องรู้จัก patterns เหล่านี้:</p>
+
+  <h3>1. Dependency Injection</h3>
+  <div class="glass-card">
+    <pre>// ❌ Anti-pattern: สร้าง dependency เองในฟังก์ชัน
+func NewUserUsecase() *UserUsecase {
+    db := sql.Open("postgres", "...")   // hard-coded!
+    repo := NewPostgresRepo(db)         // ผูกตายกับ Postgres
+    return &UserUsecase{repo: repo}
+}
+
+// ✅ Dependency Injection: รับ dependency จากภายนอก
+func NewUserUsecase(repo UserRepository) *UserUsecase {
+    return &UserUsecase{repo: repo}   // ไม่สนว่าเป็น Postgres/Redis/Mock
+}
+
+// ใน main.go → wire ทุกอย่างตรงนี้
+repo := NewPostgresRepo(db)          // production: Postgres
+uc := NewUserUsecase(repo)           // inject repository
+
+// ใน test → inject mock
+mockRepo := &MockUserRepo{}
+uc := NewUserUsecase(mockRepo)       // test: mock</pre>
+  </div>
+
+  <h3>2. Repository Pattern</h3>
+  <div class="glass-card">
+    <pre>// Interface ใน domain layer
+type UserRepository interface {
+    Create(ctx context.Context, user *User) error
+    FindByID(ctx context.Context, id string) (*User, error)
+    Update(ctx context.Context, user *User) error
+    Delete(ctx context.Context, id string) error
+    List(ctx context.Context, filter Filter) ([]User, error)
+}
+
+// Implementation 1: PostgreSQL
+type postgresUserRepo struct { db *sql.DB }
+func (r *postgresUserRepo) FindByID(ctx context.Context, id string) (*User, error) {
+    // SELECT * FROM users WHERE id = $1
+}
+
+// Implementation 2: Redis
+type redisUserRepo struct { rdb *redis.Client }
+func (r *redisUserRepo) FindByID(ctx context.Context, id string) (*User, error) {
+    // rdb.Get(ctx, "user:"+id)
+}
+
+// Implementation 3: Mock (for tests)
+type mockUserRepo struct { users map[string]*User }
+func (r *mockUserRepo) FindByID(ctx context.Context, id string) (*User, error) {
+    return r.users[id], nil
+}</pre>
+  </div>
+
+  <h3>3. Graceful Shutdown</h3>
+  <div class="glass-card">
+    <pre>// Production server ต้อง shutdown อย่างสุภาพ:
+// 1. หยุดรับ request ใหม่
+// 2. รอ request ที่กำลังทำอยู่ให้เสร็จ
+// 3. ปิด database connections
+// 4. จบ process
+
+func main() {
+    app := fiber.New()
+    // ... setup routes ...
+
+    // รัน server ใน goroutine
+    go func() {
+        if err := app.Listen(":8080"); err != nil {
+            log.Fatal(err)
+        }
+    }()
+
+    // รอ signal จาก OS (Ctrl+C หรือ kill)
+    quit := make(chan os.Signal, 1)
+    signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+    <-quit   // ← block จนกว่าจะได้ signal
+
+    fmt.Println("Shutting down...")
+    app.Shutdown()       // ← graceful shutdown
+    db.Close()           // ← ปิด DB
+    redis.Close()        // ← ปิด Redis
+    fmt.Println("Server stopped")
+}</pre>
+  </div>
+
+  <h3>4. Configuration Management</h3>
+  <div class="glass-card">
+    <pre>// 12-Factor App: ใช้ environment variables สำหรับ config
+type Config struct {
+    Server ServerConfig
+    Redis  RedisConfig
+    JWT    JWTConfig
+}
+
+type ServerConfig struct {
+    Port string
+    Env  string
+}
+
+func Load() *Config {
+    return &Config{
+        Server: ServerConfig{
+            Port: getEnv("PORT", "8080"),           // default 8080
+            Env:  getEnv("APP_ENV", "development"),
+        },
+        Redis: RedisConfig{
+            URL: os.Getenv("REDIS_URL"),             // required in prod
+        },
+        JWT: JWTConfig{
+            Secret: os.Getenv("JWT_SECRET"),          // required
+        },
+    }
+}
+
+func getEnv(key, fallback string) string {
+    if val := os.Getenv(key); val != "" {
+        return val
+    }
+    return fallback
+}</pre>
+  </div>
+
+  <h3>5. Structured Logging</h3>
+  <div class="glass-card">
+    <pre>// ❌ fmt.Println — ใช้ได้ตอนเรียน แต่ production ใช้ไม่ดี
+fmt.Println("user login:", userID, "at", time.Now())
+
+// ✅ Structured logging (ใช้ zap)
+import "go.uber.org/zap"
+
+logger, _ := zap.NewProduction()
+defer logger.Sync()
+
+logger.Info("user login",
+    zap.String("user_id", "abc-123"),
+    zap.String("ip", "1.2.3.4"),
+    zap.Int("attempt", 1),
+)
+// Output (JSON):
+// {"level":"info","ts":1719500000,"msg":"user login",
+//  "user_id":"abc-123","ip":"1.2.3.4","attempt":1}</pre>
+    <p>JSON log ง่ายต่อการค้นหา filter ใน production (เช่น Elasticsearch, CloudWatch)</p>
+  </div>
+
+  <h3>6. Prometheus Metrics</h3>
+  <div class="glass-card">
+    <pre>import "github.com/prometheus/client_golang/prometheus"
+
+// สร้าง metric
+requestCount := prometheus.NewCounterVec(
+    prometheus.CounterOpts{
+        Name: "http_requests_total",
+        Help: "Total HTTP requests",
+    },
+    []string{"method", "path", "status"},
+)
+prometheus.MustRegister(requestCount)
+
+// บันทึกใน middleware
+requestCount.WithLabelValues("GET", "/products", "200").Inc()
+
+// เปิด endpoint /metrics ให้ Prometheus มาดึงข้อมูล</pre>
+  </div>
+
+  <h3>7. Rate Limiting</h3>
+  <div class="glass-card">
+    <pre>// Fixed Window Rate Limiter ด้วย Redis
+func RateLimiter(rdb *redis.Client, maxReq int, window time.Duration) fiber.Handler {
+    return func(c *fiber.Ctx) error {
+        userID := c.Locals("user_id").(string)
+        windowNum := time.Now().Unix() / int64(window.Seconds())
+        key := fmt.Sprintf("rl:%s:%d", userID, windowNum)
+
+        pipe := rdb.Pipeline()
+        incr := pipe.Incr(ctx, key)
+        pipe.Expire(ctx, key, window)
+        pipe.Exec(ctx)
+
+        if incr.Val() > int64(maxReq) {
+            return c.Status(429).JSON(fiber.Map{
+                "error": "rate limit exceeded",
+            })
+        }
+
+        c.Set("X-RateLimit-Remaining",
+            strconv.Itoa(maxReq - int(incr.Val())))
+
+        return c.Next()
+    }
+}</pre>
+  </div>
+
+  <h3>8. Docker Multi-Stage Build</h3>
+  <div class="glass-card">
+    <pre># Stage 1: Build
+FROM golang:1.23-alpine AS builder
+WORKDIR /build
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /app/server ./cmd/api/
+
+# Stage 2: Run (scratch = 0 byte base image!)
+FROM scratch
+COPY --from=builder /etc/ssl/certs/ /etc/ssl/certs/
+COPY --from=builder /app/server /app/server
+ENTRYPOINT ["/app/server"]
+
+# Result: ~15 MB image with no OS, no shell, no attack surface 🔒</pre>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="section" id="performance">
+  <h2>⚡ Performance & Profiling</h2>
+  <p>Go มีเครื่องมือ profiling ในตัวที่ดีที่สุดในภาษา programming ทั้งหมด — ไม่ต้องลง tool เพิ่ม</p>
+
+  <h3>1. pprof — Go's Built-in Profiler</h3>
+  <div class="glass-card highlight">
+    <pre>// ─── CPU Profiling: หาว่าฟังก์ชันไหนใช้ CPU มากที่สุด ───
+import "runtime/pprof"
+
+func main() {
+    // สร้างไฟล์สำหรับเก็บ CPU profile
+    f, _ := os.Create("cpu.prof")
+    defer f.Close()
+
+    pprof.StartCPUProfile(f)
+    defer pprof.StopCPUProfile()
+
+    // ... code ที่จะ profile ...
+    doHeavyWork()
+}
+
+// วิเคราะห์:
+// $ go tool pprof cpu.prof
+// (pprof) top 10          ← แสดง 10 ฟังก์ชันที่ใช้ CPU สูงสุด
+// (pprof) web             ← เปิด graph ใน browser
+// (pprof) list doHeavyWork  ← ดู line-by-line ว่าบรรทัดไหนช้า
+
+// ─── Memory Profiling: หาว่าจุดไหน allocate memory เยอะ ───
+func main() {
+    // ... ทำงาน ...
+
+    f, _ := os.Create("mem.prof")
+    defer f.Close()
+    pprof.WriteHeapProfile(f)
+}
+
+// วิเคราะห์:
+// $ go tool pprof mem.prof
+// (pprof) top 10 -cum     ← แสดง allocation สูงสุด (cumulative)
+// (pprof) list processData</pre>
+  </div>
+
+  <h3>2. HTTP pprof (สำหรับ Production)</h3>
+  <div class="glass-card">
+    <pre>// เพิ่ม import นี้ → เปิด pprof endpoints อัตโนมัติ
+import _ "net/http/pprof"
+
+func main() {
+    // เปิด pprof server แยกจาก API หลัก (สำคัญ! อย่าเปิดให้ public)
+    go func() {
+        log.Println("pprof server on :6060")
+        log.Println(http.ListenAndServe("localhost:6060", nil))
+    }()
+
+    // ... API หลัก ...
+}
+
+// ดู profile ผ่าน browser:
+// http://localhost:6060/debug/pprof/            ← index
+// http://localhost:6060/debug/pprof/goroutine   ← goroutine dump
+// http://localhost:6060/debug/pprof/heap        ← memory
+// http://localhost:6060/debug/pprof/profile?seconds=30  ← CPU 30 วินาที
+
+// หรือใช้ command line:
+// $ go tool pprof http://localhost:6060/debug/pprof/heap
+// $ go tool pprof http://localhost:6060/debug/pprof/profile?seconds=10</pre>
+  </div>
+
+  <h3>3. Escape Analysis</h3>
+  <p><strong>หลักการ:</strong> Go compiler วิเคราะห์ว่าตัวแปรควรอยู่บน Stack (เร็ว) หรือ Heap (ช้ากว่า)</p>
+  <div class="glass-card">
+    <pre>// ดู escape analysis:
+// $ go build -gcflags="-m" ./...
+
+// ─── ตัวอย่าง: Stack vs Heap ───
+
+// ✅ อยู่บน Stack (เร็ว — ไม่ต้อง GC)
+func sum(a, b int) int {
+    result := a + b   // ← result อยู่บน stack
+    return result     // ← return ค่า (copy) ออกไป
+}
+
+// ❌ Escape ไป Heap (ช้ากว่า — ต้อง GC)
+func newUser(name string) *User {
+    u := User{Name: name}  // ← u ถูกสร้างแต่ return pointer ออกไป
+    return &u               // ← u escape ไป heap!
+}
+
+// 💡 เมื่อไหร่ที่ escape?
+// 1. return pointer ของ local variable
+// 2. ใส่ไว้ใน interface{} / any
+// 3. ใส่ไว้ใน closure
+// 4. ใส่ไว้ใน slice/map ที่ขนาดไม่แน่นอน
+
+// ─── ลดการ Escape ───
+
+// ❌ ช้า: สร้าง slice ใหม่ทุกครั้ง
+func processItems(items []Item) []Result {
+    results := make([]Result, 0)    // ← escape to heap
+    for _, item := range items {
+        results = append(results, process(item))
+    }
+    return results
+}
+
+// ✅ เร็ว: pre-allocate ขนาดที่รู้ล่วงหน้า
+func processItems(items []Item) []Result {
+    results := make([]Result, 0, len(items))  // ← capacity known
+    for _, item := range items {
+        results = append(results, process(item))
+    }
+    return results
+}</pre>
+  </div>
+
+  <h3>4. strings.Builder (String Performance)</h3>
+  <p>การต่อ string ด้วย <code>+</code> สร้าง string ใหม่ทุกครั้ง → ช้ามากใน loop</p>
+  <div class="glass-card">
+    <pre>// ❌ ช้ามาก: สร้าง string ใหม่ทุกรอบ O(n²)
+func buildSlow(n int) string {
+    var result string
+    for i := 0; i < n; i++ {
+        result += fmt.Sprintf("item-%d,", i)
+        // ทุกรอบ: สร้าง string ใหม่ + copy ทั้งหมด
+    }
+    return result
+}
+
+// ✅ เร็วมาก: strings.Builder O(n)
+func buildFast(n int) string {
+    var b strings.Builder
+    b.Grow(n * 10)   // pre-allocate ขนาดโดยประมาณ
+
+    for i := 0; i < n; i++ {
+        fmt.Fprintf(&b, "item-%d,", i)
+        // เขียนต่อท้าย buffer เดิม — ไม่สร้าง string ใหม่
+    }
+    return b.String()
+}
+
+// ─── Benchmark เปรียบเทียบ ───
+// BenchmarkBuildSlow-10     1000     1,500,000 ns/op   5,242,880 B/op
+// BenchmarkBuildFast-10   100000        15,000 ns/op      12,288 B/op
+// → strings.Builder เร็วกว่า 100x และใช้ memory น้อยกว่า 400x!</pre>
+  </div>
+
+  <h3>5. sync.Pool (Object Reuse)</h3>
+  <p><strong>ปัญหา:</strong> สร้าง object ทิ้งซ้ำๆ → GC ทำงานหนัก → latency spike</p>
+  <div class="glass-card">
+    <pre>// sync.Pool = "ถังรีไซเคิล" สำหรับ object ที่ใช้บ่อย
+
+// ─── ตัวอย่าง: Pool ของ bytes.Buffer ───
+var bufferPool = sync.Pool{
+    New: func() interface{} {
+        return new(bytes.Buffer)   // ← สร้างใหม่ถ้า pool ว่าง
+    },
+}
+
+func ProcessRequest(data []byte) string {
+    // 1. ยืม buffer จาก pool
+    buf := bufferPool.Get().(*bytes.Buffer)
+
+    // 2. ใช้งาน
+    buf.Reset()   // ← ล้างข้อมูลเก่า (สำคัญมาก!)
+    buf.Write(data)
+    buf.WriteString(" processed")
+    result := buf.String()
+
+    // 3. คืน buffer ให้ pool (ไม่ต้อง GC)
+    bufferPool.Put(buf)
+
+    return result
+}
+
+// 💡 sync.Pool เหมาะกับ:
+// - bytes.Buffer สำหรับ JSON encoding
+// - HTTP request/response objects
+// - Temporary slices ที่ใช้บ่อย
+// - ทุกอย่างที่ allocate + free บ่อยๆ</pre>
+  </div>
+
+  <h3>6. Memory Optimization Tips</h3>
+  <div class="glass-card">
+    <pre>// ─── Struct Field Ordering (Memory Alignment) ───
+
+// ❌ ไม่ดี: field เรียงไม่ดี → padding เยอะ
+type BadStruct struct {
+    a bool     // 1 byte + 7 padding
+    b int64    // 8 bytes
+    c bool     // 1 byte + 3 padding
+    d int32    // 4 bytes
+}
+// Total: 24 bytes (เสีย 10 bytes ให้ padding!)
+
+// ✅ ดี: เรียง field จากใหญ่ไปเล็ก
+type GoodStruct struct {
+    b int64    // 8 bytes
+    d int32    // 4 bytes
+    a bool     // 1 byte
+    c bool     // 1 byte + 2 padding
+}
+// Total: 16 bytes (ประหยัด 33%!)
+
+// ตรวจสอบ: go vet -fieldalignment ./...
+
+// ─── Slice Tips ───
+
+// ล้าง slice reference (ช่วย GC)
+func processAndClear(items []*BigObject) {
+    for i := range items {
+        process(items[i])
+        items[i] = nil   // ← ช่วย GC เก็บ BigObject ที่ใช้แล้ว
+    }
+}
+
+// ป้องกัน slice memory leak
+func getFirstThree(data []byte) []byte {
+    // ❌ ไม่ดี: result ยัง reference data ตัวใหญ่อยู่
+    return data[:3]
+
+    // ✅ ดี: copy ออกมา → data ตัวใหญ่โดน GC ได้
+    result := make([]byte, 3)
+    copy(result, data[:3])
+    return result
+}</pre>
+  </div>
+
+  <div class="glass-card tip">
+    <h4>💡 Performance Checklist</h4>
+    <table>
+      <thead><tr><th>เทคนิค</th><th>เมื่อไหร่</th><th>ผลลัพธ์</th></tr></thead>
+      <tbody>
+        <tr><td>Pre-allocate slices</td><td>รู้ขนาดล่วงหน้า</td><td>ลด allocation 50-90%</td></tr>
+        <tr><td>strings.Builder</td><td>ต่อ string ใน loop</td><td>เร็วขึ้น 100x</td></tr>
+        <tr><td>sync.Pool</td><td>สร้าง/ทิ้ง object บ่อย</td><td>ลด GC pressure</td></tr>
+        <tr><td>Struct alignment</td><td>struct ที่สร้างเยอะ</td><td>ลด memory 20-40%</td></tr>
+        <tr><td>Value receiver</td><td>struct เล็ก (&lt;64 bytes)</td><td>ลด heap alloc</td></tr>
+        <tr><td>Avoid interface{}</td><td>hot path</td><td>ลด boxing/unboxing</td></tr>
+        <tr><td>pprof</td><td>ก่อน optimize</td><td>หาจุดคอขวดจริง</td></tr>
+      </tbody>
+    </table>
+    <p><br><strong>กฎทอง:</strong> "อย่า optimize ก่อน measure!" — ใช้ pprof + benchmark ก่อนเสมอ</p>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="section" id="go-proverbs">
+  <h2>📜 Go Proverbs — ปรัชญาการเขียน Go</h2>
+  <p>Rob Pike (ผู้สร้าง Go) กล่าวไว้ — สุภาษิตเหล่านี้เป็นแก่นแท้ของการคิดแบบ Go</p>
+
+  <div class="glass-card highlight">
+    <h3>1. "Don't communicate by sharing memory, share memory by communicating."</h3>
+    <p>"อย่าสื่อสารโดยแชร์ memory — แชร์ memory โดยการสื่อสาร"</p>
+    <pre>// ❌ Share memory → ต้องใช้ mutex → ซับซ้อน error-prone
+var counter int
+var mu sync.Mutex
+
+func increment() {
+    mu.Lock()
+    counter++
+    mu.Unlock()
+}
+
+// ✅ Communicate → ใช้ channel → ปลอดภัย เข้าใจง่าย
+func counter(ch chan int) {
+    count := 0
+    for delta := range ch {
+        count += delta
+        fmt.Println("count:", count)
+    }
+}
+
+ch := make(chan int)
+go counter(ch)
+ch <- 1   // increment
+ch <- 5   // add 5</pre>
+  </div>
+
+  <div class="glass-card">
+    <h3>2. "The bigger the interface, the weaker the abstraction."</h3>
+    <p>"Interface ยิ่งใหญ่ ยิ่งอ่อนแอ" — interface เล็ก = ทรงพลัง</p>
+    <pre>// ❌ Interface ใหญ่เกินไป → ใครจะ implement ต้องทำเยอะ
+type DataStore interface {
+    Get(id string) (interface{}, error)
+    Set(key string, val interface{}) error
+    Delete(key string) error
+    List(prefix string) ([]interface{}, error)
+    Count() int
+    Ping() error
+    Close() error
+    Backup() error
+    Restore(data []byte) error
+}
+
+// ✅ Interface เล็ก → flexible, reusable, test ง่าย
+type Reader interface {
+    Read(p []byte) (n int, err error)
+}
+
+type Writer interface {
+    Write(p []byte) (n int, err error)
+}
+
+// compose ได้!
+type ReadWriter interface {
+    Reader
+    Writer
+}
+
+// io.Reader มี 1 method → ใช้ได้กับ file, network, buffer, compression, ...ทุกอย่าง!</pre>
+  </div>
+
+  <div class="glass-card">
+    <h3>3. "Make the zero value useful."</h3>
+    <p>"ทำให้ zero value ใช้งานได้" — struct ไม่ต้อง initialize ก็ใช้ได้เลย</p>
+    <pre>// ✅ sync.Mutex — zero value ใช้ได้เลย ไม่ต้อง init
+var mu sync.Mutex
+mu.Lock()   // ใช้ได้ทันที!
+
+// ✅ bytes.Buffer — zero value = empty buffer พร้อมใช้
+var buf bytes.Buffer
+buf.WriteString("hello")   // ใช้ได้ทันที!
+
+// ✅ ออกแบบ struct ของเราเอง ให้ zero value มีความหมาย
+type Server struct {
+    host string
+    port int
+}
+
+func (s *Server) Address() string {
+    host := s.host
+    if host == "" { host = "localhost" }   // ← zero value = localhost
+    port := s.port
+    if port == 0 { port = 8080 }           // ← zero value = 8080
+    return fmt.Sprintf("%s:%d", host, port)
+}
+
+s := Server{}           // ← ไม่ต้อง init!
+fmt.Println(s.Address()) // → "localhost:8080"</pre>
+  </div>
+
+  <div class="glass-card">
+    <h3>4. "Errors are values."</h3>
+    <p>"Error เป็นค่า" — ไม่ใช่ exception ที่โยนไปมา — จัดการได้ด้วย code ปกติ</p>
+    <pre>// Error เป็นแค่ interface ที่มี 1 method
+type error interface {
+    Error() string
+}
+
+// เพราะ error เป็น value → สร้าง logic กับมันได้!
+type RetryableError struct {
+    Err        error
+    RetryAfter time.Duration
+}
+
+func (e *RetryableError) Error() string {
+    return fmt.Sprintf("%s (retry after %s)", e.Err, e.RetryAfter)
+}
+
+// ใช้ type assertion ตรวจว่า error ชนิดไหน → ทำ retry ได้
+if re, ok := err.(*RetryableError); ok {
+    time.Sleep(re.RetryAfter)
+    // retry...
+}</pre>
+  </div>
+
+  <div class="glass-card">
+    <h3>5. "A little copying is better than a little dependency."</h3>
+    <p>"copy โค้ดเล็กน้อย ดีกว่าเพิ่ม dependency เล็กน้อย"</p>
+    <pre>// ❌ เพิ่ม dependency สำหรับฟังก์ชันเล็กๆ
+import "github.com/someone/stringutil"
+result := stringutil.Reverse("hello")
+
+// ✅ copy ฟังก์ชัน 5 บรรทัดมาเอง → ไม่ต้องพึ่ง external package
+func reverse(s string) string {
+    runes := []rune(s)
+    for i, j := 0, len(runes)-1; i < j; i, j = i+1, j-1 {
+        runes[i], runes[j] = runes[j], runes[i]
+    }
+    return string(runes)
+}
+// ลด: security risk, version conflicts, build time, supply chain attack</pre>
+  </div>
+
+  <div class="glass-card">
+    <h3>6. "Clear is better than clever."</h3>
+    <p>"ชัดเจน ดีกว่า ฉลาด" — เขียนโค้ดให้คนอ่านรู้เรื่อง ไม่ใช่เขียนให้ตัวเองอวดเก่ง</p>
+    <pre>// ❌ Clever: สั้นแต่อ่านยาก
+func f(x []int) int { r := 0; for _, v := range x { r ^= v }; return r }
+
+// ✅ Clear: ยาวกว่าแต่เข้าใจทันที
+func findSingleNumber(numbers []int) int {
+    result := 0
+    for _, num := range numbers {
+        result ^= num   // XOR: ตัวที่ซ้ำกันจะหักล้าง เหลือตัวที่ไม่ซ้ำ
+    }
+    return result
+}
+
+// ─── อีกตัวอย่าง ───
+
+// ❌ Clever
+return n > 0 && n&(n-1) == 0
+
+// ✅ Clear
+func isPowerOfTwo(n int) bool {
+    if n <= 0 {
+        return false
+    }
+    // Power of 2 ในรูป binary มี bit 1 เพียงตัวเดียว
+    // เช่น 8 = 1000, 16 = 10000
+    // n & (n-1) จะลบ rightmost bit → ถ้าเหลือ 0 แปลว่ามี bit 1 ตัวเดียว
+    return n&(n-1) == 0
+}</pre>
+  </div>
+
+  <div class="glass-card">
+    <h3>7. "Design the architecture, name the components, document the details."</h3>
+    <p>"ออกแบบสถาปัตยกรรม, ตั้งชื่อ component, เขียน document รายละเอียด"</p>
+    <pre>// ─── ตั้งชื่อดี = ไม่ต้อง comment ───
+
+// ❌ ชื่อไม่ดี
+func proc(d []byte) ([]byte, error) { ... }
+func handler(w http.ResponseWriter, r *http.Request) { ... }
+
+// ✅ ชื่อดี — บอกได้ทันทีว่าทำอะไร
+func compressGzip(data []byte) ([]byte, error) { ... }
+func handleCreateProduct(w http.ResponseWriter, r *http.Request) { ... }
+
+// ─── Go naming conventions ───
+// - CamelCase ไม่ใช่ snake_case
+// - ชื่อสั้น ถ้า scope สั้น (i, n, err)
+// - ชื่อยาว ถ้า scope ยาว (userRepository, maxRetryCount)
+// - Acronyms เป็นตัวพิมพ์ใหญ่ทั้งหมด: URL, HTTP, ID (ไม่ใช่ Url, Http, Id)
+// - Interface ตัวเดียวลงท้ายด้วย -er: Reader, Writer, Closer
+// - Package ชื่อสั้น ตัวเล็ก ไม่มี underscore: strconv, httputil</pre>
+  </div>
+
+  <div class="glass-card tip">
+    <h4>📜 Go Proverbs ทั้งหมด (by Rob Pike)</h4>
+    <ul style="line-height:2;">
+      <li>Don't communicate by sharing memory, share memory by communicating.</li>
+      <li>Concurrency is not parallelism.</li>
+      <li>Channels orchestrate; mutexes serialize.</li>
+      <li>The bigger the interface, the weaker the abstraction.</li>
+      <li>Make the zero value useful.</li>
+      <li>interface{} says nothing.</li>
+      <li>Gofmt's style is no one's favorite, yet gofmt is everyone's favorite.</li>
+      <li>A little copying is better than a little dependency.</li>
+      <li>Syscall must always be guarded with build tags.</li>
+      <li>Cgo must always be guarded with build tags.</li>
+      <li>Cgo is not Go.</li>
+      <li>With the unsafe package there are no guarantees.</li>
+      <li>Clear is better than clever.</li>
+      <li>Reflection is never clear.</li>
+      <li>Errors are values.</li>
+      <li>Don't just check errors, handle them gracefully.</li>
+      <li>Design the architecture, name the components, document the details.</li>
+      <li>Documentation is for users.</li>
+    </ul>
+    <p>🔗 <a href="https://go-proverbs.github.io/" style="color:var(--accent-cyan);">go-proverbs.github.io</a></p>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="section" id="next-steps">
+  <h2>🎯 ก้าวต่อไป — เส้นทางสู่ Backend Developer</h2>
+
+  <div class="glass-card highlight">
+    <h3>🟢 Level 1: Beginner (สัปดาห์ 1-4)</h3>
+    <ul>
+      <li>☐ เข้าใจ variables, types, functions, control flow</li>
+      <li>☐ ใช้ arrays, slices, maps, structs ได้</li>
+      <li>☐ เข้าใจ pointers (ไม่ต้องกลัว!)</li>
+      <li>☐ เขียน Go program ง่ายๆ ได้</li>
+      <li>☐ ทำ <a href="https://go.dev/tour/" style="color:var(--accent-cyan)">Go Tour</a> ให้จบ</li>
+    </ul>
+  </div>
+
+  <div class="glass-card warn">
+    <h3>🟡 Level 2: Intermediate (สัปดาห์ 5-12)</h3>
+    <ul>
+      <li>☐ เข้าใจ interfaces + methods</li>
+      <li>☐ เขียน unit tests ได้ (table-driven)</li>
+      <li>☐ ใช้ goroutines + channels ได้</li>
+      <li>☐ สร้าง REST API ด้วย net/http หรือ Fiber</li>
+      <li>☐ เชื่อมต่อ database (Redis/PostgreSQL)</li>
+      <li>☐ ใช้ go modules + จัด packages</li>
+    </ul>
+  </div>
+
+  <div class="glass-card success">
+    <h3>🔴 Level 3: Advanced (เดือน 4-6)</h3>
+    <ul>
+      <li>☐ Clean Architecture + Repository Pattern</li>
+      <li>☐ Middleware (Auth, Rate Limit, Logging)</li>
+      <li>☐ Docker + CI/CD deployment</li>
+      <li>☐ Prometheus metrics + structured logging</li>
+      <li>☐ Graceful shutdown + configuration management</li>
+      <li>☐ AWS/GCP/Railway deployment</li>
+    </ul>
+  </div>
+
+  <div class="glass-card tip">
+    <h3>⭐ Level 4: Enterprise (เดือน 7-12+)</h3>
+    <ul>
+      <li>☐ Microservices + gRPC</li>
+      <li>☐ Message queues (Kafka, RabbitMQ, NATS)</li>
+      <li>☐ Distributed systems patterns (circuit breaker, saga)</li>
+      <li>☐ Kubernetes deployment</li>
+      <li>☐ Performance optimization + profiling (pprof)</li>
+      <li>☐ Observability (OpenTelemetry, tracing)</li>
+    </ul>
+  </div>
+
+  <h3>แหล่งเรียนรู้ที่แนะนำ</h3>
+  <div class="glass-card">
+    <ul>
+      <li>📖 <a href="https://go.dev/tour/" style="color:var(--accent-cyan)">A Tour of Go</a> — interactive tutorial จาก Go team</li>
+      <li>📖 <a href="https://go.dev/doc/effective_go" style="color:var(--accent-cyan)">Effective Go</a> — official best practices</li>
+      <li>📖 <a href="https://gobyexample.com/" style="color:var(--accent-cyan)">Go by Example</a> — ตัวอย่างสั้นๆ ทุก concept</li>
+      <li>📖 <a href="https://quii.gitbook.io/learn-go-with-tests" style="color:var(--accent-cyan)">Learn Go with Tests</a> — TDD approach</li>
+      <li>📖 <a href="https://www.ardanlabs.com/blog/" style="color:var(--accent-cyan)">Ardan Labs Blog</a> — advanced Go patterns</li>
+      <li>🎬 YouTube: "justforfunc", "Anthony GG", "Nic Jackson"</li>
+    </ul>
+  </div>
+
+  <div class="glass-card" style="text-align:center; padding:32px;">
+    <h3 style="color:var(--accent-cyan); margin-bottom:12px;">🎉 ยินดีด้วย!</h3>
+    <p style="font-size:16px;">ถ้าอ่านมาถึงตรงนี้ แสดงว่าเพื่อนมีความมุ่งมั่นมากพอที่จะเป็น Backend Developer ที่เก่งได้!</p>
+    <p>สิ่งสำคัญที่สุดคือ <strong>ลงมือเขียนจริง</strong> — อ่านอย่างเดียวไม่พอ ต้องเขียนด้วย</p>
+    <p style="margin-top:12px;">ลองเล่น API จริงดูได้เลยที่ <a href="playground.html" style="color:var(--accent-cyan); font-weight:600;">⚡ Playground</a>
+      หรือดูโครงสร้างโปรเจกต์จริงได้ที่ <a href="architecture.html" style="color:var(--accent-cyan); font-weight:600;">🏗️ Architecture</a></p>
+  </div>
+</section>
+
+    <!-- Footer -->
+    <div style="text-align:center; padding:40px 0 20px; color:var(--text-dim); font-size:12px;">
+      No.1 API · Learn Go · สร้างด้วย 💙 เพื่อการศึกษา
+    </div>
+  </main>
+</div>
+
+<!-- Scroll to top -->
+<button class="scroll-top" id="scrollTop" title="Scroll to top">
+  <svg viewBox="0 0 24 24"><path d="M12 4l-8 8h5v8h6v-8h5z"/></svg>
+</button>
+
+<script>
+// ── Sidebar toggle ────────────────────────
+const menuBtn = document.getElementById('menuBtn');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('sidebarOverlay');
+menuBtn.addEventListener('click', () => { sidebar.classList.toggle('open'); overlay.classList.toggle('show'); });
+overlay.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.remove('show'); });
+
+// ── Active sidebar link ───────────────────
+const sections = document.querySelectorAll('.section');
+const sideLinks = document.querySelectorAll('.sidebar a');
+function updateActive() {
+  let current = '';
+  sections.forEach(s => { if (s.getBoundingClientRect().top <= 120) current = s.id; });
+  sideLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + current));
+}
+window.addEventListener('scroll', updateActive, { passive: true });
+updateActive();
+sideLinks.forEach(a => a.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.remove('show'); }));
+
+// ── Progress bar ──────────────────────────
+const bar = document.getElementById('progressBar');
+window.addEventListener('scroll', () => {
+  const h = document.documentElement;
+  const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+  bar.style.width = pct + '%';
+}, { passive: true });
+
+// ── Scroll to top ─────────────────────────
+const scrollBtn = document.getElementById('scrollTop');
+window.addEventListener('scroll', () => scrollBtn.classList.toggle('show', window.scrollY > 400), { passive: true });
+scrollBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+</script>
+</body>
+</html>
