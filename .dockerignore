@@ -16,9 +16,6 @@ Dockerfile
 *.test
 *.prof
 
-# UI mockup (not needed in container)
-ui-mockup/
-
 # Environment files (never bake secrets into image)
 .env
 .env.*

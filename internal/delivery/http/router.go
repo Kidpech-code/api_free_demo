@@ -1,11 +1,14 @@
 package http
 
 import (
+	"io/fs"
+	"net/http"
 	"strings"
 
 	"github.com/gofiber/adaptor/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/filesystem"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"github.com/prometheus/client_golang/prometheus"
@@ -28,6 +31,7 @@ func NewRouter(
 	productUC usecase.ProductUsecase,
 	m *metrics.Metrics,
 	logger *zap.Logger,
+	webUI fs.FS,
 ) *fiber.App {
 	app := fiber.New(fiber.Config{
 		AppName:      "API Free Demo Sandbox",
@@ -125,6 +129,16 @@ func NewRouter(
 			"user_id": c.Locals(middleware.ContextKeyUserID),
 		})
 	})
+
+	// ── Web UI (served last — catches all unmatched routes) ───────────────
+	// Files are compiled directly into the binary via go:embed.
+	// intro.html is served as the index page for / and any unknown path.
+	app.Use("/", filesystem.New(filesystem.Config{
+		Root:         http.FS(webUI),
+		Index:        "intro.html",
+		Browse:       false,
+		NotFoundFile: "intro.html",
+	}))
 
 	return app
 }

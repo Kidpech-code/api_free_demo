@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io/fs"
 	"os"
 	"os/signal"
 	"syscall"
@@ -50,7 +51,12 @@ func main() {
 	productUC := usecase.NewProductUsecase(productRepo, logger)
 
 	// ── 7. HTTP Router (Fiber) ──
-	app := httpDelivery.NewRouter(cfg, rc.RDB(), productUC, m, logger)
+	// Strip the "web/" prefix so the embedded FS root maps directly to the URL root.
+	webRoot, err := fs.Sub(WebFS, "web")
+	if err != nil {
+		logger.Fatal("failed to sub webFS", zap.Error(err))
+	}
+	app := httpDelivery.NewRouter(cfg, rc.RDB(), productUC, m, logger, webRoot)
 
 	// ── 8. Graceful Shutdown ──
 	quit := make(chan os.Signal, 1)
