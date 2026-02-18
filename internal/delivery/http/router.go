@@ -1,6 +1,8 @@
 package http
 
 import (
+	"strings"
+
 	"github.com/gofiber/adaptor/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -16,6 +18,7 @@ import (
 	"api_free_demo/internal/delivery/http/middleware"
 	"api_free_demo/internal/domain/usecase"
 	"api_free_demo/internal/infrastructure/metrics"
+	appUsecase "api_free_demo/internal/usecase"
 )
 
 // NewRouter creates and configures the Fiber application with all routes.
@@ -45,15 +48,29 @@ func NewRouter(
 	// ── Global Middleware ──
 	app.Use(recover.New())
 	app.Use(requestid.New())
-	app.Use(cors.New())
+
+	// CORS: allow specific origins when configured, otherwise allow all (dev/sandbox mode)
+	corsConfig := cors.Config{
+		AllowMethods: strings.Join([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}, ","),
+		AllowHeaders: "Origin, Content-Type, Accept, Authorization, X-Request-ID",
+	}
+	if len(cfg.App.CORSOrigins) > 0 {
+		corsConfig.AllowOrigins = strings.Join(cfg.App.CORSOrigins, ",")
+	} else {
+		corsConfig.AllowOrigins = "*"
+	}
+	app.Use(cors.New(corsConfig))
 	app.Use(middleware.MetricsMiddleware(m))
+
+	// ── Auth Usecase ──
+	authUC := appUsecase.NewAuthUsecase(rdb, cfg.JWT.Secret, logger)
 
 	// ── System Endpoints (no auth required) ──
 	healthH := handler.NewHealthHandler(rdb)
-	authH := handler.NewAuthHandler(cfg.JWT.Secret)
+	legacyAuthH := handler.NewLegacyAuthHandler(cfg.JWT.Secret)
+	authH := handler.NewAuthHandler(authUC, logger)
 
 	app.Get("/health", healthH.Health)
-	app.Get("/auth/token", authH.GenerateToken)
 
 	// Prometheus metrics endpoint
 	app.Get("/metrics", adaptor.HTTPHandler(promhttp.HandlerFor(
@@ -61,12 +78,30 @@ func NewRouter(
 		promhttp.HandlerOpts{EnableOpenMetrics: true},
 	)))
 
-	// ── Authenticated API Routes ──
+	// ── Auth Endpoints ────────────────────────────────────────────────────
+	//
+	//  GET  /auth/token            — legacy 72h demo token (backward compat)
+	//  POST /auth/login            — dual-token: AccessToken(15m)+RefreshToken(7d)
+	//  POST /auth/refresh          — exchange RefreshToken → new AccessToken
+	//  POST /auth/logout           — revoke RefreshToken (requires AccessToken)
+	//
+	// All /auth/* routes intentionally bypass the rate-limiter so students
+	// can freely experiment with the token lifecycle.
+	app.Get("/auth/token", legacyAuthH.GenerateToken)
+	app.Post("/auth/login", authH.Login)
+	app.Post("/auth/refresh", authH.Refresh)
+
+	// Logout requires a valid AccessToken so it sits behind JWTAuth.
+	logoutGroup := app.Group("/auth")
+	logoutGroup.Use(middleware.JWTAuth(cfg.JWT.Secret, logger))
+	logoutGroup.Post("/logout", authH.Logout)
+
+	// ── Authenticated API Routes ──────────────────────────────────────────
 	api := app.Group("/api/v1")
 	api.Use(middleware.JWTAuth(cfg.JWT.Secret, logger))
 	api.Use(middleware.RateLimiter(rdb, cfg.App.RateLimit, cfg.App.RateWindow, m, logger))
 
-	// Product routes
+	// Product routes (accessible by any authenticated user)
 	productH := handler.NewProductHandler(productUC, logger)
 	products := api.Group("/products")
 	products.Post("/", productH.Create)
@@ -75,6 +110,21 @@ func NewRouter(
 	products.Get("/:id", productH.GetByID)
 	products.Put("/:id", productH.Update)
 	products.Delete("/:id", productH.Delete)
+
+	// ── Admin-only Routes (RBAC example) ─────────────────────────────────
+	// Access requires a token obtained via:
+	//   POST /auth/login { "user_id": "alice", "role": "admin" }
+	//
+	// Attempting to access with a "user"-role token returns HTTP 403.
+	admin := api.Group("/admin")
+	admin.Use(middleware.RequireRole("admin"))
+	admin.Get("/ping", func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{
+			"success": true,
+			"message": "welcome, admin 🚀",
+			"user_id": c.Locals(middleware.ContextKeyUserID),
+		})
+	})
 
 	return app
 }

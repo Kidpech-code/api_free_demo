@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NovaCademy · Multi-Language Code Viewer</title>
+
+  <!-- PrismJS core + themes -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css" />
+
+  <style>
+    /* ═══════════════════════════════════════════════════════════════════
+       GLOBAL RESET & DESIGN TOKENS — NovaCademy Space Theme 2026
+    ═══════════════════════════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      /* Background depth layers */
+      --bg-void:            #01020a;
+      --bg-deep:            #03040e;
+      --glass-bg:           rgba(8, 14, 40, 0.58);
+      --glass-bg-hover:     rgba(12, 20, 52, 0.72);
+      --glass-border:       rgba(90, 130, 255, 0.18);
+      --glass-border-lit:   rgba(0, 229, 255, 0.35);
+      --glass-shadow:       0 8px 48px rgba(0, 6, 50, 0.80);
+
+      /* Neon accent palette */
+      --neon-cyan:          #00e5ff;
+      --neon-cyan-dim:      rgba(0, 229, 255, 0.15);
+      --neon-cyan-glow:     0 0 18px rgba(0, 229, 255, 0.50),
+                            0 0 40px rgba(0, 180, 230, 0.20);
+      --neon-purple:        #b44dff;
+      --neon-purple-dim:    rgba(180, 77, 255, 0.14);
+      --neon-purple-glow:   0 0 18px rgba(180, 77, 255, 0.45);
+      --neon-green:         #00e676;
+      --neon-green-glow:    0 0 14px rgba(0, 230, 118, 0.55);
+      --neon-orange:        #ff9100;
+      --neon-magenta:       #e040fb;
+      --neon-blue:          #2979ff;
+
+      /* Typography */
+      --text-primary:       #e8eeff;
+      --text-secondary:     #8899cc;
+      --text-dim:           #44547a;
+      --font-sans:          'Inter', 'Segoe UI', system-ui, sans-serif;
+      --font-mono:          'Cascadia Code', 'Fira Code', 'SF Mono', 'JetBrains Mono', monospace;
+
+      /* Language tab indicator colours */
+      --tab-curl:           #ff9100;
+      --tab-js:             #f0db4f;
+      --tab-py:             #4db6ff;
+      --tab-go:             #79d4f0;
+      --tab-dart:           #54c5f8;
+      --tab-java:           #f4511e;
+      --tab-php:            #b39ddb;
+
+      /* Radius scale */
+      --r-xl:               20px;
+      --r-lg:               14px;
+      --r-md:               10px;
+      --r-sm:               6px;
+    }
+
+    html, body {
+      min-height: 100vh;
+      background: var(--bg-void);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      overflow-x: hidden;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       CANVAS — Animated starfield cosmos background
+    ═══════════════════════════════════════════════════════════════════ */
+    .cosmos {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 90% 65% at 15% 10%,  rgba(60, 40, 160, .22) 0%, transparent 70%),
+        radial-gradient(ellipse 70% 55% at 85% 90%,  rgba(0, 100, 180, .18) 0%, transparent 65%),
+        radial-gradient(ellipse 50% 40% at 50% 50%,  rgba(80, 0, 140, .10) 0%, transparent 70%),
+        linear-gradient(168deg, #01020a 0%, #050717 55%, #03051a 100%);
+    }
+
+    /* Static star field generated via CSS box-shadows */
+    .stars-layer {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        radial-gradient(1px   1px   at  4%  7%,  rgba(230,240,255,.70)  0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 68%  3%,  rgba(255,255,255,.75)  0%, transparent 100%),
+        radial-gradient(1px   1px   at 38% 16%,  rgba(180,205,255,.55)  0%, transparent 100%),
+        radial-gradient(1px   1px   at 89% 22%,  rgba(200,225,255,.60)  0%, transparent 100%),
+        radial-gradient(1px   1px   at 12% 58%,  rgba(210,225,255,.45)  0%, transparent 100%),
+        radial-gradient(1px   1px   at 58% 67%,  rgba(220,235,255,.42)  0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 91% 78%,  rgba(255,255,255,.65)  0%, transparent 100%),
+        radial-gradient(1px   1px   at 25% 85%,  rgba(190,215,255,.48)  0%, transparent 100%),
+        radial-gradient(1px   1px   at 77% 45%,  rgba(210,230,255,.38)  0%, transparent 100%),
+        radial-gradient(1px   1px   at 50% 32%,  rgba(200,220,255,.52)  0%, transparent 100%),
+        radial-gradient(0.8px 0.8px at 33% 72%,  rgba(180,200,255,.40)  0%, transparent 100%),
+        radial-gradient(1px   1px   at 82% 12%,  rgba(230,240,255,.55)  0%, transparent 100%),
+        radial-gradient(0.8px 0.8px at 47% 92%,  rgba(200,215,255,.35)  0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at  8% 38%,  rgba(255,255,255,.50)  0%, transparent 100%);
+    }
+
+    /* Pulsing nebula orb */
+    .nebula-orb {
+      position: fixed; z-index: 0; pointer-events: none;
+      width: 600px; height: 600px;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(ellipse, rgba(70,20,140,.14) 0%, transparent 70%);
+      animation: nebulaPulse 8s ease-in-out infinite;
+    }
+    @keyframes nebulaPulse {
+      0%, 100% { opacity: .6; transform: translate(-50%,-50%) scale(1); }
+      50%       { opacity: 1;  transform: translate(-50%,-50%) scale(1.12); }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       PAGE LAYOUT
+    ═══════════════════════════════════════════════════════════════════ */
+    .page-wrapper {
+      position: relative; z-index: 1;
+      display: flex; flex-direction: column;
+      align-items: center;
+      padding: 60px 20px 80px;
+      min-height: 100vh;
+    }
+
+    /* Page heading */
+    .page-heading {
+      text-align: center;
+      margin-bottom: 44px;
+    }
+    .page-heading .eyebrow {
+      display: inline-flex; align-items: center; gap: 7px;
+      font-size: 10px; font-weight: 800; letter-spacing: .16em;
+      text-transform: uppercase; color: var(--neon-cyan);
+      background: var(--neon-cyan-dim);
+      border: 1px solid rgba(0,229,255,.22);
+      padding: 4px 14px; border-radius: 20px;
+      margin-bottom: 14px;
+    }
+    .page-heading h1 {
+      font-size: clamp(26px, 4vw, 42px);
+      font-weight: 800; line-height: 1.15;
+      background: linear-gradient(130deg, #e8eeff 20%, var(--neon-cyan) 60%, var(--neon-purple) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 20px rgba(0,229,255,.18));
+      margin-bottom: 10px;
+    }
+    .page-heading p {
+      font-size: 14px; color: var(--text-secondary); max-width: 500px; margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       CODE VIEWER WIDGET
+    ═══════════════════════════════════════════════════════════════════ */
+    .code-viewer {
+      width: 100%;
+      max-width: 860px;
+
+      /* Glass panel */
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--r-xl);
+      box-shadow:
+        var(--glass-shadow),
+        inset 0 1px 0 rgba(255,255,255,.04);
+      backdrop-filter: blur(28px) saturate(160%);
+      -webkit-backdrop-filter: blur(28px) saturate(160%);
+      overflow: hidden;
+      transition: border-color .3s;
+    }
+    .code-viewer:hover {
+      border-color: rgba(0, 229, 255, 0.22);
+    }
+
+    /* ── Tab strip ──────────────────────────────────────────────────── */
+    .cv-header {
+      display: flex;
+      align-items: stretch;
+      border-bottom: 1px solid var(--glass-border);
+      background: rgba(4, 8, 28, 0.55);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .cv-header::-webkit-scrollbar { display: none; }
+
+    .cv-tabs {
+      display: flex;
+      flex: 1;
+      gap: 2px;
+      padding: 6px 8px 0;
+    }
+
+    .cv-tab {
+      position: relative;
+      display: flex; align-items: center; gap: 7px;
+      padding: 8px 18px 10px;
+      border: none; background: transparent;
+      border-radius: var(--r-md) var(--r-md) 0 0;
+      font-family: var(--font-sans);
+      font-size: 12px; font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: color .2s, background .2s;
+      white-space: nowrap;
+      outline: none;
+    }
+    .cv-tab:hover {
+      color: var(--text-primary);
+      background: rgba(100, 140, 255, .06);
+    }
+
+    /* Active tab glow — colour driven by data-color attribute */
+    .cv-tab.active {
+      color: var(--tab-active-color, var(--neon-cyan));
+      background: rgba(var(--tab-active-rgb, 0,229,255), .07);
+    }
+    /* Animated underline bar */
+    .cv-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 50%;
+      transform: translateX(-50%);
+      height: 2px;
+      border-radius: 2px 2px 0 0;
+      width: 70%;
+      background: var(--tab-active-color, var(--neon-cyan));
+      box-shadow:
+        0 0 8px var(--tab-active-color, var(--neon-cyan)),
+        0 0 20px var(--tab-active-color, var(--neon-cyan));
+      animation: tabBarSlide .25s cubic-bezier(.22,.68,0,1.2) both;
+    }
+    @keyframes tabBarSlide {
+      from { width: 0; opacity: 0; }
+      to   { width: 70%; opacity: 1; }
+    }
+
+    /* Language icon dot */
+    .cv-tab .lang-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--tab-active-color, var(--text-dim));
+      flex-shrink: 0;
+      transition: background .2s, box-shadow .2s;
+    }
+    .cv-tab.active .lang-dot {
+      box-shadow: 0 0 6px var(--tab-active-color, var(--neon-cyan)),
+                  0 0 14px var(--tab-active-color, var(--neon-cyan));
+    }
+
+    /* Copy button in header */
+    .cv-copy-btn {
+      display: flex; align-items: center; gap: 6px;
+      margin: 8px 14px 2px auto;
+      padding: 5px 14px;
+      background: rgba(0, 229, 255, .06);
+      border: 1px solid rgba(0, 229, 255, .18);
+      border-radius: var(--r-md);
+      font-family: var(--font-sans);
+      font-size: 11px; font-weight: 700;
+      color: var(--neon-cyan);
+      cursor: pointer;
+      transition: background .18s, box-shadow .18s, border-color .18s, color .18s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .cv-copy-btn:hover {
+      background: rgba(0, 229, 255, .12);
+      box-shadow: var(--neon-cyan-glow);
+    }
+    /* Copied! state */
+    .cv-copy-btn.copied {
+      background: rgba(0, 230, 118, .12);
+      border-color: rgba(0, 230, 118, .40);
+      color: var(--neon-green);
+      box-shadow: var(--neon-green-glow);
+      animation: copiedPulse .4s ease-out;
+    }
+    @keyframes copiedPulse {
+      0%   { transform: scale(1); }
+      40%  { transform: scale(1.08); }
+      100% { transform: scale(1); }
+    }
+
+    /* Copy button icon */
+    .copy-icon, .check-icon { width: 13px; height: 13px; }
+    .check-icon { display: none; }
+    .cv-copy-btn.copied .copy-icon { display: none; }
+    .cv-copy-btn.copied .check-icon { display: inline; }
+
+    /* ── Code pane area ─────────────────────────────────────────────── */
+    .cv-body {
+      position: relative;
+      background: rgba(1, 3, 14, 0.55);
+    }
+
+    .cv-pane {
+      display: none;
+      animation: paneFadeIn .22s ease-out;
+    }
+    .cv-pane.active { display: block; }
+
+    @keyframes paneFadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Override PrismJS default background — we use our glass */
+    .cv-pane pre[class*="language-"],
+    .cv-pane code[class*="language-"] {
+      background: transparent !important;
+      text-shadow: none !important;
+    }
+    .cv-pane pre.line-numbers {
+      padding: 24px 20px 24px 58px !important;
+      margin: 0 !important;
+      border-radius: 0 !important;
+      font-family: var(--font-mono) !important;
+      font-size: 13px !important;
+      line-height: 1.75 !important;
+      max-height: 440px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(100,140,255,.12) transparent;
+    }
+    .cv-pane pre.line-numbers::-webkit-scrollbar { width: 4px; }
+    .cv-pane pre.line-numbers::-webkit-scrollbar-thumb {
+      background: rgba(100,140,255,.15); border-radius: 4px;
+    }
+
+    /* Prism line-numbers gutter blend */
+    .cv-pane pre.line-numbers .line-numbers-rows {
+      border-right: 1px solid rgba(100,140,255,.12) !important;
+      padding-right: 10px !important;
+      top: 24px !important;
+    }
+    .cv-pane pre.line-numbers .line-numbers-rows > span::before {
+      color: var(--text-dim) !important;
+    }
+
+    /* ── Custom Prism token colours — Space palette ───────────────── */
+    .token.comment, .token.prolog, .token.doctype, .token.cdata {
+      color: #4a5a7a !important; font-style: italic;
+    }
+    .token.keyword, .token.tag, .token.selector,
+    .token.important, .token.atrule, .token.rule {
+      color: var(--neon-cyan) !important;
+      text-shadow: 0 0 8px rgba(0,229,255,.30) !important;
+    }
+    .token.literal-property, .token.property {
+      color: #7eb8ff !important;
+    }
+    .token.string, .token.attr-value, .token.template-string {
+      color: #90ee90 !important;
+      text-shadow: 0 0 6px rgba(0,200,100,.20) !important;
+    }
+    .token.number, .token.boolean, .token.constant {
+      color: var(--neon-orange) !important;
+      text-shadow: 0 0 6px rgba(255,145,0,.25) !important;
+    }
+    .token.function, .token.function-name {
+      color: var(--neon-purple) !important;
+      text-shadow: 0 0 8px rgba(180,77,255,.28) !important;
+    }
+    .token.class-name, .token.builtin {
+      color: #f0c060 !important;
+      text-shadow: 0 0 6px rgba(240,192,80,.22) !important;
+    }
+    .token.operator, .token.entity, .token.url {
+      color: #cc99cd !important;
+    }
+    .token.punctuation { color: #6680aa !important; }
+    .token.parameter   { color: #f8c060 !important; }
+    .token.namespace   { color: #54c5f8 !important; }
+    .token.decorator, .token.annotation { color: var(--neon-magenta) !important; }
+    .token.variable    { color: #e8eeff !important; }
+
+    /* ── Bottom status bar ──────────────────────────────────────────── */
+    .cv-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 18px;
+      border-top: 1px solid rgba(100,140,255,.10);
+      background: rgba(4, 8, 28, 0.45);
+    }
+    .cv-meta {
+      display: flex; align-items: center; gap: 16px;
+    }
+    .cv-meta-item {
+      font-size: 10px; color: var(--text-dim);
+      display: flex; align-items: center; gap: 5px;
+    }
+    .cv-meta-item strong { color: var(--text-secondary); }
+    .cv-lang-badge {
+      font-size: 10px; font-weight: 800; letter-spacing: .08em;
+      padding: 2px 10px; border-radius: 20px;
+      text-transform: uppercase;
+      background: var(--neon-cyan-dim);
+      color: var(--neon-cyan);
+      border: 1px solid rgba(0,229,255,.22);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       SCENARIO SWITCHER — selector above the viewer
+    ═══════════════════════════════════════════════════════════════════ */
+    .scenario-bar {
+      display: flex; align-items: center; gap: 10px;
+      width: 100%; max-width: 860px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .scenario-label {
+      font-size: 10px; font-weight: 800; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--text-dim);
+      white-space: nowrap;
+    }
+    .scenario-chips {
+      display: flex; gap: 6px; flex-wrap: wrap;
+    }
+    .scenario-chip {
+      padding: 5px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--glass-border);
+      background: transparent;
+      font-family: var(--font-sans);
+      font-size: 11px; font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: background .18s, color .18s, border-color .18s, box-shadow .18s;
+    }
+    .scenario-chip:hover {
+      background: rgba(100,140,255,.08);
+      color: var(--text-primary);
+    }
+    .scenario-chip.active {
+      background: var(--neon-cyan-dim);
+      border-color: rgba(0,229,255,.35);
+      color: var(--neon-cyan);
+      box-shadow: var(--neon-cyan-glow);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       DEMO PREVIEW: render multiple viewers stacked
+    ═══════════════════════════════════════════════════════════════════ */
+    .stack-label {
+      width: 100%; max-width: 860px;
+      display: flex; align-items: center; gap: 10px;
+      margin: 36px 0 14px;
+    }
+    .stack-label-text {
+      font-size: 10px; font-weight: 800; letter-spacing: .14em;
+      text-transform: uppercase; color: var(--text-dim);
+    }
+    .stack-label-line {
+      flex: 1; height: 1px;
+      background: linear-gradient(90deg, rgba(100,140,255,.15), transparent);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       TOAST notification (alternative copy feedback)
+    ═══════════════════════════════════════════════════════════════════ */
+    .toast {
+      position: fixed; bottom: 32px; left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: rgba(0,230,118,.12);
+      border: 1px solid rgba(0,230,118,.35);
+      color: var(--neon-green);
+      font-size: 12px; font-weight: 700;
+      padding: 10px 24px; border-radius: 30px;
+      backdrop-filter: blur(12px);
+      box-shadow: var(--neon-green-glow);
+      z-index: 9999;
+      opacity: 0;
+      transition: transform .3s cubic-bezier(.22,.68,0,1.2), opacity .3s;
+      pointer-events: none;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ─── Background layers ─────────────────────────────────────── -->
+  <div class="cosmos" aria-hidden="true"></div>
+  <div class="stars-layer" aria-hidden="true"></div>
+  <div class="nebula-orb" aria-hidden="true"></div>
+
+  <!-- ─── Page ─────────────────────────────────────────────────── -->
+  <div class="page-wrapper">
+
+    <!-- Heading -->
+    <header class="page-heading">
+      <div class="eyebrow">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor">
+          <circle cx="5" cy="5" r="4" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M5 2v3l2 1.2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+        NovaCademy · API Sandbox
+      </div>
+      <h1>Multi-Language Code Viewer</h1>
+      <p>Switch between languages instantly. Copy with one click. Neon-lit syntax highlighting across every tab.</p>
+    </header>
+
+    <!-- Scenario switcher -->
+    <div class="scenario-bar" id="scenarioBar">
+      <span class="scenario-label">Scenario</span>
+      <div class="scenario-chips" id="scenarioChips"></div>
+    </div>
+
+    <!-- The Code Viewer widget (single instance, driven by JS) -->
+    <div class="code-viewer" id="codeViewer">
+      <!-- Tab strip -->
+      <div class="cv-header">
+        <div class="cv-tabs" id="cvTabs" role="tablist"></div>
+        <button class="cv-copy-btn" id="cvCopyBtn" title="Copy code to clipboard">
+          <!-- Copy icon -->
+          <svg class="copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
+          <!-- Check icon (shown after copy) -->
+          <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          <span class="copy-label">Copy</span>
+        </button>
+      </div>
+
+      <!-- Code panes (rendered by JS) -->
+      <div class="cv-body" id="cvBody"></div>
+
+      <!-- Footer meta bar -->
+      <div class="cv-footer">
+        <div class="cv-meta">
+          <div class="cv-meta-item">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>
+            <span>Lines: <strong id="footerLines">–</strong></span>
+          </div>
+          <div class="cv-meta-item">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+            <span>Last updated: <strong>2026-02-18</strong></span>
+          </div>
+        </div>
+        <div class="cv-lang-badge" id="footerLang">–</div>
+      </div>
+    </div>
+
+    <!-- Standalone embedded demo section -->
+    <div class="stack-label">
+      <span class="stack-label-text">Component props reference</span>
+      <div class="stack-label-line"></div>
+    </div>
+
+    <!-- Props card -->
+    <div class="code-viewer" style="max-width:860px; width:100%;">
+      <div class="cv-header">
+        <div class="cv-tabs" role="tablist">
+          <button class="cv-tab active"
+            style="--tab-active-color:#f0db4f;"
+            role="tab">
+            <span class="lang-dot" style="background:#f0db4f;"></span>
+            JavaScript
+          </button>
+        </div>
+      </div>
+      <div class="cv-body">
+        <div class="cv-pane active">
+          <pre class="line-numbers language-javascript"><code class="language-javascript">/**
+ * CodeViewer — prop contract (React / Vue / Web Component)
+ *
+ * @prop {Object}  snippets      - Map of { languageLabel → codeString }
+ * @prop {string}  defaultTab    - Which tab to activate on mount (default: first key)
+ * @prop {boolean} showLineNums  - Toggle line-number gutter   (default: true)
+ * @prop {string}  maxHeight     - Max height of the code pane (default: "440px")
+ * @prop {boolean} showFooter    - Show bottom meta bar        (default: true)
+ * @prop {Function} onCopy       - Callback after clipboard copy(code, lang) => void
+ */
+const snippets = {
+  cURL:       `curl -X POST "https://api.sandbox.example.com/auth/login" ...`,
+  JavaScript: `const res = await fetch('/auth/login', { method: 'POST', ... });`,
+  Python:     `import requests\nrequests.post(BASE_URL + "/auth/login", json={...})`,
+  Go:         `http.Post(baseURL+"/auth/login", "application/json", body)`,
+  Dart:       `await dio.post('/auth/login', data: {'user_id': userId});`,
+};
+
+// Mount
+const viewer = new CodeViewer({ snippets, defaultTab: 'cURL', showLineNums: true });</code></pre>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /page-wrapper -->
+
+  <!-- Toast -->
+  <div class="toast" id="toast">✓ Copied to clipboard</div>
+
+  <!-- PrismJS engine -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+
+  <script>
+  /* ═══════════════════════════════════════════════════════════════════
+     DATA — pulled from /ui-mockup/snippets.json (simulated inline)
+     In production: fetch('/ui-mockup/snippets.json').then(r=>r.json())
+  ═══════════════════════════════════════════════════════════════════ */
+  const SCENARIOS = [
+    {
+      id: "auth_login",
+      title: "Get Auth Token",
+      method: "POST", path: "/auth/login",
+      snippets: {
+        "cURL": `# ── Auth: Get Token ─────────────────────────────────────────────────\ncurl -s -X POST "https://api.sandbox.example.com/auth/login" \\\n  -H "Content-Type: application/json" \\\n  -d '{"user_id": "alice", "role": "user"}'\n\n# Tip: pipe to jq for pretty output\n# curl ... | jq '.data.access_token'`,
+
+        "JavaScript": `// ── Auth: Get Token (Fetch API) ─────────────────────────────────────\nconst BASE_URL = "https://api.sandbox.example.com";\n\nasync function getToken(userId = "alice", role = "user") {\n  const res = await fetch(\`\${BASE_URL}/auth/login\`, {\n    method: "POST",\n    headers: { "Content-Type": "application/json" },\n    body: JSON.stringify({ user_id: userId, role }),\n  });\n\n  if (!res.ok) throw new Error(\`Login failed: \${res.status}\`);\n\n  const { data } = await res.json();\n  sessionStorage.setItem("access_token",  data.access_token);\n  sessionStorage.setItem("refresh_token", data.refresh_token);\n  return data;\n}\n\ngetToken().then(d => console.log("Expires in:", d.expires_in, "s"));`,
+
+        "Python": `# ── Auth: Get Token (requests) ──────────────────────────────────────\nimport requests\n\nBASE_URL = "https://api.sandbox.example.com"\n\ndef get_token(user_id: str = "alice", role: str = "user") -> dict:\n    resp = requests.post(\n        f"{BASE_URL}/auth/login",\n        json={"user_id": user_id, "role": role},\n        timeout=10,\n    )\n    resp.raise_for_status()\n    data = resp.json()["data"]\n    print(f"Access token expires in {data['expires_in']}s")\n    return data\n\ntoken_pair = get_token()\naccess_token  = token_pair["access_token"]\nrefresh_token = token_pair["refresh_token"]`,
+
+        "Go": `// ── Auth: Get Token (net/http) ──────────────────────────────────────\npackage main\n\nimport (\n\t"bytes"\n\t"encoding/json"\n\t"fmt"\n\t"net/http"\n)\n\nconst baseURL = "https://api.sandbox.example.com"\n\ntype loginReq struct {\n\tUserID string \`json:"user_id"\`\n\tRole   string \`json:"role"\`\n}\n\ntype tokenPair struct {\n\tAccessToken  string \`json:"access_token"\`\n\tRefreshToken string \`json:"refresh_token"\`\n\tExpiresIn    int    \`json:"expires_in"\`\n}\n\nfunc getToken(id, role string) (*tokenPair, error) {\n\tbody, _ := json.Marshal(loginReq{UserID: id, Role: role})\n\tresp, err := http.Post(baseURL+"/auth/login", "application/json", bytes.NewReader(body))\n\tif err != nil { return nil, err }\n\tdefer resp.Body.Close()\n\n\tvar out struct { Data tokenPair \`json:"data"\` }\n\tjson.NewDecoder(resp.Body).Decode(&out)\n\treturn &out.Data, nil\n}\n\nfunc main() {\n\tpair, _ := getToken("alice", "user")\n\tfmt.Println("Token:", pair.AccessToken[:20]+"...")\n}`,
+
+        "Dart": `// ── Auth: Get Token (Dio — Flutter) ────────────────────────────────\nimport 'package:dio/dio.dart';\n\nconst String baseUrl = 'https://api.sandbox.example.com';\nfinal Dio dio = Dio(BaseOptions(baseUrl: baseUrl));\n\nFuture<Map<String, dynamic>> getToken({\n  String userId = 'alice',\n  String role = 'user',\n}) async {\n  final response = await dio.post<Map<String, dynamic>>(\n    '/auth/login',\n    data: {'user_id': userId, 'role': role},\n  );\n  final data = response.data!['data'] as Map<String, dynamic>;\n  print('Expires in: \${data['expires_in']}s');\n  return data;\n}\n\nvoid main() async {\n  final pair = await getToken();\n  print('token: \${pair['access_token']}');\n}`,
+      },
+    },
+
+    {
+      id: "create_product",
+      title: "Create Product",
+      method: "POST", path: "/api/v1/products",
+      snippets: {
+        "cURL": `# ── Products: Create ────────────────────────────────────────────────\nexport AT="<your_access_token>"\n\ncurl -s -X POST "https://api.sandbox.example.com/api/v1/products" \\\n  -H "Authorization: Bearer $AT" \\\n  -H "Content-Type: application/json" \\\n  -d '{\n    "name":        "Mechanical Keyboard",\n    "description": "TKL, hot-swap, RGB",\n    "price":       89.99,\n    "stock":       500\n  }' | jq`,
+
+        "JavaScript": `// ── Products: Create ────────────────────────────────────────────────\nconst BASE_URL = "https://api.sandbox.example.com";\nconst token   = sessionStorage.getItem("access_token");\n\nasync function createProduct(payload) {\n  const res = await fetch(\`\${BASE_URL}/api/v1/products\`, {\n    method: "POST",\n    headers: {\n      "Content-Type":  "application/json",\n      "Authorization": \`Bearer \${token}\`,\n    },\n    body: JSON.stringify(payload),\n  });\n  if (!res.ok) throw new Error(await res.text());\n  return res.json();\n}\n\ncreateProduct({ name: "Keyboard", price: 89.99, stock: 500 })\n  .then(d => console.log("Created:", d.data.id));`,
+
+        "Python": `# ── Products: Create ────────────────────────────────────────────────\nimport requests\n\nBASE_URL    = "https://api.sandbox.example.com"\naccess_token = "<your_access_token>"  # from get_token()\n\ndef create_product(name, price, stock, description="") -> dict:\n    resp = requests.post(\n        f"{BASE_URL}/api/v1/products",\n        json={"name": name, "description": description,\n              "price": price, "stock": stock},\n        headers={"Authorization": f"Bearer {access_token}"},\n        timeout=10,\n    )\n    resp.raise_for_status()\n    return resp.json()["data"]\n\nproduct = create_product("Mechanical Keyboard", 89.99, 500)\nprint(f"Created product id: {product['id']}")`,
+
+        "Go": `// ── Products: Create ────────────────────────────────────────────────\npackage main\n\nimport (\n\t"bytes"\n\t"encoding/json"\n\t"fmt"\n\t"net/http"\n)\n\nconst baseURL = "https://api.sandbox.example.com"\n\ntype Product struct {\n\tName        string  \`json:"name"\`\n\tDescription string  \`json:"description"\`\n\tPrice       float64 \`json:"price"\`\n\tStock       int     \`json:"stock"\`\n}\n\nfunc createProduct(token string, p Product) error {\n\tbody, _ := json.Marshal(p)\n\treq, _ := http.NewRequest("POST", baseURL+"/api/v1/products", bytes.NewReader(body))\n\treq.Header.Set("Content-Type",  "application/json")\n\treq.Header.Set("Authorization", "Bearer "+token)\n\n\tresp, err := http.DefaultClient.Do(req)\n\tif err != nil { return err }\n\tdefer resp.Body.Close()\n\tfmt.Println("Status:", resp.StatusCode)\n\treturn nil\n}`,
+
+        "Dart": `// ── Products: Create ────────────────────────────────────────────────\nimport 'package:dio/dio.dart';\n\nconst String baseUrl = 'https://api.sandbox.example.com';\nfinal Dio dio = Dio(BaseOptions(baseUrl: baseUrl));\n\nFuture<Map<String, dynamic>> createProduct({\n  required String token,\n  required String name,\n  required double price,\n  required int stock,\n}) async {\n  dio.options.headers['Authorization'] = 'Bearer \$token';\n  final response = await dio.post<Map<String, dynamic>>(\n    '/api/v1/products',\n    data: {'name': name, 'price': price, 'stock': stock},\n  );\n  return response.data!['data'] as Map<String, dynamic>;\n}`,
+      },
+    },
+
+    {
+      id: "list_products",
+      title: "List Products",
+      method: "GET", path: "/api/v1/products",
+      snippets: {
+        "cURL": `# ── Products: List ──────────────────────────────────────────────────\nexport AT="<your_access_token>"\n\ncurl -s "https://api.sandbox.example.com/api/v1/products?page=1&limit=20" \\\n  -H "Authorization: Bearer $AT" | jq '.data[]|{id,name,price}'`,
+
+        "JavaScript": `// ── Products: List ──────────────────────────────────────────────────\nconst BASE_URL = "https://api.sandbox.example.com";\nconst token   = sessionStorage.getItem("access_token");\n\nasync function listProducts({ page = 1, limit = 20 } = {}) {\n  const url = \`\${BASE_URL}/api/v1/products?page=\${page}&limit=\${limit}\`;\n  const res = await fetch(url, {\n    headers: { "Authorization": \`Bearer \${token}\` },\n  });\n  if (!res.ok) throw new Error(await res.text());\n  const { data } = await res.json();\n  return data; // array of products\n}\n\nlistProducts().then(products =>\n  products.forEach(p => console.log(p.name, "$"+p.price))\n);`,
+
+        "Python": `# ── Products: List ──────────────────────────────────────────────────\nimport requests\n\nBASE_URL     = "https://api.sandbox.example.com"\naccess_token = "<your_access_token>"\n\ndef list_products(page: int = 1, limit: int = 20) -> list:\n    resp = requests.get(\n        f"{BASE_URL}/api/v1/products",\n        params={"page": page, "limit": limit},\n        headers={"Authorization": f"Bearer {access_token}"},\n        timeout=10,\n    )\n    resp.raise_for_status()\n    return resp.json()["data"]\n\nfor p in list_products():\n    print(f"{p['name']:30s}  \${p['price']:.2f}")`,
+
+        "Go": `// ── Products: List ──────────────────────────────────────────────────\npackage main\n\nimport (\n\t"encoding/json"\n\t"fmt"\n\t"net/http"\n)\n\nconst baseURL = "https://api.sandbox.example.com"\n\nfunc listProducts(token string, page, limit int) ([]map[string]any, error) {\n\turl := fmt.Sprintf("%s/api/v1/products?page=%d&limit=%d", baseURL, page, limit)\n\treq, _ := http.NewRequest("GET", url, nil)\n\treq.Header.Set("Authorization", "Bearer "+token)\n\n\tresp, err := http.DefaultClient.Do(req)\n\tif err != nil { return nil, err }\n\tdefer resp.Body.Close()\n\n\tvar out struct { Data []map[string]any \`json:"data"\` }\n\tjson.NewDecoder(resp.Body).Decode(&out)\n\treturn out.Data, nil\n}`,
+
+        "Dart": `// ── Products: List ──────────────────────────────────────────────────\nimport 'package:dio/dio.dart';\n\nconst String baseUrl = 'https://api.sandbox.example.com';\nfinal Dio dio = Dio(BaseOptions(baseUrl: baseUrl));\n\nFuture<List<dynamic>> listProducts({\n  required String token,\n  int page  = 1,\n  int limit = 20,\n}) async {\n  dio.options.headers['Authorization'] = 'Bearer \$token';\n  final response = await dio.get<Map<String, dynamic>>(\n    '/api/v1/products',\n    queryParameters: {'page': page, 'limit': limit},\n  );\n  return response.data!['data'] as List<dynamic>;\n}`,
+      },
+    },
+  ];
+
+  /* ═══════════════════════════════════════════════════════════════════
+     LANGUAGE CONFIG — display name, Prism language id, neon colour
+  ═══════════════════════════════════════════════════════════════════ */
+  const LANG_CONFIG = {
+    "cURL":       { prism: "bash",       color: "#ff9100", rgb: "255,145,0",     label: "cURL"       },
+    "JavaScript": { prism: "javascript", color: "#f0db4f", rgb: "240,219,79",    label: "JavaScript" },
+    "Python":     { prism: "python",     color: "#4db6ff", rgb: "77,182,255",    label: "Python"     },
+    "Go":         { prism: "go",         color: "#79d4f0", rgb: "121,212,240",   label: "Go"         },
+    "Dart":       { prism: "dart",       color: "#54c5f8", rgb: "84,197,248",    label: "Dart"       },
+  };
+
+  /* ═══════════════════════════════════════════════════════════════════
+     STATE
+  ═══════════════════════════════════════════════════════════════════ */
+  let activeScenarioIdx = 0;
+  let activeLang        = Object.keys(LANG_CONFIG)[0]; // "cURL"
+  let copyTimer         = null;
+
+  /* ═══════════════════════════════════════════════════════════════════
+     DOM REFS
+  ═══════════════════════════════════════════════════════════════════ */
+  const elTabs       = document.getElementById("cvTabs");
+  const elBody       = document.getElementById("cvBody");
+  const elCopyBtn    = document.getElementById("cvCopyBtn");
+  const elCopyLabel  = elCopyBtn.querySelector(".copy-label");
+  const elFooterLine = document.getElementById("footerLines");
+  const elFooterLang = document.getElementById("footerLang");
+  const elToast      = document.getElementById("toast");
+  const elScenChips  = document.getElementById("scenarioChips");
+
+  /* ═══════════════════════════════════════════════════════════════════
+     RENDER HELPERS
+  ═══════════════════════════════════════════════════════════════════ */
+  function escapeHtml(s) {
+    return s
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
+  function lineCount(s) {
+    return s.split("\n").length;
+  }
+
+  /** Render tabs & panes for the current scenario */
+  function renderViewer(scenIdx, langKey) {
+    const scenario = SCENARIOS[scenIdx];
+    const langs    = Object.keys(scenario.snippets);
+
+    // --- Tabs ---
+    elTabs.innerHTML = langs.map(lang => {
+      const cfg  = LANG_CONFIG[lang] || { color: "#8899cc", rgb: "136,153,204", label: lang };
+      const isActive = lang === langKey;
+      return `<button
+        class="cv-tab${isActive ? " active" : ""}"
+        role="tab"
+        aria-selected="${isActive}"
+        data-lang="${lang}"
+        style="--tab-active-color:${cfg.color};"
+      >
+        <span class="lang-dot" style="background:${cfg.color};"></span>
+        ${cfg.label}
+      </button>`;
+    }).join("");
+
+    // --- Panes ---
+    elBody.innerHTML = langs.map(lang => {
+      const cfg   = LANG_CONFIG[lang] || { prism: "plaintext" };
+      const code  = scenario.snippets[lang] || "";
+      const isAct = lang === langKey;
+      return `<div class="cv-pane${isAct ? " active" : ""}" data-lang="${lang}">
+        <pre class="line-numbers language-${cfg.prism}"><code class="language-${cfg.prism}">${escapeHtml(code)}</code></pre>
+      </div>`;
+    }).join("");
+
+    // Re-run Prism on new DOM
+    if (window.Prism) Prism.highlightAllUnder(elBody);
+
+    // Footer
+    const activeLangCode = scenario.snippets[langKey] || "";
+    const cfg = LANG_CONFIG[langKey] || {};
+    elFooterLine.textContent = lineCount(activeLangCode);
+    elFooterLang.textContent = (cfg.label || langKey).toUpperCase();
+
+    // Tab click listeners
+    elTabs.querySelectorAll(".cv-tab").forEach(btn => {
+      btn.addEventListener("click", () => switchLang(btn.dataset.lang));
+    });
+  }
+
+  function switchLang(lang) {
+    activeLang = lang;
+
+    // Update tab active state
+    elTabs.querySelectorAll(".cv-tab").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.lang === lang);
+      btn.setAttribute("aria-selected", btn.dataset.lang === lang);
+    });
+
+    // Update pane active state
+    elBody.querySelectorAll(".cv-pane").forEach(pane => {
+      pane.classList.toggle("active", pane.dataset.lang === lang);
+    });
+
+    // Update footer
+    const scenario     = SCENARIOS[activeScenarioIdx];
+    const activeCode   = scenario.snippets[lang] || "";
+    const cfg          = LANG_CONFIG[lang] || {};
+    elFooterLine.textContent = lineCount(activeCode);
+    elFooterLang.textContent = (cfg.label || lang).toUpperCase();
+  }
+
+  function renderScenarioChips() {
+    elScenChips.innerHTML = SCENARIOS.map((sc, i) =>
+      `<button class="scenario-chip${i === activeScenarioIdx ? " active" : ""}" data-idx="${i}">
+        <span style="font-size:9px;font-weight:800;padding:1px 5px;border-radius:3px;
+                     margin-right:5px;background:rgba(100,140,255,.10);
+                     color:${sc.method==="POST"?"#82b4ff":sc.method==="GET"?"#00e676":"#ffcc80"}">
+          ${sc.method}
+        </span>
+        ${sc.title}
+      </button>`
+    ).join("");
+
+    elScenChips.querySelectorAll(".scenario-chip").forEach(btn => {
+      btn.addEventListener("click", () => {
+        activeScenarioIdx = +btn.dataset.idx;
+
+        // Preserve selected language if available in new scenario, else fall back to first
+        const newSnippets = SCENARIOS[activeScenarioIdx].snippets;
+        if (!newSnippets[activeLang]) activeLang = Object.keys(newSnippets)[0];
+
+        renderScenarioChips();
+        renderViewer(activeScenarioIdx, activeLang);
+
+        // Reset copy button
+        resetCopyBtn();
+      });
+    });
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     COPY TO CLIPBOARD
+  ═══════════════════════════════════════════════════════════════════ */
+  function resetCopyBtn() {
+    elCopyBtn.classList.remove("copied");
+    elCopyLabel.textContent = "Copy";
+  }
+
+  elCopyBtn.addEventListener("click", async () => {
+    const scenario = SCENARIOS[activeScenarioIdx];
+    const code     = scenario.snippets[activeLang] || "";
+
+    try {
+      await navigator.clipboard.writeText(code);
+    } catch {
+      // Fallback for older browsers
+      const ta = document.createElement("textarea");
+      ta.value = code;
+      ta.style.cssText = "position:fixed;opacity:0;pointer-events:none";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+    }
+
+    // Button visual feedback
+    elCopyBtn.classList.add("copied");
+    elCopyLabel.textContent = "Copied!";
+
+    // Toast
+    elToast.classList.add("show");
+
+    // Reset after 2.2s
+    clearTimeout(copyTimer);
+    copyTimer = setTimeout(() => {
+      resetCopyBtn();
+      elToast.classList.remove("show");
+    }, 2200);
+  });
+
+  /* ═══════════════════════════════════════════════════════════════════
+     BOOT
+  ═══════════════════════════════════════════════════════════════════ */
+  renderScenarioChips();
+  renderViewer(activeScenarioIdx, activeLang);
+
+  // Highlight the static props-reference pane too
+  document.addEventListener("DOMContentLoaded", () => {
+    if (window.Prism) Prism.highlightAll();
+  });
+  if (document.readyState !== "loading" && window.Prism) Prism.highlightAll();
+  </script>
+</body>
+</html>

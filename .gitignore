@@ -2,6 +2,7 @@
 bin/
 *.exe
 *.out
+server
 
 # Go
 *.test
@@ -18,5 +19,7 @@ vendor/
 .idea/
 
 # OS
+.DS_Store
+Thumbs.db
 .DS_Store
 Thumbs.db

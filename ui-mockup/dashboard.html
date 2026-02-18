@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NovaCademy — Mission Control Dashboard</title>
+  <style>
+    /* ─── Reset & Base ─────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-deep:       #03040e;
+      --bg-space:      #060918;
+      --glass-bg:      rgba(12, 18, 48, 0.55);
+      --glass-border:  rgba(100, 140, 255, 0.18);
+      --glass-shadow:  rgba(0, 10, 60, 0.7);
+      --accent-cyan:   #00e5ff;
+      --accent-orange: #ff8c00;
+      --accent-magenta:#e040fb;
+      --accent-green:  #00e676;
+      --purple-mid:    #7c4dff;
+      --blue-mid:      #1a6bff;
+      --teal-mid:      #00bcd4;
+      --text-primary:  #e8eeff;
+      --text-secondary:#8899cc;
+      --text-dim:      #4a5580;
+      --sidebar-w:     76px;
+      --radius-lg:     18px;
+      --radius-md:     12px;
+      --radius-sm:     8px;
+    }
+
+    html, body {
+      width: 100%; height: 100%; overflow: hidden;
+      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg-deep);
+      color: var(--text-primary);
+    }
+
+    /* ─── Cosmic Background ─────────────────────────────────────────────────── */
+    .cosmos {
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%,  rgba(72,  52, 180, 0.22) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 50% at 80% 85%,  rgba(0,  120, 180, 0.18) 0%, transparent 65%),
+        radial-gradient(ellipse 50% 40% at 60% 30%,  rgba(140, 40, 200, 0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 70% 55% at 10% 80%,  rgba(0,  180, 200, 0.10) 0%, transparent 65%),
+        linear-gradient(160deg, #03040e 0%, #060918 50%, #04061a 100%);
+    }
+    .stars-layer {
+      position: fixed; inset: 0; z-index: 0;
+      background-image:
+        radial-gradient(1px 1px at 15%  8%, rgba(220,230,255,0.75) 0%, transparent 100%),
+        radial-gradient(1px 1px at 62% 14%, rgba(200,210,255,0.60) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 80% 5%, rgba(255,255,255,0.80) 0%, transparent 100%),
+        radial-gradient(1px 1px at 35% 22%, rgba(180,200,255,0.55) 0%, transparent 100%),
+        radial-gradient(1px 1px at 90% 30%, rgba(200,220,255,0.65) 0%, transparent 100%),
+        radial-gradient(1px 1px at 5%  45%, rgba(210,220,255,0.50) 0%, transparent 100%),
+        radial-gradient(1px 1px at 50% 55%, rgba(220,230,255,0.45) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 75% 65%, rgba(255,255,255,0.70) 0%, transparent 100%),
+        radial-gradient(1px 1px at 28% 70%, rgba(180,200,255,0.55) 0%, transparent 100%),
+        radial-gradient(1px 1px at 92% 75%, rgba(200,215,255,0.60) 0%, transparent 100%),
+        radial-gradient(1px 1px at 10% 88%, rgba(210,225,255,0.50) 0%, transparent 100%),
+        radial-gradient(1px 1px at 55% 92%, rgba(180,200,255,0.45) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 42% 38%, rgba(255,255,255,0.65) 0%, transparent 100%),
+        radial-gradient(1px 1px at 70% 48%, rgba(200,215,255,0.55) 0%, transparent 100%),
+        radial-gradient(1px 1px at 22% 52%, rgba(215,225,255,0.45) 0%, transparent 100%);
+    }
+
+    /* ─── Layout Shell ──────────────────────────────────────────────────────── */
+    .shell {
+      position: relative; z-index: 1;
+      display: flex;
+      width: 100%; height: 100vh;
+    }
+
+    /* ─── Sidebar ───────────────────────────────────────────────────────────── */
+    .sidebar {
+      width: var(--sidebar-w);
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 0 20px;
+      background: rgba(6, 9, 28, 0.70);
+      border-right: 1px solid var(--glass-border);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      gap: 6px;
+      overflow: hidden;
+    }
+    .sidebar-logo {
+      width: 40px; height: 40px; margin-bottom: 28px;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, var(--purple-mid) 0%, var(--accent-cyan) 100%);
+      border-radius: 10px;
+      font-size: 20px;
+      box-shadow: 0 0 20px rgba(0, 229, 255, 0.35);
+    }
+    .nav-item {
+      width: 48px; height: 48px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 4px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s;
+      position: relative;
+    }
+    .nav-item:hover { background: rgba(100, 140, 255, 0.12); }
+    .nav-item.active {
+      background: rgba(0, 229, 255, 0.10);
+      box-shadow: inset 0 0 0 1px rgba(0, 229, 255, 0.25);
+    }
+    .nav-item .nav-icon { font-size: 22px; line-height: 1; }
+    .nav-item .nav-label { font-size: 8px; color: var(--text-dim); letter-spacing: 0.04em; font-weight: 500; }
+    .nav-item.active .nav-label { color: var(--accent-cyan); }
+    .nav-item.active::after {
+      content: '';
+      position: absolute; right: -1px; top: 50%; transform: translateY(-50%);
+      width: 3px; height: 24px;
+      background: linear-gradient(180deg, var(--accent-cyan), var(--purple-mid));
+      border-radius: 2px 0 0 2px;
+    }
+    .sidebar-spacer { flex: 1; }
+    .avatar-wrap {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: linear-gradient(135deg, #1a2060, #2a1060);
+      border: 2px solid rgba(0, 229, 255, 0.4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      box-shadow: 0 0 12px rgba(0, 229, 255, 0.25);
+    }
+
+    /* ─── Main Content ──────────────────────────────────────────────────────── */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ─── Topbar ────────────────────────────────────────────────────────────── */
+    .topbar {
+      display: flex; align-items: center;
+      padding: 16px 28px;
+      background: rgba(6, 9, 28, 0.50);
+      border-bottom: 1px solid var(--glass-border);
+      backdrop-filter: blur(20px);
+      gap: 16px;
+      flex-shrink: 0;
+    }
+    .topbar-title { font-size: 13px; color: var(--text-secondary); font-weight: 400; letter-spacing: 0.06em; text-transform: uppercase; }
+    .topbar-title span { color: var(--text-primary); font-weight: 600; }
+    .topbar-spacer { flex: 1; }
+    .search-bar {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(20, 28, 70, 0.60);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 7px 16px;
+      width: 220px;
+    }
+    .search-bar span { font-size: 13px; color: var(--text-dim); }
+    .search-bar input {
+      background: none; border: none; outline: none;
+      color: var(--text-primary); font-size: 13px; width: 100%;
+    }
+    .search-bar input::placeholder { color: var(--text-dim); }
+    .topbar-badge {
+      position: relative;
+      width: 36px; height: 36px;
+      background: rgba(20, 28, 70, 0.60);
+      border: 1px solid var(--glass-border);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; cursor: pointer;
+    }
+    .topbar-badge::after {
+      content: '3';
+      position: absolute; top: 4px; right: 4px;
+      background: var(--accent-magenta);
+      color: #fff; font-size: 8px; font-weight: 700;
+      width: 14px; height: 14px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .xp-chip {
+      display: flex; align-items: center; gap: 6px;
+      background: rgba(124, 77, 255, 0.15);
+      border: 1px solid rgba(124, 77, 255, 0.35);
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 12px; font-weight: 600; color: #b388ff;
+    }
+    .xp-chip .dot { width: 7px; height: 7px; border-radius: 50%; background: #b388ff; box-shadow: 0 0 6px #b388ff; }
+
+    /* ─── Content Grid ──────────────────────────────────────────────────────── */
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px 28px 28px;
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      grid-template-rows: auto auto 1fr;
+      gap: 20px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(100,140,255,0.2) transparent;
+    }
+    .content::-webkit-scrollbar { width: 4px; }
+    .content::-webkit-scrollbar-track { background: transparent; }
+    .content::-webkit-scrollbar-thumb { background: rgba(100,140,255,0.2); border-radius: 4px; }
+
+    /* ─── Hero Section ──────────────────────────────────────────────────────── */
+    .hero {
+      grid-column: 1;
+      grid-row: 1;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 8px 40px var(--glass-shadow), inset 0 1px 0 rgba(255,255,255,0.06);
+      padding: 28px 32px;
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; top: -60px; right: 80px;
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(124,77,255,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-ring-wrap {
+      flex-shrink: 0;
+      position: relative;
+      width: 150px; height: 150px;
+    }
+    .ring-svg { width: 150px; height: 150px; transform: rotate(-90deg); }
+    .ring-track { fill: none; stroke: rgba(100,140,255,0.12); stroke-width: 8; }
+    .ring-progress {
+      fill: none;
+      stroke-width: 8;
+      stroke-linecap: round;
+      stroke: url(#ringGrad);
+      stroke-dasharray: 408;
+      stroke-dashoffset: 102; /* 75% */
+      filter: drop-shadow(0 0 6px rgba(0,229,255,0.7));
+      transition: stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1);
+    }
+    .ring-orbit {
+      fill: none; stroke: rgba(0,229,255,0.08); stroke-width: 1;
+      stroke-dasharray: 4 6;
+    }
+    .ring-inner {
+      position: absolute; inset: 18px;
+      background: rgba(6, 10, 30, 0.80);
+      border-radius: 50%;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      border: 1px solid rgba(100,140,255,0.12);
+    }
+    .ring-pct { font-size: 30px; font-weight: 700; color: var(--text-primary); line-height: 1; letter-spacing: -0.02em; }
+    .ring-pct span { font-size: 13px; font-weight: 400; color: var(--accent-cyan); }
+    .ring-sub { font-size: 9px; color: var(--text-dim); font-weight: 500; letter-spacing: 0.08em; margin-top: 3px; text-transform: uppercase; }
+    /* orbiting dot */
+    .orbit-dot {
+      position: absolute;
+      width: 10px; height: 10px;
+      background: var(--accent-cyan);
+      border-radius: 50%;
+      box-shadow: 0 0 12px var(--accent-cyan);
+      top: 50%; left: 50%;
+      transform-origin: 0 0;
+      animation: orbitSpin 6s linear infinite;
+    }
+    @keyframes orbitSpin {
+      from { transform: rotate(0deg) translate(71px, 0) rotate(0deg); }
+      to   { transform: rotate(360deg) translate(71px, 0) rotate(-360deg); }
+    }
+    .hero-text { flex: 1; }
+    .hero-eyebrow {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--accent-cyan);
+      margin-bottom: 8px;
+    }
+    .hero-heading {
+      font-size: 22px; font-weight: 700; line-height: 1.3;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+    }
+    .hero-heading em { font-style: normal; color: var(--accent-cyan); }
+    .hero-sub {
+      font-size: 13px; color: var(--text-secondary); line-height: 1.6;
+      max-width: 400px; margin-bottom: 20px;
+    }
+    .hero-stats {
+      display: flex; gap: 24px;
+    }
+    .stat {
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .stat-val { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+    .stat-lbl { font-size: 10px; color: var(--text-dim); font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; }
+    .stat-val .accent-o { color: var(--accent-orange); }
+    .stat-val .accent-m { color: var(--accent-magenta); }
+    .hero-cta {
+      flex-shrink: 0;
+      display: flex; flex-direction: column; gap: 10px; align-items: flex-end;
+    }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: linear-gradient(135deg, var(--blue-mid) 0%, var(--purple-mid) 100%);
+      color: #fff; font-size: 13px; font-weight: 600;
+      padding: 10px 22px; border-radius: 22px; border: none; cursor: pointer;
+      box-shadow: 0 4px 20px rgba(26,107,255,0.35);
+      white-space: nowrap;
+      transition: box-shadow 0.2s, transform 0.15s;
+    }
+    .btn-primary:hover { box-shadow: 0 6px 28px rgba(26,107,255,0.5); transform: translateY(-1px); }
+    .btn-ghost {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--glass-border);
+      color: var(--text-secondary); font-size: 12px; font-weight: 500;
+      padding: 9px 18px; border-radius: 22px; cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      white-space: nowrap;
+    }
+    .btn-ghost:hover { background: rgba(100,140,255,0.10); color: var(--text-primary); }
+    /* streak chip */
+    .streak-chip {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 11px; color: var(--accent-orange);
+      font-weight: 600;
+    }
+    .streak-chip .flame { font-size: 14px; }
+
+    /* ─── Section Label ─────────────────────────────────────────────────────── */
+    .section-label {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.10em;
+      text-transform: uppercase; color: var(--text-dim);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .section-label::after {
+      content: ''; flex: 1; height: 1px;
+      background: linear-gradient(90deg, var(--glass-border), transparent);
+    }
+
+    /* ─── Courses Row ───────────────────────────────────────────────────────── */
+    .courses-area {
+      grid-column: 1; grid-row: 2;
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    .courses-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .course-card {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      padding: 22px 20px 18px;
+      display: flex; flex-direction: column; gap: 14px;
+      cursor: pointer;
+      position: relative; overflow: hidden;
+      box-shadow: 0 4px 24px var(--glass-shadow);
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    }
+    .course-card::after {
+      content: '';
+      position: absolute; bottom: -30px; right: -30px;
+      width: 100px; height: 100px;
+      border-radius: 50%;
+      opacity: 0.06;
+      transition: opacity 0.3s;
+    }
+    .course-card:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,10,60,0.8); }
+    .course-card:hover::after { opacity: 0.12; }
+
+    .card-api::after     { background: var(--accent-cyan); }
+    .card-arch::after    { background: var(--purple-mid); }
+    .card-redis::after   { background: var(--accent-orange); }
+    .card-k8s::after     { background: var(--accent-green); }
+    .card-api:hover   { border-color: rgba(0,229,255,0.35); }
+    .card-arch:hover  { border-color: rgba(124,77,255,0.35); }
+    .card-redis:hover { border-color: rgba(255,140,0,0.35); }
+    .card-k8s:hover   { border-color: rgba(0,230,118,0.35); }
+
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; }
+    .card-icon {
+      width: 44px; height: 44px; border-radius: var(--radius-sm)+2px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; border-radius: 10px;
+    }
+    .icon-cyan   { background: rgba(0,229,255,0.10); box-shadow: 0 0 16px rgba(0,229,255,0.15); }
+    .icon-purple { background: rgba(124,77,255,0.10); box-shadow: 0 0 16px rgba(124,77,255,0.15); }
+    .icon-orange { background: rgba(255,140,0,0.10);  box-shadow: 0 0 16px rgba(255,140,0,0.15); }
+    .icon-green  { background: rgba(0,230,118,0.10);  box-shadow: 0 0 16px rgba(0,230,118,0.15); }
+
+    .card-badge {
+      font-size: 9px; font-weight: 700; letter-spacing: 0.07em;
+      text-transform: uppercase; padding: 3px 8px; border-radius: 20px;
+    }
+    .badge-active   { background: rgba(0,229,255,0.12); color: var(--accent-cyan); border: 1px solid rgba(0,229,255,0.25); }
+    .badge-locked   { background: rgba(255,255,255,0.05); color: var(--text-dim); border: 1px solid var(--glass-border); }
+    .badge-new      { background: rgba(224,64,251,0.12); color: var(--accent-magenta); border: 1px solid rgba(224,64,251,0.25); }
+
+    .card-title { font-size: 14px; font-weight: 600; color: var(--text-primary); line-height: 1.3; }
+    .card-meta  { font-size: 11px; color: var(--text-dim); display: flex; align-items: center; gap: 6px; }
+    .card-meta .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--text-dim); }
+
+    .card-progress { display: flex; flex-direction: column; gap: 6px; }
+    .progress-row { display: flex; justify-content: space-between; align-items: center; }
+    .progress-label { font-size: 10px; color: var(--text-dim); font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; }
+    .progress-val   { font-size: 11px; font-weight: 700; }
+    .val-cyan   { color: var(--accent-cyan); }
+    .val-purple { color: #b388ff; }
+    .val-orange { color: var(--accent-orange); }
+    .val-green  { color: var(--accent-green); }
+
+    .prog-track {
+      height: 5px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: visible; position: relative;
+    }
+    .prog-fill {
+      height: 100%; border-radius: 3px;
+      position: relative; overflow: visible;
+    }
+    .prog-fill::after {
+      content: '';
+      position: absolute; right: -1px; top: 50%; transform: translateY(-50%);
+      width: 8px; height: 8px; border-radius: 50%;
+      background: inherit; /* will be overridden */
+    }
+    .fill-cyan   { background: linear-gradient(90deg, var(--blue-mid), var(--accent-cyan)); }
+    .fill-cyan::after   { background: var(--accent-cyan); box-shadow: 0 0 6px var(--accent-cyan); }
+    .fill-purple { background: linear-gradient(90deg, #5c35bb, #b388ff); }
+    .fill-purple::after { background: #b388ff; box-shadow: 0 0 6px #b388ff; }
+    .fill-orange { background: linear-gradient(90deg, #c84b00, var(--accent-orange)); }
+    .fill-orange::after { background: var(--accent-orange); box-shadow: 0 0 6px var(--accent-orange); }
+    .fill-green  { background: linear-gradient(90deg, #007a3a, var(--accent-green)); }
+    .fill-green::after  { background: var(--accent-green); box-shadow: 0 0 6px var(--accent-green); }
+
+    /* ─── Activity Row ──────────────────────────────────────────────────────── */
+    .activity-area {
+      grid-column: 1; grid-row: 3;
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    .timeline-list {
+      display: flex; flex-direction: column; gap: 0;
+    }
+    .timeline-item {
+      display: flex; gap: 14px; align-items: flex-start;
+      padding: 12px 16px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 0; border-bottom: none;
+      backdrop-filter: blur(16px);
+      transition: background 0.15s;
+    }
+    .timeline-item:first-child { border-radius: var(--radius-md) var(--radius-md) 0 0; }
+    .timeline-item:last-child  { border-radius: 0 0 var(--radius-md) var(--radius-md); border-bottom: 1px solid var(--glass-border); }
+    .timeline-item:only-child  { border-radius: var(--radius-md); border-bottom: 1px solid var(--glass-border); }
+    .timeline-item:hover { background: rgba(20,30,70,0.70); }
+    .tl-icon {
+      width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 15px;
+      margin-top: 1px;
+    }
+    .tl-body { flex: 1; }
+    .tl-title { font-size: 13px; font-weight: 500; color: var(--text-primary); margin-bottom: 2px; }
+    .tl-sub   { font-size: 11px; color: var(--text-dim); }
+    .tl-time  { font-size: 10px; color: var(--text-dim); flex-shrink: 0; margin-top: 4px; white-space: nowrap; }
+    .tl-xp {
+      font-size: 11px; font-weight: 700; color: #b388ff;
+      flex-shrink: 0; margin-top: 2px;
+    }
+
+    /* ─── Right Panel ───────────────────────────────────────────────────────── */
+    .right-panel {
+      grid-column: 2; grid-row: 1 / 4;
+      display: flex; flex-direction: column; gap: 18px;
+    }
+
+    /* ─── Glasscard Base ────────────────────────────────────────────────────── */
+    .glasscard {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      box-shadow: 0 4px 24px var(--glass-shadow), inset 0 1px 0 rgba(255,255,255,0.05);
+      padding: 20px;
+    }
+    .glasscard-title {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.10em;
+      text-transform: uppercase; color: var(--text-dim);
+      margin-bottom: 16px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .glasscard-title a {
+      font-size: 10px; color: var(--accent-cyan); text-decoration: none; font-weight: 600;
+      letter-spacing: 0.06em; text-transform: uppercase;
+    }
+
+    /* ─── Skill Radar ───────────────────────────────────────────────────────── */
+    .skill-list { display: flex; flex-direction: column; gap: 12px; }
+    .skill-row { display: flex; flex-direction: column; gap: 5px; }
+    .skill-head { display: flex; justify-content: space-between; align-items: center; }
+    .skill-name { font-size: 12px; color: var(--text-secondary); font-weight: 500; }
+    .skill-lvl  { font-size: 10px; font-weight: 700; }
+
+    /* ─── Badges (Mission Patches) ──────────────────────────────────────────── */
+    .badges-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+    }
+    .badge-item {
+      display: flex; flex-direction: column; align-items: center; gap: 5px;
+      cursor: pointer;
+    }
+    .badge-icon {
+      width: 52px; height: 52px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px;
+      position: relative;
+      transition: transform 0.2s, filter 0.2s;
+    }
+    .badge-item:hover .badge-icon { transform: scale(1.08); }
+    .badge-earned .badge-icon {
+      background: conic-gradient(from 0deg, #c0a060, #f8e89a, #c0a060, #8a6030, #f0d080, #c0a060);
+      box-shadow: 0 0 18px rgba(240,208,128,0.40), inset 0 1px 0 rgba(255,255,255,0.4);
+    }
+    .badge-earned-cyan .badge-icon {
+      background: conic-gradient(from 0deg, #0060a0, #00e5ff, #0060a0, #004080, #00c8e0, #0060a0);
+      box-shadow: 0 0 18px rgba(0,229,255,0.40), inset 0 1px 0 rgba(255,255,255,0.3);
+    }
+    .badge-earned-purple .badge-icon {
+      background: conic-gradient(from 0deg, #5c35bb, #b388ff, #5c35bb, #3a1080, #9060e0, #5c35bb);
+      box-shadow: 0 0 18px rgba(124,77,255,0.40), inset 0 1px 0 rgba(255,255,255,0.3);
+    }
+    .badge-locked-item .badge-icon {
+      background: rgba(30,38,80,0.70);
+      border: 2px dashed rgba(100,140,255,0.15);
+      filter: grayscale(1) opacity(0.4);
+    }
+    .badge-name { font-size: 9px; color: var(--text-dim); font-weight: 500; text-align: center; letter-spacing: 0.04em; }
+    .badge-earned .badge-name,
+    .badge-earned-cyan .badge-name,
+    .badge-earned-purple .badge-name { color: var(--text-secondary); }
+
+    /* ─── Next Lesson ───────────────────────────────────────────────────────── */
+    .next-lesson {
+      display: flex; gap: 14px; align-items: center;
+      background: linear-gradient(135deg, rgba(26,107,255,0.12), rgba(124,77,255,0.10));
+      border: 1px solid rgba(26,107,255,0.25);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      cursor: pointer;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .next-lesson:hover {
+      border-color: rgba(26,107,255,0.45);
+      box-shadow: 0 4px 20px rgba(26,107,255,0.20);
+    }
+    .next-lesson-icon {
+      width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0;
+      background: rgba(26,107,255,0.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+    }
+    .next-lesson-body { flex: 1; }
+    .next-lesson-eyebrow { font-size: 9px; color: var(--accent-cyan); font-weight: 700; letter-spacing: 0.10em; text-transform: uppercase; margin-bottom: 3px; }
+    .next-lesson-title { font-size: 12px; font-weight: 600; color: var(--text-primary); margin-bottom: 2px; }
+    .next-lesson-sub { font-size: 10px; color: var(--text-dim); }
+    .next-lesson-arrow { font-size: 18px; color: var(--accent-cyan); flex-shrink: 0; }
+
+    /* ─── Leaderboard ───────────────────────────────────────────────────────── */
+    .lb-list { display: flex; flex-direction: column; gap: 8px; }
+    .lb-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 10px; border-radius: var(--radius-sm);
+      transition: background 0.15s; cursor: pointer;
+    }
+    .lb-row:hover { background: rgba(100,140,255,0.06); }
+    .lb-row.me { background: rgba(0,229,255,0.05); border: 1px solid rgba(0,229,255,0.15); border-radius: var(--radius-sm); }
+    .lb-rank { font-size: 12px; font-weight: 700; color: var(--text-dim); width: 18px; text-align: right; flex-shrink: 0; }
+    .lb-rank.gold   { color: #f8d840; }
+    .lb-rank.silver { color: #c0c8d8; }
+    .lb-rank.bronze { color: #c07840; }
+    .lb-av {
+      width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 14px;
+      background: rgba(30,40,80,0.80);
+      border: 1px solid var(--glass-border);
+    }
+    .lb-name { flex: 1; font-size: 12px; font-weight: 500; color: var(--text-secondary); }
+    .lb-row.me .lb-name { color: var(--accent-cyan); font-weight: 600; }
+    .lb-xp { font-size: 11px; font-weight: 700; color: var(--text-dim); }
+    .lb-row.me .lb-xp { color: var(--accent-cyan); }
+
+    /* ─── Animations ────────────────────────────────────────────────────────── */
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+    .glow-pulse { animation: pulseGlow 3s ease-in-out infinite; }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .animate-in { animation: slideUp 0.5s ease both; }
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.4s; }
+  </style>
+</head>
+<body>
+
+<!-- ── Cosmic Background ── -->
+<div class="cosmos"></div>
+<div class="stars-layer"></div>
+
+<!-- ── App Shell ── -->
+<div class="shell">
+
+  <!-- ─────────────── Sidebar ─────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">🚀</div>
+
+    <div class="nav-item active" title="Dashboard">
+      <span class="nav-icon">🛸</span>
+      <span class="nav-label">Home</span>
+    </div>
+    <div class="nav-item" title="Courses">
+      <span class="nav-icon">🗺️</span>
+      <span class="nav-label">Courses</span>
+    </div>
+    <div class="nav-item" title="Missions">
+      <span class="nav-icon">🎯</span>
+      <span class="nav-label">Missions</span>
+    </div>
+    <div class="nav-item" title="Lab">
+      <span class="nav-icon">⚗️</span>
+      <span class="nav-label">Lab</span>
+    </div>
+    <div class="nav-item" title="Community">
+      <span class="nav-icon">🌌</span>
+      <span class="nav-label">Galaxy</span>
+    </div>
+
+    <div class="sidebar-spacer"></div>
+
+    <div class="nav-item" title="Profile">
+      <span class="nav-icon">👨‍🚀</span>
+      <span class="nav-label">Profile</span>
+    </div>
+    <div class="nav-item" title="Settings" style="margin-bottom:8px">
+      <span class="nav-icon">⚙️</span>
+      <span class="nav-label">Settings</span>
+    </div>
+    <div class="avatar-wrap">👨‍💻</div>
+  </aside>
+
+  <!-- ─────────────── Main ─────────────── -->
+  <div class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-title">Mission Control &nbsp;/&nbsp; <span>Dashboard</span></div>
+      <div class="topbar-spacer"></div>
+      <div class="search-bar">
+        <span>🔭</span>
+        <input type="text" placeholder="Search modules, missions…" />
+      </div>
+      <div class="xp-chip"><div class="dot"></div> 4,280 XP</div>
+      <div class="topbar-badge">🔔</div>
+    </header>
+
+    <!-- Content Grid -->
+    <div class="content">
+
+      <!-- ── HERO ── -->
+      <section class="hero animate-in">
+        <!-- Ring HUD -->
+        <div class="hero-ring-wrap">
+          <svg class="ring-svg" viewBox="0 0 150 150">
+            <defs>
+              <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%"   stop-color="#1a6bff"/>
+                <stop offset="100%" stop-color="#00e5ff"/>
+              </linearGradient>
+            </defs>
+            <!-- outer orbit decoration -->
+            <circle class="ring-orbit" cx="75" cy="75" r="70"/>
+            <!-- background track -->
+            <circle class="ring-track" cx="75" cy="75" r="65"/>
+            <!-- progress arc -->
+            <circle class="ring-progress" cx="75" cy="75" r="65"/>
+          </svg>
+          <div class="ring-inner">
+            <div class="ring-pct">75<span>%</span></div>
+            <div class="ring-sub">Mission Progress</div>
+          </div>
+          <div class="orbit-dot glow-pulse"></div>
+        </div>
+
+        <!-- Copy -->
+        <div class="hero-text">
+          <div class="hero-eyebrow">⚡ Active Mission · Season 3</div>
+          <h1 class="hero-heading">Welcome back, <em>Commander</em>.<br/>Ready for the next jump?</h1>
+          <p class="hero-sub">3 modules unlocked in your current orbit. Your next checkpoint is <strong style="color:var(--text-primary)">Chapter 9: Rate Limiting Patterns</strong>.</p>
+          <div class="hero-stats">
+            <div class="stat">
+              <div class="stat-val">12</div>
+              <div class="stat-lbl">Modules Done</div>
+            </div>
+            <div class="stat">
+              <div class="stat-val accent-o">3</div>
+              <div class="stat-lbl">In Orbit</div>
+            </div>
+            <div class="stat">
+              <div class="stat-val accent-m">7</div>
+              <div class="stat-lbl">Badges Earned</div>
+            </div>
+            <div class="stat">
+              <div class="stat-val">16</div>
+              <div class="stat-lbl">Day Streak</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CTAs -->
+        <div class="hero-cta">
+          <button class="btn-primary">▶ Resume Mission</button>
+          <button class="btn-ghost">📋 View Roadmap</button>
+          <div class="streak-chip">
+            <span class="flame">🔥</span> 16-day streak · Keep it going!
+          </div>
+        </div>
+      </section>
+
+      <!-- ── RIGHT PANEL ── -->
+      <div class="right-panel">
+
+        <!-- Next Lesson -->
+        <div class="glasscard animate-in delay-1">
+          <div class="glasscard-title">Next In Queue</div>
+          <div class="next-lesson">
+            <div class="next-lesson-icon">📡</div>
+            <div class="next-lesson-body">
+              <div class="next-lesson-eyebrow">API Engineering · Ch.9</div>
+              <div class="next-lesson-title">Rate Limiting Patterns</div>
+              <div class="next-lesson-sub">~22 min &nbsp;·&nbsp; Intermediate</div>
+            </div>
+            <div class="next-lesson-arrow">›</div>
+          </div>
+        </div>
+
+        <!-- Skill Levels -->
+        <div class="glasscard animate-in delay-2">
+          <div class="glasscard-title">Skill Levels <a href="#">View All →</a></div>
+          <div class="skill-list">
+            <div class="skill-row">
+              <div class="skill-head">
+                <span class="skill-name">API Design</span>
+                <span class="skill-lvl val-cyan">Lv 8</span>
+              </div>
+              <div class="prog-track"><div class="prog-fill fill-cyan" style="width:82%"></div></div>
+            </div>
+            <div class="skill-row">
+              <div class="skill-head">
+                <span class="skill-name">System Architecture</span>
+                <span class="skill-lvl val-purple">Lv 6</span>
+              </div>
+              <div class="prog-track"><div class="prog-fill fill-purple" style="width:60%"></div></div>
+            </div>
+            <div class="skill-row">
+              <div class="skill-head">
+                <span class="skill-name">Distributed Systems</span>
+                <span class="skill-lvl val-orange">Lv 5</span>
+              </div>
+              <div class="prog-track"><div class="prog-fill fill-orange" style="width:45%"></div></div>
+            </div>
+            <div class="skill-row">
+              <div class="skill-head">
+                <span class="skill-name">Go / Performance</span>
+                <span class="skill-lvl val-green">Lv 7</span>
+              </div>
+              <div class="prog-track"><div class="prog-fill fill-green" style="width:70%"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mission Patches -->
+        <div class="glasscard animate-in delay-3">
+          <div class="glasscard-title">Mission Patches <a href="#">7/24 Earned</a></div>
+          <div class="badges-grid">
+            <div class="badge-item badge-earned" title="First Launch">
+              <div class="badge-icon">🚀</div>
+              <div class="badge-name">First Launch</div>
+            </div>
+            <div class="badge-item badge-earned-cyan" title="API Pilot">
+              <div class="badge-icon">📡</div>
+              <div class="badge-name">API Pilot</div>
+            </div>
+            <div class="badge-item badge-earned-purple" title="Architect">
+              <div class="badge-icon">🏛️</div>
+              <div class="badge-name">Architect</div>
+            </div>
+            <div class="badge-item badge-earned" title="No Sleep">
+              <div class="badge-icon">🔥</div>
+              <div class="badge-name">No Sleep ×14</div>
+            </div>
+            <div class="badge-item badge-earned-cyan" title="Redis Master">
+              <div class="badge-icon">⚡</div>
+              <div class="badge-name">Cache Lord</div>
+            </div>
+            <div class="badge-item badge-earned-purple" title="Deep Diver">
+              <div class="badge-icon">🔭</div>
+              <div class="badge-name">Deep Diver</div>
+            </div>
+            <div class="badge-item badge-locked-item" title="Locked">
+              <div class="badge-icon">🌑</div>
+              <div class="badge-name">Dark Side</div>
+            </div>
+            <div class="badge-item badge-locked-item" title="Locked">
+              <div class="badge-icon">🛰️</div>
+              <div class="badge-name">Satellite</div>
+            </div>
+            <div class="badge-item badge-locked-item" title="Locked">
+              <div class="badge-icon">🌟</div>
+              <div class="badge-name">Supernova</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Leaderboard -->
+        <div class="glasscard animate-in delay-4">
+          <div class="glasscard-title">Leaderboard <a href="#">Full Board →</a></div>
+          <div class="lb-list">
+            <div class="lb-row">
+              <span class="lb-rank gold">1</span>
+              <div class="lb-av">🦁</div>
+              <span class="lb-name">astro_mike</span>
+              <span class="lb-xp">6,810 xp</span>
+            </div>
+            <div class="lb-row">
+              <span class="lb-rank silver">2</span>
+              <div class="lb-av">🐺</div>
+              <span class="lb-name">_neon_wolf</span>
+              <span class="lb-xp">5,920 xp</span>
+            </div>
+            <div class="lb-row">
+              <span class="lb-rank bronze">3</span>
+              <div class="lb-av">🦊</div>
+              <span class="lb-name">cosmo_dev</span>
+              <span class="lb-xp">5,340 xp</span>
+            </div>
+            <div class="lb-row me">
+              <span class="lb-rank" style="color:var(--accent-cyan)">5</span>
+              <div class="lb-av" style="border-color:rgba(0,229,255,0.4)">👨‍💻</div>
+              <span class="lb-name">You · Commander</span>
+              <span class="lb-xp">4,280 xp</span>
+            </div>
+            <div class="lb-row">
+              <span class="lb-rank">6</span>
+              <div class="lb-av">🐢</div>
+              <span class="lb-name">byte_turtle</span>
+              <span class="lb-xp">4,010 xp</span>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /right-panel -->
+
+      <!-- ── COURSES ── -->
+      <div class="courses-area animate-in delay-1">
+        <div class="section-label">Active Missions</div>
+        <div class="courses-grid">
+
+          <!-- Card 1: API Engineering -->
+          <div class="course-card card-api">
+            <div class="card-header">
+              <div class="card-icon icon-cyan">📡</div>
+              <span class="card-badge badge-active">Active</span>
+            </div>
+            <div>
+              <div class="card-title">API Engineering</div>
+              <div class="card-meta">16 modules <span class="dot"></span> Go &amp; REST <span class="dot"></span> Advanced</div>
+            </div>
+            <div class="card-progress">
+              <div class="progress-row">
+                <span class="progress-label">Progress</span>
+                <span class="progress-val val-cyan">82%</span>
+              </div>
+              <div class="prog-track">
+                <div class="prog-fill fill-cyan" style="width:82%"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2: Clean Architecture -->
+          <div class="course-card card-arch">
+            <div class="card-header">
+              <div class="card-icon icon-purple">🏛️</div>
+              <span class="card-badge badge-active">Active</span>
+            </div>
+            <div>
+              <div class="card-title">Clean Architecture</div>
+              <div class="card-meta">12 modules <span class="dot"></span> Design Patterns <span class="dot"></span> Expert</div>
+            </div>
+            <div class="card-progress">
+              <div class="progress-row">
+                <span class="progress-label">Progress</span>
+                <span class="progress-val val-purple">58%</span>
+              </div>
+              <div class="prog-track">
+                <div class="prog-fill fill-purple" style="width:58%"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3: Redis Mastery -->
+          <div class="course-card card-redis">
+            <div class="card-header">
+              <div class="card-icon icon-orange">⚡</div>
+              <span class="card-badge badge-active">Active</span>
+            </div>
+            <div>
+              <div class="card-title">Redis Mastery</div>
+              <div class="card-meta">10 modules <span class="dot"></span> Distributed <span class="dot"></span> Intermediate</div>
+            </div>
+            <div class="card-progress">
+              <div class="progress-row">
+                <span class="progress-label">Progress</span>
+                <span class="progress-val val-orange">40%</span>
+              </div>
+              <div class="prog-track">
+                <div class="prog-fill fill-orange" style="width:40%"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 4: Cloud Native (locked/new) -->
+          <div class="course-card card-k8s">
+            <div class="card-header">
+              <div class="card-icon icon-green">☁️</div>
+              <span class="card-badge badge-new">New</span>
+            </div>
+            <div>
+              <div class="card-title">Cloud Native &amp; K8s</div>
+              <div class="card-meta">18 modules <span class="dot"></span> Kubernetes <span class="dot"></span> Expert</div>
+            </div>
+            <div class="card-progress">
+              <div class="progress-row">
+                <span class="progress-label">Progress</span>
+                <span class="progress-val val-green">0%</span>
+              </div>
+              <div class="prog-track">
+                <div class="prog-fill fill-green" style="width:0%"></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── ACTIVITY FEED ── -->
+      <div class="activity-area animate-in delay-2">
+        <div class="section-label">Recent Activity</div>
+        <div class="timeline-list">
+          <div class="timeline-item">
+            <div class="tl-icon icon-cyan" style="background:rgba(0,229,255,0.10)">✅</div>
+            <div class="tl-body">
+              <div class="tl-title">Completed: Chapter 8 — Pipeline Batching in Redis</div>
+              <div class="tl-sub">API Engineering · Module 8 of 16</div>
+            </div>
+            <div class="tl-xp">+120 XP</div>
+            <div class="tl-time">2h ago</div>
+          </div>
+          <div class="timeline-item">
+            <div class="tl-icon" style="background:rgba(124,77,255,0.10);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px">🏆</div>
+            <div class="tl-body">
+              <div class="tl-title">Earned Mission Patch: "Cache Lord"</div>
+              <div class="tl-sub">Redis Mastery · Completed 4 Redis modules</div>
+            </div>
+            <div class="tl-xp">+250 XP</div>
+            <div class="tl-time">2h ago</div>
+          </div>
+          <div class="timeline-item">
+            <div class="tl-icon" style="background:rgba(255,140,0,0.10);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px">📝</div>
+            <div class="tl-body">
+              <div class="tl-title">Completed Quiz: ZSET Cursor Pagination Patterns</div>
+              <div class="tl-sub">Score: 9/10 · Clean Architecture</div>
+            </div>
+            <div class="tl-xp">+80 XP</div>
+            <div class="tl-time">Yesterday</div>
+          </div>
+          <div class="timeline-item">
+            <div class="tl-icon" style="background:rgba(0,230,118,0.10);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px">🔥</div>
+            <div class="tl-body">
+              <div class="tl-title">Streak Milestone: 14 Days &amp; counting</div>
+              <div class="tl-sub">Keep showing up. The universe rewards consistency.</div>
+            </div>
+            <div class="tl-xp">+200 XP</div>
+            <div class="tl-time">2d ago</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+</body>
+</html>

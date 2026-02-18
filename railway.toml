@@ -1,0 +1,26 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+healthcheckPath = "/health"
+healthcheckTimeout = 30
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
+
+# Environment variables automatically injected by Railway:
+#   PORT        — Railway sets this; the app reads it from config.
+#   REDIS_URL   — Set automatically when you add a Redis plugin/service.
+#                 Format: redis://:password@host:port/db
+#                         rediss://:password@host:port/db  (TLS)
+#
+# Variables you must set manually in the Railway dashboard:
+#   ENVIRONMENT          = production
+#   JWT_SECRET           = <openssl rand -hex 32>
+#   LOG_LEVEL            = info
+#
+# Optional overrides (defaults are production-safe):
+#   CORS_ALLOWED_ORIGINS = https://your-frontend.railway.app
+#   RATE_LIMIT           = 100
+#   RATE_WINDOW          = 1m
+#   DATA_TTL             = 72h
