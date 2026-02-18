@@ -334,6 +334,108 @@
     }
     .snippet-copy-btn:active { opacity: .75; }
     .snippet-hint { font-size: 10px; color: var(--text-dim); }
+
+    /* ── Status Code Reference Modal ──────────────────────────────── */
+    .sc-modal-overlay {
+      position: fixed; inset: 0; z-index: 950;
+      background: rgba(3,4,14,.82); backdrop-filter: blur(6px);
+      display: none; align-items: flex-start; justify-content: center;
+      padding: 24px 12px; overflow-y: auto;
+    }
+    .sc-modal-overlay.open { display: flex; }
+    .sc-modal {
+      width: min(760px, 100%); background: rgba(6,9,28,.98);
+      border: 1px solid var(--glass-border); border-radius: 18px;
+      box-shadow: 0 24px 80px rgba(0,0,40,.8);
+      animation: scModalIn .22s ease;
+    }
+    @keyframes scModalIn { from{transform:translateY(-24px);opacity:0} to{transform:translateY(0);opacity:1} }
+    .sc-modal-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 24px; border-bottom: 1px solid var(--glass-border);
+    }
+    .sc-modal-title { font-size: 14px; font-weight: 800; color: #ffb347; letter-spacing: .04em; }
+    .sc-modal-close {
+      width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--glass-border);
+      background: rgba(100,140,255,.06); color: var(--text-secondary); cursor: pointer;
+      font-size: 16px; display: flex; align-items: center; justify-content: center;
+    }
+    .sc-modal-close:hover { background: rgba(255,82,82,.14); color: #ff8080; }
+    .sc-modal-body { padding: 20px 24px 30px; }
+    .sc-group-title {
+      font-size: 9px; font-weight: 900; letter-spacing: .18em; text-transform: uppercase;
+      color: var(--text-dim); padding: 20px 0 8px; border-bottom: 1px solid rgba(100,140,255,.08);
+      margin-bottom: 4px;
+    }
+    .sc-card {
+      display: grid; grid-template-columns: 72px 1fr; gap: 0 14px;
+      padding: 12px 0; border-bottom: 1px solid rgba(100,140,255,.05); align-items: start;
+    }
+    .sc-badge {
+      font-size: 13px; font-weight: 900; font-family: monospace;
+      padding: 4px 8px; border-radius: 7px; text-align: center; line-height: 1.3; align-self: start; margin-top: 2px;
+    }
+    .sc-2xx { background: rgba(0,230,118,.12); color: #00e676; border: 1px solid rgba(0,230,118,.2); }
+    .sc-3xx { background: rgba(0,229,255,.10); color: #00e5ff; border: 1px solid rgba(0,229,255,.18); }
+    .sc-4xx { background: rgba(255,82,82,.12); color: #ff8080; border: 1px solid rgba(255,82,82,.20); }
+    .sc-5xx { background: rgba(255,140,0,.12); color: #ffb347; border: 1px solid rgba(255,140,0,.20); }
+    .sc-name { font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+    .sc-desc { font-size: 11px; color: var(--text-secondary); line-height: 1.65; }
+    .sc-tag {
+      display: inline-block; font-size: 9px; font-weight: 700; padding: 1px 6px;
+      border-radius: 4px; background: rgba(100,140,255,.10); color: var(--text-dim);
+      margin-top: 5px; margin-right: 4px;
+    }
+    .btn-status-code {
+      padding: 5px 12px; border-radius: 6px; font-size: 10px; font-weight: 700;
+      background: rgba(255,140,0,.10); border: 1px solid rgba(255,140,0,.22);
+      color: #ffb347; cursor: pointer; white-space: nowrap;
+      transition: background .15s; font-family: inherit;
+    }
+    .btn-status-code:hover { background: rgba(255,140,0,.20); }
+    .hamburger {
+      display: none; background: none; border: 1px solid var(--glass-border);
+      border-radius: 6px; padding: 5px 8px; color: var(--text-secondary);
+      cursor: pointer; font-size: 16px; align-items: center; justify-content: center;
+    }
+
+    /* ── Responsive Mobile ─────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      html, body { overflow: auto; }
+      .topnav { padding: 10px 16px; gap: 8px; flex-wrap: wrap; height: auto; }
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+      .token-bar { padding: 8px 14px; gap: 7px; flex-wrap: wrap; }
+      .token-input { min-width: 0; font-size: 10px; flex: 1 1 120px; }
+      .playground {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto;
+        height: auto; min-height: calc(100vh - 110px);
+      }
+      .ep-list {
+        display: none; border-right: none;
+        border-bottom: 1px solid var(--glass-border);
+        max-height: 260px; overflow-y: auto;
+      }
+      .ep-list.mobile-open { display: block; }
+      .req-panel { border-right: none; border-bottom: 1px solid var(--glass-border); min-height: 320px; }
+      .res-panel { min-height: 280px; }
+      .url-row { flex-wrap: wrap; gap: 6px; }
+      .url-input { width: 100%; min-width: 0; }
+      .panel-header { flex-wrap: wrap; gap: 6px; }
+      .sc-modal-overlay { padding: 0; align-items: flex-end; }
+      .sc-modal { border-radius: 18px 18px 0 0; max-height: 90vh; overflow-y: auto; }
+      .sc-modal-body { padding: 16px 16px 24px; }
+      .sc-card { grid-template-columns: 60px 1fr; }
+      .snippet-drawer { width: 100vw; }
+    }
+    @media (max-width: 480px) {
+      .logo-text { font-size: 13px; }
+      .btn-xs { padding: 4px 9px; font-size: 9px; }
+      .token-label { display: none; }
+      .sc-badge { font-size: 11px; }
+      .sc-name { font-size: 12px; }
+    }
   </style>
 </head>
 <body>
@@ -353,7 +455,9 @@
     <a class="nav-link active" href="playground.html">⚡ Playground</a>
   </div>
   <div class="nav-spacer"></div>
+  <button class="btn-status-code" onclick="openStatusCodeModal()">📊 Status Codes</button>
   <a class="btn-xs btn-docs" href="docs.html">📖 API Reference</a>
+  <button class="hamburger" onclick="toggleMobileMenu()" title="เปิด/ปิด Endpoints">☰</button>
 </nav>
 
 <!-- Token Bar -->
@@ -396,6 +500,48 @@
     <div class="ep-item" data-ep="bulk" onclick="selectEndpoint(this,'bulk')">
       <span class="ep-method m-post">POST</span><span class="ep-path">/api/v1/products/bulk</span>
     </div>
+    <div class="ep-group-label" style="margin-top:8px;color:#ff8c00">🔴 Error Sandbox</div>
+    <div style="padding:2px 14px 6px;font-size:9px;color:var(--text-dim);line-height:1.55">เรียกแล้วได้ error จริง ๆ<br>เรียนรู้การ handle แต่ละแบบ</div>
+    <div class="ep-item" data-ep="e400" onclick="selectEndpoint(this,'e400')">
+      <span class="ep-method" style="background:rgba(255,82,82,.12);color:#ff8080;min-width:34px;font-size:9px;font-weight:900;padding:2px 5px;border-radius:4px;text-align:center;font-family:monospace">400</span><span class="ep-path">/sandbox/errors/400</span>
+    </div>
+    <div class="ep-item" data-ep="e401" onclick="selectEndpoint(this,'e401')">
+      <span class="ep-method" style="background:rgba(255,82,82,.12);color:#ff8080;min-width:34px;font-size:9px;font-weight:900;padding:2px 5px;border-radius:4px;text-align:center;font-family:monospace">401</span><span class="ep-path">/sandbox/errors/401</span>
+    </div>
+    <div class="ep-item" data-ep="e403" onclick="selectEndpoint(this,'e403')">
+      <span class="ep-method" style="background:rgba(255,82,82,.12);color:#ff8080;min-width:34px;font-size:9px;font-weight:900;padding:2px 5px;border-radius:4px;text-align:center;font-family:monospace">403</span><span class="ep-path">/sandbox/errors/403</span>
+    </div>
+    <div class="ep-item" data-ep="e404" onclick="selectEndpoint(this,'e404')">
+      <span class="ep-method" style="background:rgba(255,82,82,.12);color:#ff8080;min-width:34px;font-size:9px;font-weight:900;padding:2px 5px;border-radius:4px;text-align:center;font-family:monospace">404</span><span class="ep-path">/sandbox/errors/404</span>
+    </div>
+    <div class="ep-item" data-ep="e405" onclick="selectEndpoint(this,'e405')">
+      <span class="ep-method" style="background:rgba(255,82,82,.12);color:#ff8080;min-width:34px;font-size:9px;font-weight:900;padding:2px 5px;border-radius:4px;text-align:center;font-family:monospace">405</span><span class="ep-path">/sandbox/errors/405</span>
+    </div>
+    <div class="ep-item" data-ep="e409" onclick="selectEndpoint(this,'e409')">
+      <span class="ep-method" style="background:rgba(255,82,82,.12);color:#ff8080;min-width:34px;font-size:9px;font-weight:900;padding:2px 5px;border-radius:4px;text-align:center;font-family:monospace">409</span><span class="ep-path">/sandbox/errors/409</span>
+    </div>
+    <div class="ep-item" data-ep="e410" onclick="selectEndpoint(this,'e410')">
+      <span class="ep-method" style="background:rgba(255,82,82,.12);color:#ff8080;min-width:34px;font-size:9px;font-weight:900;padding:2px 5px;border-radius:4px;text-align:center;font-family:monospace">410</span><span class="ep-path">/sandbox/errors/410</span>
+    </div>
+    <div class="ep-item" data-ep="e422" onclick="selectEndpoint(this,'e422')">
+      <span class="ep-method" style="background:rgba(255,82,82,.12);color:#ff8080;min-width:34px;font-size:9px;font-weight:900;padding:2px 5px;border-radius:4px;text-align:center;font-family:monospace">422</span><span class="ep-path">/sandbox/errors/422</span>
+    </div>
+    <div class="ep-item" data-ep="e429" onclick="selectEndpoint(this,'e429')">
+      <span class="ep-method" style="background:rgba(255,140,0,.14);color:#ffb347;min-width:34px;font-size:9px;font-weight:900;padding:2px 5px;border-radius:4px;text-align:center;font-family:monospace">429</span><span class="ep-path">/sandbox/errors/429</span>
+    </div>
+    <div class="ep-item" data-ep="e500" onclick="selectEndpoint(this,'e500')">
+      <span class="ep-method" style="background:rgba(255,140,0,.14);color:#ffb347;min-width:34px;font-size:9px;font-weight:900;padding:2px 5px;border-radius:4px;text-align:center;font-family:monospace">500</span><span class="ep-path">/sandbox/errors/500</span>
+    </div>
+    <div class="ep-item" data-ep="e502" onclick="selectEndpoint(this,'e502')">
+      <span class="ep-method" style="background:rgba(255,140,0,.14);color:#ffb347;min-width:34px;font-size:9px;font-weight:900;padding:2px 5px;border-radius:4px;text-align:center;font-family:monospace">502</span><span class="ep-path">/sandbox/errors/502</span>
+    </div>
+    <div class="ep-item" data-ep="e503" onclick="selectEndpoint(this,'e503')">
+      <span class="ep-method" style="background:rgba(255,140,0,.14);color:#ffb347;min-width:34px;font-size:9px;font-weight:900;padding:2px 5px;border-radius:4px;text-align:center;font-family:monospace">503</span><span class="ep-path">/sandbox/errors/503</span>
+    </div>
+    <div class="ep-item" data-ep="e504" onclick="selectEndpoint(this,'e504')">
+      <span class="ep-method" style="background:rgba(255,140,0,.14);color:#ffb347;min-width:34px;font-size:9px;font-weight:900;padding:2px 5px;border-radius:4px;text-align:center;font-family:monospace">504</span><span class="ep-path">/sandbox/errors/504</span>
+    </div>
+    <div style="height:16px"></div>
   </div>
 
   <!-- Middle: Request builder -->
@@ -468,6 +614,17 @@
     </div>
   </div>
 
+</div>
+
+<!-- Status Code Reference Modal -->
+<div class="sc-modal-overlay" id="scModalOverlay" onclick="closeStatusCodeModalOnOverlay(event)">
+  <div class="sc-modal">
+    <div class="sc-modal-head">
+      <div class="sc-modal-title">📊 HTTP Status Code — คู่มือฉบับเข้าใจง่าย</div>
+      <button class="sc-modal-close" onclick="closeStatusCodeModal()">✕</button>
+    </div>
+    <div class="sc-modal-body" id="scModalBody"></div>
+  </div>
 </div>
 
 <div class="snippet-overlay" id="snippetOverlay" onclick="closeSnippetDrawerOnOverlay(event)">
@@ -1133,8 +1290,91 @@ function copySnippet() {
 
 // Close drawer with Escape key
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeSnippetDrawer();
+  if (e.key === 'Escape') { closeSnippetDrawer(); closeStatusCodeModal(); }
 });
+
+// ── Error Sandbox Endpoints (merged into ENDPOINTS) ─────────────────────────
+const ERROR_SANDBOX_EPS = {
+  e400: { method:'GET', url:BASE+'/api/v1/sandbox/errors/400', body:'', desc:'400 — request ไม่ถูก schema / validation' },
+  e401: { method:'GET', url:BASE+'/api/v1/sandbox/errors/401', body:'', desc:'401 — ไม่ได้ authenticate / token หมดอายุ' },
+  e403: { method:'GET', url:BASE+'/api/v1/sandbox/errors/403', body:'', desc:'403 — authenticate แล้วแต่ไม่มีสิทธิ์' },
+  e404: { method:'GET', url:BASE+'/api/v1/sandbox/errors/404', body:'', desc:'404 — ไม่พบ resource ที่ขอ' },
+  e405: { method:'GET', url:BASE+'/api/v1/sandbox/errors/405', body:'', desc:'405 — HTTP method ไม่ถูกต้องสำหรับ endpoint นี้' },
+  e409: { method:'GET', url:BASE+'/api/v1/sandbox/errors/409', body:'', desc:'409 — ข้อมูลซ้ำหรือ state ขัดแย้ง' },
+  e410: { method:'GET', url:BASE+'/api/v1/sandbox/errors/410', body:'', desc:'410 — resource ถูกลบถาวร จะไม่กลับมา' },
+  e422: { method:'GET', url:BASE+'/api/v1/sandbox/errors/422', body:'', desc:'422 — JSON ถูก syntax แต่ business logic ไม่ผ่าน' },
+  e429: { method:'GET', url:BASE+'/api/v1/sandbox/errors/429', body:'', desc:'429 — ส่ง request เกิน rate limit ดู Retry-After header' },
+  e500: { method:'GET', url:BASE+'/api/v1/sandbox/errors/500', body:'', desc:'500 — server error ที่ไม่คาดคิด (bug)' },
+  e502: { method:'GET', url:BASE+'/api/v1/sandbox/errors/502', body:'', desc:'502 — gateway รับ response ผิดจาก upstream' },
+  e503: { method:'GET', url:BASE+'/api/v1/sandbox/errors/503', body:'', desc:'503 — server ยังไม่พร้อม / overload / maintenance' },
+  e504: { method:'GET', url:BASE+'/api/v1/sandbox/errors/504', body:'', desc:'504 — gateway timeout รอ upstream นานเกิน' },
+};
+Object.assign(ENDPOINTS, ERROR_SANDBOX_EPS);
+
+// ── Mobile hamburger ────────────────────────────────────────────────────────
+function toggleMobileMenu() {
+  document.querySelector('.ep-list').classList.toggle('mobile-open');
+}
+
+// ── Status Code Reference Modal ──────────────────────────────────────────────
+const SC_DATA = [
+  { group:'✅ 2xx — สำเร็จ! Server เข้าใจและทำให้แล้ว', cls:'sc-2xx', codes:[
+    { code:'200', name:'OK', emoji:'🎉', desc:'Request สำเร็จแบบธรรมดาที่สุด ใช้กับ GET, PUT, DELETE ที่ทำงานสำเร็จ', tags:['GET','PUT','DELETE','PATCH'] },
+    { code:'201', name:'Created', emoji:'✨', desc:'Resource ใหม่ถูกสร้างสำเร็จ ควรมี Location header บอก URL ของ resource ใหม่ ใช้กับ POST ที่ create ข้อมูล', tags:['POST'] },
+    { code:'204', name:'No Content', emoji:'🫙', desc:'สำเร็จ แต่ไม่มี body ตอบกลับ ใช้กับ DELETE หรือ action ที่ไม่ต้องการ response body เช่น logout', tags:['DELETE','POST'] },
+  ]},
+  { group:'↪️ 3xx — Redirect: ไปต่อที่อื่นได้เลย', cls:'sc-3xx', codes:[
+    { code:'301', name:'Moved Permanently', emoji:'🏠', desc:'URL เปลี่ยนถาวร Browser และ crawler ควร update URL เก่าออก ใช้ตอน migrate domain หรือเปลี่ยน path โครงสร้าง', tags:['SEO','Domain migration'] },
+    { code:'302', name:'Found (Temporary Redirect)', emoji:'↩️', desc:'Redirect ชั่วคราว URL เดิมยังใช้ได้อยู่ Browser จะ GET ปลายทางใหม่ แต่ไม่ควร cache', tags:['OAuth flow','Login redirect'] },
+    { code:'304', name:'Not Modified', emoji:'💾', desc:'Resource ไม่เปลี่ยนจาก cache ล่าสุด Client ใช้ของที่ cache ไว้ได้เลย ลด bandwidth ได้มาก ใช้คู่กับ ETag / If-Modified-Since', tags:['Caching','ETag','Performance'] },
+  ]},
+  { group:'⚠️ 4xx — Client Error: ผิดที่ฝั่งคนส่ง', cls:'sc-4xx', codes:[
+    { code:'400', name:'Bad Request', emoji:'📋', desc:'Request ผิด syntax หรือ validation ไม่ผ่าน เช่น ส่ง JSON ผิด format, field หาย, type ผิด Server เข้าใจ request แต่ปฏิเสธเพราะ input ไม่ถูก', tags:['Validation','Input error'] },
+    { code:'401', name:'Unauthorized', emoji:'🔑', desc:'ยังไม่ได้ authenticate ไม่มี token หรือ token หมดอายุ ต้อง login ใหม่ก่อน (ชื่อ Unauthorized แต่ความหมายจริงๆ คือ Unauthenticated!)', tags:['Auth required','Token expired'] },
+    { code:'403', name:'Forbidden', emoji:'🚫', desc:'Authenticate แล้ว แต่ไม่มีสิทธิ์ เช่น user ธรรมดาพยายามเข้า admin endpoint ต่างจาก 401 ตรงที่รู้แล้วว่าคุณเป็นใคร แต่ไม่ได้รับอนุญาต', tags:['RBAC','Permission denied'] },
+    { code:'404', name:'Not Found', emoji:'🔍', desc:'ไม่พบ resource ที่ขอ อาจเป็นเพราะ ID ผิด ถูกลบไปแล้ว หรือ URL path พิมพ์ผิด ใช้บ่อยที่สุดใน REST API', tags:['ID not found','Deleted'] },
+    { code:'405', name:'Method Not Allowed', emoji:'🔧', desc:'URL ถูก แต่ HTTP method ผิด เช่น ส่ง PATCH ไปที่ endpoint ที่รับแค่ GET/PUT ดู Allow header ในคำตอบเพื่อรู้ว่า method ไหนถูก', tags:['Wrong method','Allow header'] },
+    { code:'408', name:'Request Timeout', emoji:'⏱️', desc:'Client ส่ง request ช้าเกินไป server รอนานแล้วตัดการเชื่อมต่อ ต่างจาก 504 ตรงที่เป็น timeout ระหว่าง client กับ server โดยตรง', tags:['Timeout','Network'] },
+    { code:'409', name:'Conflict', emoji:'⚔️', desc:'State ปัจจุบันขัดแย้งกับ request เช่น สร้าง user ซ้ำ email หรือ upload version เก่ากว่าที่มีอยู่ ต้อง resolve conflict ก่อน', tags:['Duplicate','Version conflict'] },
+    { code:'410', name:'Gone', emoji:'💨', desc:'Resource ถูกลบถาวร และจะไม่กลับมา ต่างจาก 404 ตรงที่ API ยืนยัน "เคยมี แต่ตอนนี้ไม่มีและจะไม่มีอีก" ช่วย crawler ลบ URL ออกจาก index', tags:['Permanent delete','SEO'] },
+    { code:'413', name:'Payload Too Large', emoji:'📦', desc:'Body ที่ส่งมาใหญ่เกิน limit ของ server เช่น upload ไฟล์ใหญ่เกิน limit ที่กำหนด ต้องบีบอัดหรือแบ่งส่งเป็น chunks', tags:['Upload limit','File size'] },
+    { code:'415', name:'Unsupported Media Type', emoji:'📄', desc:'Content-Type ที่ส่งมา server ไม่รองรับ เช่น ส่ง text/plain แต่ server ต้องการ application/json แก้ header ให้ถูก', tags:['Content-Type','Header'] },
+    { code:'422', name:'Unprocessable Entity', emoji:'🧩', desc:'JSON ถูก syntax แต่ logic ไม่ผ่าน เช่น date ยังมาไม่ถึง price เป็น 0 enum ผิดค่า Server เข้าใจ request แต่ business rule บอกว่าทำไม่ได้', tags:['Business logic','Semantic error'] },
+    { code:'429', name:'Too Many Requests', emoji:'🚦', desc:'ส่ง request เกิน rate limit ดู header X-RateLimit-Remaining, X-RateLimit-Reset และ Retry-After เพื่อรู้ว่าต้องรอนานแค่ไหน ควร implement backoff', tags:['Rate limiting','Retry-After','Backoff'] },
+  ]},
+  { group:'🔥 5xx — Server Error: ผิดที่ฝั่ง server', cls:'sc-5xx', codes:[
+    { code:'500', name:'Internal Server Error', emoji:'💥', desc:'Server เจอ error ที่ไม่คาดคิด เช่น null pointer, DB query พัง ไม่ใช่ความผิดของ client แต่ client ก็ทำอะไรไม่ได้นอกจาก retry และรายงาน bug', tags:['Bug','Server crash'] },
+    { code:'501', name:'Not Implemented', emoji:'🔨', desc:'Server รู้จัก method นั้น แต่ยังไม่ได้ implement เช่น PATCH ที่วางแผนไว้แต่ยังไม่ได้ทำ ต่างจาก 405 ตรงที่ method นั้น valid แต่ยังไม่พร้อม', tags:['WIP','Coming soon'] },
+    { code:'502', name:'Bad Gateway', emoji:'🌐', desc:'Server ทำหน้าที่เป็น gateway/proxy แล้วได้รับ response ที่ไม่ถูกต้องจาก upstream service เช่น microservice ข้างหลังส่งข้อมูลเสีย', tags:['Microservices','Proxy'] },
+    { code:'503', name:'Service Unavailable', emoji:'🏗️', desc:'Server ยังไม่พร้อม เช่น กำลัง deploy, overload หรือ maintenance มักมี Retry-After header บอกว่าจะกลับมาเมื่อไหร่ ควร implement circuit breaker', tags:['Maintenance','Overload','Circuit breaker'] },
+    { code:'504', name:'Gateway Timeout', emoji:'⏰', desc:'Gateway รอ upstream service นานเกินไปแล้วหมดเวลา ต่างจาก 408 ตรงที่เป็น timeout ระหว่าง server กับ upstream ไม่ใช่ client กับ server', tags:['Timeout','Upstream slow'] },
+  ]},
+];
+
+function openStatusCodeModal() {
+  const body = document.getElementById('scModalBody');
+  if (!body.innerHTML.trim()) {
+    body.innerHTML = SC_DATA.map(g => `
+      <div class="sc-group-title">${g.group}</div>
+      ${g.codes.map(c => `
+        <div class="sc-card">
+          <div class="sc-badge ${g.cls}">${c.code}</div>
+          <div>
+            <div class="sc-name">${c.emoji} ${c.name}</div>
+            <div class="sc-desc">${c.desc}</div>
+            <div>${c.tags.map(t=>`<span class="sc-tag">${t}</span>`).join('')}</div>
+          </div>
+        </div>`).join('')}
+    `).join('');
+  }
+  document.getElementById('scModalOverlay').classList.add('open');
+}
+function closeStatusCodeModal() {
+  document.getElementById('scModalOverlay').classList.remove('open');
+}
+function closeStatusCodeModalOnOverlay(e) {
+  if (e.target === document.getElementById('scModalOverlay')) closeStatusCodeModal();
+}
 </script>
 </body>
 </html>

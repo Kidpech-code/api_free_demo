@@ -112,6 +112,25 @@ func NewRouter(
 	logoutGroup.Use(middleware.JWTAuth(cfg.JWT.Secret, logger))
 	logoutGroup.Post("/logout", authH.Logout)
 
+	// ── Error Sandbox (no auth required — for learning) ───────────────────
+	// These endpoints intentionally return specific HTTP error codes so
+	// students can explore error handling without manufacturing failures.
+	errH := handler.NewErrorSandboxHandler()
+	errSandbox := app.Group("/api/v1/sandbox/errors")
+	errSandbox.Get("/400", errH.E400)
+	errSandbox.Get("/401", errH.E401)
+	errSandbox.Get("/403", errH.E403)
+	errSandbox.Get("/404", errH.E404)
+	errSandbox.Get("/405", errH.E405)
+	errSandbox.Get("/409", errH.E409)
+	errSandbox.Get("/410", errH.E410)
+	errSandbox.Get("/422", errH.E422)
+	errSandbox.Get("/429", errH.E429)
+	errSandbox.Get("/500", errH.E500)
+	errSandbox.Get("/502", errH.E502)
+	errSandbox.Get("/503", errH.E503)
+	errSandbox.Get("/504", errH.E504)
+
 	// ── Authenticated API Routes ──────────────────────────────────────────
 	api := app.Group("/api/v1")
 	api.Use(middleware.JWTAuth(cfg.JWT.Secret, logger))
