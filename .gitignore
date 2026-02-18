@@ -1,11 +1,22 @@
-# local env / secrets
+# Binaries
+bin/
+*.exe
+*.out
+
+# Go
+*.test
+*.prof
+vendor/
+
+# Environment
 .env
-*.pem
-*.key
-*.crt
-credentials.json
-# docker
-docker-compose.override.yml
+.env.*
+!.env.example
+
 # IDE
 .vscode/
 .idea/
+
+# OS
+.DS_Store
+Thumbs.db
