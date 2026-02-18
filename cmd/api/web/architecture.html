@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>No.1 · Architecture Guide</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg-deep:      #03040e;
+      --glass-bg:     rgba(12, 18, 48, 0.60);
+      --glass-border: rgba(100, 140, 255, 0.18);
+      --glass-shadow: rgba(0, 10, 60, 0.7);
+      --accent-cyan:  #00e5ff;
+      --accent-orange:#ff8c00;
+      --accent-magenta:#e040fb;
+      --accent-green: #00e676;
+      --accent-red:   #ff5252;
+      --accent-yellow:#ffd740;
+      --purple-mid:   #7c4dff;
+      --blue-mid:     #1a6bff;
+      --text-primary: #e8eeff;
+      --text-secondary:#8899cc;
+      --text-dim:     #4a5580;
+      --radius-lg:    18px;
+      --radius-md:    12px;
+      --radius-sm:    8px;
+    }
+    html { height: 100%; scroll-behavior: smooth; }
+    body {
+      min-height: 100%; font-family: 'Inter','Segoe UI',system-ui,sans-serif;
+      background: var(--bg-deep); color: var(--text-primary);
+      line-height: 1.7;
+    }
+    .cosmos { position: fixed; inset: 0; z-index: 0; pointer-events:none;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 15%, rgba(72,52,180,.22) 0%,transparent 70%),
+        radial-gradient(ellipse 60% 50% at 80% 85%, rgba(0,120,180,.18) 0%,transparent 65%),
+        linear-gradient(160deg, #03040e 0%, #060918 60%, #04061a 100%);
+    }
+    .stars { position: fixed; inset: 0; z-index: 0; pointer-events:none;
+      background-image:
+        radial-gradient(1px 1px at 5% 8%,rgba(220,230,255,.65) 0%,transparent 100%),
+        radial-gradient(1.5px 1.5px at 70% 4%,rgba(255,255,255,.72) 0%,transparent 100%),
+        radial-gradient(1px 1px at 40% 18%,rgba(180,200,255,.50) 0%,transparent 100%),
+        radial-gradient(1px 1px at 90% 25%,rgba(200,220,255,.58) 0%,transparent 100%),
+        radial-gradient(1px 1px at 15% 60%,rgba(210,220,255,.44) 0%,transparent 100%),
+        radial-gradient(1px 1px at 60% 70%,rgba(220,230,255,.40) 0%,transparent 100%),
+        radial-gradient(1.5px 1.5px at 93% 80%,rgba(255,255,255,.62) 0%,transparent 100%);
+    }
+
+    /* ── Topnav ──────────────────────────────────────────────────────── */
+    .topnav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 28px; height: 54px;
+      background: rgba(4,6,22,.92); border-bottom: 1px solid var(--glass-border);
+      backdrop-filter: blur(24px);
+    }
+    .logo { display: flex; align-items: center; gap: 9px; text-decoration: none; }
+    .logo-mark { width: 30px; height: 30px; border-radius: 7px; background: linear-gradient(135deg,var(--purple-mid),var(--accent-cyan)); display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 0 14px rgba(0,229,255,.28); }
+    .logo-text { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+    .logo-text span { color: var(--accent-cyan); }
+    .nav-links { display: flex; gap: 3px; margin-left: 20px; }
+    .nav-link { padding: 5px 12px; border-radius: 16px; font-size: 12px; font-weight: 500; color: var(--text-secondary); text-decoration: none; transition: background .15s,color .15s; white-space:nowrap; }
+    .nav-link:hover { background: rgba(100,140,255,.10); color: var(--text-primary); }
+    .nav-link.active { background: rgba(0,229,255,.10); color: var(--accent-cyan); border: 1px solid rgba(0,229,255,.20); }
+    .nav-spacer { flex: 1; }
+    .btn-sm { padding: 5px 14px; border-radius: 16px; font-size: 12px; font-weight: 600; text-decoration: none; transition: .15s; }
+    .btn-ghost { color: var(--text-secondary); border: 1px solid var(--glass-border); }
+    .btn-ghost:hover { color: var(--accent-cyan); border-color: var(--accent-cyan); }
+
+    /* ── Layout with sidebar ─────────────────────────────────────── */
+    .page-wrap {
+      position: relative; z-index: 1;
+      display: flex; min-height: calc(100vh - 54px);
+    }
+    .sidebar {
+      position: sticky; top: 54px; height: calc(100vh - 54px);
+      width: 260px; min-width: 260px;
+      overflow-y: auto;
+      padding: 24px 16px;
+      background: rgba(4,6,22,.70);
+      border-right: 1px solid var(--glass-border);
+      backdrop-filter: blur(16px);
+    }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 4px; }
+    .sidebar h3 {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .12em; color: var(--text-dim); margin: 20px 0 8px;
+    }
+    .sidebar h3:first-child { margin-top: 0; }
+    .sidebar a {
+      display: block; padding: 6px 12px; border-radius: 8px;
+      font-size: 13px; color: var(--text-secondary); text-decoration: none;
+      transition: .15s; margin-bottom: 2px;
+    }
+    .sidebar a:hover { background: rgba(100,140,255,.10); color: var(--text-primary); }
+    .sidebar a.active { background: rgba(0,229,255,.10); color: var(--accent-cyan); }
+
+    /* ── Main Content ────────────────────────────────────────────── */
+    .main-content {
+      flex: 1; padding: 40px 48px 80px; max-width: 960px; margin: 0 auto;
+      overflow-y: auto;
+    }
+
+    /* ── Section styling ─────────────────────────────────────────── */
+    .section { margin-bottom: 64px; scroll-margin-top: 70px; }
+    .section h1 {
+      font-size: 32px; font-weight: 800; margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta));
+      background-clip: text;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .section h2 {
+      font-size: 22px; font-weight: 700; color: var(--accent-cyan);
+      margin: 36px 0 12px; padding-bottom: 6px;
+      border-bottom: 1px solid var(--glass-border);
+    }
+    .section h3 {
+      font-size: 17px; font-weight: 600; color: var(--accent-orange);
+      margin: 24px 0 8px;
+    }
+    .section p { color: var(--text-secondary); margin-bottom: 14px; }
+    .section ul, .section ol {
+      color: var(--text-secondary); margin: 0 0 16px 24px;
+    }
+    .section li { margin-bottom: 6px; }
+    .section strong { color: var(--text-primary); }
+
+    /* ── Glass Card ──────────────────────────────────────────────── */
+    .glass-card {
+      background: var(--glass-bg); border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md); padding: 24px; margin-bottom: 20px;
+      box-shadow: 0 8px 32px var(--glass-shadow);
+    }
+    .glass-card.highlight {
+      border-left: 3px solid var(--accent-cyan);
+    }
+    .glass-card.warn {
+      border-left: 3px solid var(--accent-orange);
+    }
+    .glass-card.success {
+      border-left: 3px solid var(--accent-green);
+    }
+
+    /* ── Code blocks ─────────────────────────────────────────────── */
+    pre {
+      background: rgba(2,4,18,.80); border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm); padding: 16px 20px;
+      overflow-x: auto; margin-bottom: 16px;
+      font-family: 'SF Mono','Cascadia Code','Fira Code',monospace;
+      font-size: 13px; line-height: 1.6; color: var(--text-primary);
+    }
+    code {
+      font-family: 'SF Mono','Cascadia Code','Fira Code',monospace;
+      font-size: 12.5px;
+    }
+    :not(pre) > code {
+      background: rgba(100,140,255,.12); padding: 2px 7px; border-radius: 5px;
+      color: var(--accent-cyan); font-size: 12px;
+    }
+
+    /* ── Diagram boxes ───────────────────────────────────────────── */
+    .diagram {
+      background: rgba(2,4,18,.85); border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md); padding: 24px; margin: 20px 0;
+      font-family: 'SF Mono','Cascadia Code',monospace; font-size: 13px;
+      color: var(--accent-cyan); line-height: 1.8; white-space: pre;
+      overflow-x: auto;
+    }
+
+    /* ── Comparison Table ────────────────────────────────────────── */
+    .cmp-table {
+      width: 100%; border-collapse: collapse; margin: 16px 0 20px;
+      font-size: 13px;
+    }
+    .cmp-table th {
+      background: rgba(100,140,255,.12); color: var(--accent-cyan);
+      text-align: left; padding: 10px 14px; font-weight: 600;
+      border-bottom: 2px solid var(--glass-border);
+    }
+    .cmp-table td {
+      padding: 10px 14px; color: var(--text-secondary);
+      border-bottom: 1px solid rgba(100,140,255,.08);
+    }
+    .cmp-table tr:hover td { background: rgba(100,140,255,.05); }
+    .badge {
+      display: inline-block; padding: 2px 8px; border-radius: 10px;
+      font-size: 11px; font-weight: 600;
+    }
+    .badge-cyan { background: rgba(0,229,255,.15); color: var(--accent-cyan); }
+    .badge-orange { background: rgba(255,140,0,.15); color: var(--accent-orange); }
+    .badge-green { background: rgba(0,230,118,.15); color: var(--accent-green); }
+    .badge-magenta { background: rgba(224,64,251,.15); color: var(--accent-magenta); }
+
+    /* ── Flow arrow list ─────────────────────────────────────────── */
+    .flow-list { list-style: none; margin: 0 0 16px; padding: 0; }
+    .flow-list li {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 10px 0; color: var(--text-secondary);
+      border-bottom: 1px solid rgba(100,140,255,.06);
+    }
+    .flow-list li:last-child { border-bottom: none; }
+    .flow-num {
+      flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple-mid), var(--accent-cyan));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; color: #fff;
+    }
+
+    /* ── Hamburger ───────────────────────────────────────────────── */
+    .hamburger {
+      display: none; background: none; border: none; cursor: pointer;
+      padding: 6px; color: var(--text-secondary);
+    }
+    .hamburger svg { width: 22px; height: 22px; }
+
+    /* ── Responsive ──────────────────────────────────────────────── */
+    @media (max-width: 1024px) {
+      .main-content { padding: 32px 24px 60px; }
+    }
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .hamburger { display: block; }
+      .sidebar {
+        position: fixed; top: 54px; left: 0; z-index: 99;
+        width: 280px; height: calc(100vh - 54px);
+        transform: translateX(-100%);
+        transition: transform .25s ease;
+      }
+      .sidebar.open { transform: translateX(0); }
+      .sidebar-overlay {
+        display: none; position: fixed; inset: 0; top: 54px; z-index: 98;
+        background: rgba(0,0,0,.5);
+      }
+      .sidebar-overlay.show { display: block; }
+      .main-content { padding: 24px 16px 60px; }
+      .section h1 { font-size: 24px; }
+      .section h2 { font-size: 18px; }
+      .diagram { font-size: 11px; padding: 16px; }
+      pre { font-size: 11.5px; padding: 12px; }
+      .cmp-table { font-size: 11.5px; }
+      .cmp-table th, .cmp-table td { padding: 8px 10px; }
+    }
+    @media (max-width: 480px) {
+      .topnav { padding: 10px 14px; }
+      .main-content { padding: 18px 12px 40px; }
+      .glass-card { padding: 16px; }
+    }
+
+    /* Scroll indicator */
+    .scroll-top {
+      position: fixed; bottom: 24px; right: 24px; z-index: 90;
+      width: 42px; height: 42px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple-mid), var(--accent-cyan));
+      border: none; cursor: pointer; display: none;
+      align-items: center; justify-content: center;
+      box-shadow: 0 4px 20px rgba(0,229,255,.3);
+      transition: .2s;
+    }
+    .scroll-top.show { display: flex; }
+    .scroll-top svg { width: 20px; height: 20px; fill: #fff; }
+  </style>
+</head>
+<body>
+<div class="cosmos"></div>
+<div class="stars"></div>
+
+<!-- ── Topnav ──────────────────────────────────────────────────── -->
+<nav class="topnav">
+  <a class="logo" href="intro.html">
+    <div class="logo-mark">🚀</div>
+    <div class="logo-text">No.1<span>API</span></div>
+  </a>
+  <button class="hamburger" id="menuBtn" aria-label="Toggle menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+  </button>
+  <div class="nav-links">
+    <a class="nav-link" href="intro.html">🏠 เริ่มต้น</a>
+    <a class="nav-link" href="docs.html">📖 Docs</a>
+    <a class="nav-link" href="playground.html">⚡ Playground</a>
+    <a class="nav-link active" href="architecture.html">🏗️ Architecture</a>
+  </div>
+  <div class="nav-spacer"></div>
+  <a class="btn-sm btn-ghost" href="dashboard.html">Dashboard →</a>
+</nav>
+
+<!-- ── Page Layout ─────────────────────────────────────────────── -->
+<div class="page-wrap">
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Sidebar TOC -->
+  <aside class="sidebar" id="sidebar">
+    <h3>พื้นฐาน</h3>
+    <a href="#intro">ทำไมโครงสร้างถึงสำคัญ</a>
+    <a href="#clean-arch">Clean Architecture</a>
+    <a href="#go-layout">Go Project Layout</a>
+
+    <h3>โครงสร้างโปรเจกต์เรา</h3>
+    <a href="#our-structure">ภาพรวม Directory</a>
+    <a href="#layer-domain">Domain Layer</a>
+    <a href="#layer-usecase">Usecase Layer</a>
+    <a href="#layer-infra">Infrastructure Layer</a>
+    <a href="#layer-delivery">Delivery Layer</a>
+    <a href="#layer-cmd">cmd/ & pkg/</a>
+
+    <h3>Enterprise Patterns</h3>
+    <a href="#uber-cachefront">Uber CacheFront</a>
+    <a href="#our-vs-uber">Our Project vs Uber</a>
+    <a href="#redis-docstore">Redis DocStore</a>
+
+    <h3>Security & Middleware</h3>
+    <a href="#auth-flow">JWT Dual-Token Auth</a>
+    <a href="#middleware-pipeline">Middleware Pipeline</a>
+    <a href="#rate-limiting">Rate Limiting</a>
+
+    <h3>Best Practices</h3>
+    <a href="#observability">Observability</a>
+    <a href="#deployment">Deployment</a>
+    <a href="#checklist">Checklist สำหรับ Backend Dev</a>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content" id="content">
+
+    <!-- ============================================================ -->
+    <!-- SECTION: ทำไมโครงสร้างถึงสำคัญ -->
+    <!-- ============================================================ -->
+    <section class="section" id="intro">
+      <h1>🏗️ Go API Architecture Guide</h1>
+      <p>คู่มือเชิงลึกสำหรับนักพัฒนา Backend ที่ต้องการเข้าใจโครงสร้าง API ระดับ production —
+        ตั้งแต่หลักการ Clean Architecture ไปจนถึงการวิเคราะห์สถาปัตยกรรมจริงของ Uber ที่รองรับ <strong>150 ล้าน reads/วินาที</strong></p>
+
+      <div class="glass-card highlight">
+        <h3>ทำไมโครงสร้างถึงสำคัญ?</h3>
+        <p>โปรเจกต์ที่โครงสร้างดีจะ:</p>
+        <ul>
+          <li><strong>อ่านง่าย</strong> — Developer ใหม่เข้าใจได้ภายใน 15 นาที</li>
+          <li><strong>ทดสอบง่าย</strong> — แต่ละ layer mock ได้อิสระผ่าน interface</li>
+          <li><strong>ขยายได้</strong> — เพิ่ม feature ใหม่โดยไม่ทำลาย feature เดิม</li>
+          <li><strong>เปลี่ยน technology ได้</strong> — เปลี่ยน database จาก Redis เป็น PostgreSQL โดยแก้แค่ infrastructure layer</li>
+          <li><strong>Deploy ได้มั่นใจ</strong> — Separation of concerns ทำให้ bug ไม่กระจาย</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION: Clean Architecture -->
+    <!-- ============================================================ -->
+    <section class="section" id="clean-arch">
+      <h2>🧅 Clean Architecture</h2>
+      <p>หลักการจาก Robert C. Martin (Uncle Bob) — แบ่ง code เป็นวงกลมซ้อนกัน โดย <strong>dependency ชี้เข้าด้านใน</strong> เสมอ
+        (Outer layer รู้จัก Inner layer แต่ Inner layer ไม่รู้จัก Outer layer)</p>
+
+      <div class="diagram">┌──────────────────────────────────────────────────┐
+│              Delivery (HTTP/gRPC/CLI)              │   ← รับ request จากโลกภายนอก
+│  ┌──────────────────────────────────────────────┐  │
+│  │           Usecase (Business Logic)            │  │   ← กฎทางธุรกิจ
+│  │  ┌────────────────────────────────────────┐   │  │
+│  │  │        Domain (Entities + Interfaces)   │   │  │   ← แก่นของระบบ
+│  │  └────────────────────────────────────────┘   │  │
+│  └──────────────────────────────────────────────┘  │
+│              Infrastructure (DB/Cache/External)     │   ← implementation ที่เป็นรูปธรรม
+└──────────────────────────────────────────────────┘</div>
+
+      <h3>หลักการสำคัญ 4 ข้อ</h3>
+      <div class="glass-card">
+        <ol>
+          <li><strong>Dependency Inversion</strong> — Domain กำหนด interface, Infrastructure implement → เปลี่ยน DB ได้โดยไม่แก้ business logic</li>
+          <li><strong>Separation of Concerns</strong> — Handler รับ HTTP request เท่านั้น ไม่มี business logic / Usecase ไม่รู้ว่ามา HTTP หรือ gRPC</li>
+          <li><strong>Single Responsibility</strong> — แต่ละ file/struct ทำหน้าที่เดียว เช่น <code>auth_handler.go</code> จัดการ auth endpoint, <code>product_usecase.go</code> จัดการ product logic</li>
+          <li><strong>Interface Segregation</strong> — interface เล็กและเฉพาะเจาะจง เช่น <code>ProductRepository</code> มีเฉพาะ method ที่ product ต้องการ</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION: Go Project Layout -->
+    <!-- ============================================================ -->
+    <section class="section" id="go-layout">
+      <h2>📁 Go Project Layout (Best Practice)</h2>
+      <p>ตามแนวทาง <strong>golang-standards/project-layout</strong> ที่เป็นที่นิยมในชุมชน Go:</p>
+
+      <div class="glass-card">
+        <pre>project-root/
+├── cmd/                    ← Entry points (main packages)
+│   └── api/
+│       └── main.go         ← Binary entry — wire dependencies แล้วสั่ง start server
+│
+├── internal/               ← Private code (Go compiler ห้าม import จากภายนอก module)
+│   ├── config/             ← Configuration loading
+│   ├── domain/             ← Entities + Interfaces (แก่นของระบบ)
+│   │   ├── model/          ← Data structures (Product, User, etc.)
+│   │   ├── repository/     ← Repository interfaces
+│   │   └── usecase/        ← Usecase interfaces
+│   ├── usecase/            ← Business logic implementation
+│   ├── infrastructure/     ← External service implementations
+│   │   ├── repository/     ← DB/Cache implementation
+│   │   ├── redis/          ← Redis client wrapper
+│   │   ├── metrics/        ← Prometheus metrics
+│   │   └── logging/        ← Structured logging (Zap)
+│   └── delivery/           ← Transport layer
+│       └── http/
+│           ├── router.go   ← Route definitions + middleware chain
+│           ├── handler/    ← HTTP handlers (controllers)
+│           └── middleware/  ← Auth, rate limit, metrics
+│
+├── pkg/                    ← Public shared utilities (importable จาก project อื่น)
+│   └── response/           ← Standardized JSON response
+│
+├── Dockerfile              ← Multi-stage build
+├── go.mod                  ← Dependencies
+└── railway.toml            ← Deployment config</pre>
+      </div>
+
+      <h3>ทำไมถึงใช้ <code>internal/</code>?</h3>
+      <div class="glass-card warn">
+        <p><code>internal/</code> เป็น <strong>Go compiler enforcement</strong> — package ภายนอก module นี้ไม่สามารถ import code ใน <code>internal/</code> ได้
+          ทำให้เรามั่นใจว่า business logic, repository, handler จะไม่ถูกเรียกใช้จากที่อื่นโดยไม่ตั้งใจ</p>
+        <p>ต่างจาก <code>pkg/</code> ที่เป็น public — ใครก็ import ได้ เหมาะสำหรับ utility ทั่วไปเช่น response helper</p>
+      </div>
+
+      <h3>ทำไมแยก <code>domain/repository/</code> (interface) กับ <code>infrastructure/repository/</code> (impl)?</h3>
+      <div class="glass-card success">
+        <p>นี่คือหัวใจของ <strong>Dependency Inversion Principle</strong>:</p>
+        <ul>
+          <li><code>domain/repository/product_repository.go</code> — กำหนด interface <code>ProductRepository</code> พร้อม method signatures</li>
+          <li><code>infrastructure/repository/product_repository.go</code> — implement interface นั้นด้วย Redis</li>
+          <li>Usecase depend on interface (domain) ไม่ depend on implementation (infrastructure)</li>
+          <li>ถ้าวันนี้ใช้ Redis วันหน้าจะเปลี่ยนเป็น PostgreSQL → สร้าง <code>infrastructure/repository/pg_product_repository.go</code> ใหม่ โดย <strong>ไม่ต้องแก้ usecase เลย</strong></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION: ภาพรวม Directory -->
+    <!-- ============================================================ -->
+    <section class="section" id="our-structure">
+      <h2>🗂️ โครงสร้างโปรเจกต์ No.1 API</h2>
+      <p>มาดูว่าแต่ละไฟล์ในโปรเจกต์เราทำหน้าที่อะไร:</p>
+
+      <table class="cmp-table">
+        <thead>
+          <tr>
+            <th>ไฟล์</th>
+            <th>Layer</th>
+            <th>หน้าที่</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>cmd/api/main.go</code></td><td><span class="badge badge-magenta">Entry</span></td><td>Wire dependencies, start Fiber server, graceful shutdown</td></tr>
+          <tr><td><code>cmd/api/web.go</code></td><td><span class="badge badge-magenta">Entry</span></td><td><code>go:embed</code> — ฝัง HTML/CSS/JS เข้า binary</td></tr>
+          <tr><td><code>internal/config/config.go</code></td><td><span class="badge badge-orange">Config</span></td><td>โหลด env vars → struct (Server, Redis, JWT, App, GitHub)</td></tr>
+          <tr><td><code>internal/domain/model/product.go</code></td><td><span class="badge badge-cyan">Domain</span></td><td>Entity: Product, ProductFilter, ProductPage</td></tr>
+          <tr><td><code>internal/domain/model/auth.go</code></td><td><span class="badge badge-cyan">Domain</span></td><td>Entity: TokenPair, LoginRequest, RefreshRequest</td></tr>
+          <tr><td><code>internal/domain/errors.go</code></td><td><span class="badge badge-cyan">Domain</span></td><td>Sentinel errors (ErrNotFound, ErrDeleted, ...)</td></tr>
+          <tr><td><code>internal/domain/repository/product_repository.go</code></td><td><span class="badge badge-cyan">Domain</span></td><td>Interface: ProductRepository (10 methods)</td></tr>
+          <tr><td><code>internal/domain/usecase/product_usecase.go</code></td><td><span class="badge badge-cyan">Domain</span></td><td>Interface: ProductUsecase + BulkCreateItem</td></tr>
+          <tr><td><code>internal/usecase/product_usecase.go</code></td><td><span class="badge badge-green">Usecase</span></td><td>Business logic: Create, Update, Delete, List, BulkCreate พร้อม validation</td></tr>
+          <tr><td><code>internal/usecase/auth_usecase.go</code></td><td><span class="badge badge-green">Usecase</span></td><td>Auth lifecycle: Login→JWT+Refresh, Refresh, Logout พร้อม Redis HASH storage</td></tr>
+          <tr><td><code>internal/infrastructure/repository/product_repository.go</code></td><td><span class="badge badge-orange">Infra</span></td><td>Redis DocStore: HASH+ZSET, cache layer, pipeline operations</td></tr>
+          <tr><td><code>internal/infrastructure/redis/client.go</code></td><td><span class="badge badge-orange">Infra</span></td><td>Redis connection manager (URL/Addr, TLS, pool settings)</td></tr>
+          <tr><td><code>internal/infrastructure/metrics/metrics.go</code></td><td><span class="badge badge-orange">Infra</span></td><td>Prometheus counters/histograms registration</td></tr>
+          <tr><td><code>internal/infrastructure/logging/logger.go</code></td><td><span class="badge badge-orange">Infra</span></td><td>Zap structured logger (JSON prod / Console dev)</td></tr>
+          <tr><td><code>internal/delivery/http/router.go</code></td><td><span class="badge badge-magenta">Delivery</span></td><td>Fiber app setup, route groups, middleware chain, embedded web UI</td></tr>
+          <tr><td><code>internal/delivery/http/handler/product_handler.go</code></td><td><span class="badge badge-magenta">Delivery</span></td><td>CRUD + BulkCreate + List (cursor pagination)</td></tr>
+          <tr><td><code>internal/delivery/http/handler/auth_handler.go</code></td><td><span class="badge badge-magenta">Delivery</span></td><td>Login/Refresh/Logout + simulate_expiry mode</td></tr>
+          <tr><td><code>internal/delivery/http/handler/system_handler.go</code></td><td><span class="badge badge-magenta">Delivery</span></td><td>Health check, Legacy token</td></tr>
+          <tr><td><code>internal/delivery/http/handler/error_sandbox_handler.go</code></td><td><span class="badge badge-magenta">Delivery</span></td><td>13 educational error endpoints (400–503)</td></tr>
+          <tr><td><code>internal/delivery/http/handler/github_auth_handler.go</code></td><td><span class="badge badge-magenta">Delivery</span></td><td>GitHub OAuth 2.0 login/callback/logout</td></tr>
+          <tr><td><code>internal/delivery/http/middleware/auth.go</code></td><td><span class="badge badge-magenta">Delivery</span></td><td>JWT validation + RBAC (RequireRole)</td></tr>
+          <tr><td><code>internal/delivery/http/middleware/ratelimit.go</code></td><td><span class="badge badge-magenta">Delivery</span></td><td>Fixed-window rate limiter via Redis pipeline</td></tr>
+          <tr><td><code>internal/delivery/http/middleware/metrics_mw.go</code></td><td><span class="badge badge-magenta">Delivery</span></td><td>Prometheus HTTP request count + latency</td></tr>
+          <tr><td><code>internal/delivery/http/middleware/github_session.go</code></td><td><span class="badge badge-magenta">Delivery</span></td><td>GitHub session cookie verification</td></tr>
+          <tr><td><code>pkg/response/response.go</code></td><td><span class="badge badge-green">Shared</span></td><td>Standardized JSON envelope: <code>{success, data, error, meta}</code></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION: Domain Layer -->
+    <!-- ============================================================ -->
+    <section class="section" id="layer-domain">
+      <h2>🎯 Domain Layer — แก่นของระบบ</h2>
+      <p>Domain layer คือ <strong>"ความจริง" ของระบบ</strong> — ไม่รู้จัก HTTP, ไม่รู้จัก Redis, ไม่รู้จัก Framework ใดๆ ทั้งสิ้น
+        มีแค่ entities (structs) กับ interfaces (contracts)</p>
+
+      <h3>Entity: Product</h3>
+      <div class="glass-card">
+        <pre>type Product struct {
+    ID          string    `json:"id"`
+    UserID      string    `json:"user_id"`
+    Name        string    `json:"name"`
+    Description string    `json:"description"`
+    Price       float64   `json:"price"`
+    Deleted     bool      `json:"deleted"`          // ← Soft Delete flag
+    CreatedAt   time.Time `json:"created_at"`
+    UpdatedAt   time.Time `json:"updated_at"`
+}</pre>
+        <p>สังเกตว่ามี <code>Deleted bool</code> — ใช้ <strong>Soft Delete pattern</strong> เหมือนของ Uber ที่ข้อมูลไม่หายจริง ยังค้นหาย้อนกลับได้</p>
+      </div>
+
+      <h3>Repository Interface</h3>
+      <div class="glass-card">
+        <pre>type ProductRepository interface {
+    Create(ctx context.Context, product *model.Product) error
+    FindByID(ctx context.Context, userID, id string) (*model.Product, error)
+    Update(ctx context.Context, product *model.Product) error
+    SoftDelete(ctx context.Context, userID, id string) error
+    HardDelete(ctx context.Context, userID, id string) error
+    List(ctx context.Context, userID string, filter model.ProductFilter) (*model.ProductPage, error)
+    Count(ctx context.Context, userID string) (int64, error)
+    BulkCreate(ctx context.Context, products []model.Product) (int, error)
+    BulkFindByIDs(ctx context.Context, userID string, ids []string) ([]model.Product, error)
+}</pre>
+        <p>ข้อสังเกต: นี่คือ <strong>interface</strong> ที่อยู่ใน domain layer — ไม่มี Redis, SQL หรือ implementation ใดๆ
+          Usecase layer จะ depend on interface นี้ ไม่ใช่ depend on Redis implementation</p>
+      </div>
+
+      <h3>Sentinel Errors</h3>
+      <div class="glass-card">
+        <pre>var (
+    ErrNotFound   = errors.New("resource not found")
+    ErrDeleted    = errors.New("resource has been soft-deleted")
+    ErrForbidden  = errors.New("forbidden")
+    ErrConflict   = errors.New("resource conflict")
+    ErrQuotaLimit = errors.New("quota limit reached")
+)</pre>
+        <p>ใช้ <code>errors.Is()</code> เพื่อเปรียบเทียบ — เป็น Go idiom ที่สำคัญมาก handler layer จะใช้ errors นี้ตัดสินใจ HTTP status code</p>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION: Usecase Layer -->
+    <!-- ============================================================ -->
+    <section class="section" id="layer-usecase">
+      <h2>⚙️ Usecase Layer — Business Logic</h2>
+      <p>Usecase layer คือที่อยู่ของ <strong>กฎทางธุรกิจ</strong> — validation, business rules, orchestration ระหว่าง repositories</p>
+
+      <h3>Dependency Injection</h3>
+      <div class="glass-card">
+        <pre>type productUsecase struct {
+    repo   repository.ProductRepository  // ← interface จาก domain
+    logger *zap.Logger
+}
+
+func NewProductUsecase(
+    repo repository.ProductRepository,
+    logger *zap.Logger,
+) usecase.ProductUsecase {
+    return &productUsecase{repo: repo, logger: logger}
+}</pre>
+        <p><code>repo</code> เป็น interface — ใน production จะเป็น Redis implementation แต่ใน test จะเป็น mock
+          นี่คือพลังของ <strong>Dependency Injection + Interface</strong></p>
+      </div>
+
+      <h3>Business Logic ตัวอย่าง: Create Product</h3>
+      <div class="glass-card">
+        <pre>func (uc *productUsecase) Create(ctx context.Context, p *model.Product) error {
+    // ── Validation (business rule) ──────────────
+    if strings.TrimSpace(p.Name) == "" {
+        return fmt.Errorf("product name is required")
+    }
+    if p.Price &lt; 0 {
+        return fmt.Errorf("price must not be negative")
+    }
+
+    // ── Quota check (business rule) ─────────────
+    count, _ := uc.repo.Count(ctx, p.UserID)
+    if count >= 50 {
+        return domain.ErrQuotaLimit
+    }
+
+    // ── Delegate to repository (infrastructure) ─
+    return uc.repo.Create(ctx, p)
+}</pre>
+        <p>Usecase ทำ 3 อย่าง: <strong>Validate → Apply business rules → Delegate</strong>
+          ไม่เคยทำ HTTP response, ไม่เคยเรียก Redis โดยตรง</p>
+      </div>
+
+      <h3>Auth Usecase: Dual-Token Flow</h3>
+      <div class="glass-card">
+        <pre>// Login Flow:
+//  1. Validate credentials (sandbox: accept any user/pass)
+//  2. Generate Access Token (JWT, HS256, 15 min TTL)
+//  3. Generate Refresh Token (random hex, 7 day TTL)
+//  4. Store refresh token in Redis HASH: sandbox:{user_id}:auth:refresh
+//  5. Return TokenPair {access_token, refresh_token, expires_in}
+//
+// Why dual-token?
+//  - Access Token: สั้น (15 min) → ถ้าหลุดเสียหายน้อย
+//  - Refresh Token: ยาว (7 days) → ใช้ขอ Access Token ใหม่ได้
+//  - เมื่อ Refresh → ทั้ง Access + Refresh ออกใหม่ (Token Rotation)</pre>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION: Infrastructure Layer -->
+    <!-- ============================================================ -->
+    <section class="section" id="layer-infra">
+      <h2>🔧 Infrastructure Layer — ของจริง</h2>
+      <p>Infrastructure layer คือที่ implement interfaces ที่ domain กำหนด — ใช้ technology จริงๆ เช่น Redis, PostgreSQL, gRPC client</p>
+
+      <h3>Redis DocStore Pattern</h3>
+      <p>โปรเจกต์เราใช้ Redis เป็น primary data store (ไม่ใช่แค่ cache) — pattern ที่ Uber เรียกว่า <strong>DocStore</strong></p>
+
+      <div class="glass-card highlight">
+        <h3>Redis Key Schema</h3>
+        <pre>Data key :  sandbox:{user_id}:product:{id}          → JSON string (ข้อมูลจริง)
+Index key:  sandbox:{user_id}:product:_index         → ZSET (score=timestamp, สำหรับ pagination)
+Cache key:  sandbox:{user_id}:product:_cache:{id}    → JSON string (hot-cache, TTL 5 min)</pre>
+        <p>ใช้ 3 key types ร่วมกัน: <strong>Data</strong> (HASH), <strong>Index</strong> (ZSET), <strong>Cache</strong> (hot layer)</p>
+      </div>
+
+      <h3>Read Path — Integrated Cache</h3>
+      <div class="glass-card">
+        <ul class="flow-list">
+          <li><span class="flow-num">1</span><div><strong>Hot-Cache Lookup</strong> — ดึงจาก <code>_cache:{id}</code> key ก่อน (TTL 5 min) → <span class="badge badge-green">Cache Hit</span></div></li>
+          <li><span class="flow-num">2</span><div><strong>Storage Read</strong> — ถ้า cache miss → ดึงจาก data key <code>sandbox:{uid}:product:{id}</code> → <span class="badge badge-orange">Cache Miss</span></div></li>
+          <li><span class="flow-num">3</span><div><strong>Back-fill Cache</strong> — เอาข้อมูลที่ได้เขียนกลับเข้า hot-cache → ครั้งต่อไปจะ hit cache (Write-Through)</div></li>
+        </ul>
+      </div>
+
+      <h3>Write Path — Write-Invalidate</h3>
+      <div class="glass-card">
+        <pre>// Update: เขียน data key ใหม่ + ลบ cache key (invalidate)
+pipe := r.rdb.Pipeline()
+pipe.Set(ctx, dataKey, data, r.dataTTL)    // overwrite data
+pipe.Del(ctx, cacheKey)                     // invalidate cache
+pipe.Exec(ctx)
+
+// Soft Delete: เหมือน Update แต่ set Deleted=true + ลบออกจาก ZSET index
+pipe.Set(ctx, dataKey, data, r.dataTTL)
+pipe.Del(ctx, cacheKey)
+pipe.ZRem(ctx, indexKey, id)               // ลบออกจาก index
+pipe.Exec(ctx)</pre>
+        <p>ทุก operation ใช้ <strong>Redis Pipeline</strong> — ส่งคำสั่งหลายตัวในรอบเดียว ลด network round-trips</p>
+      </div>
+
+      <h3>Cursor-Based Pagination (ZSET)</h3>
+      <div class="glass-card">
+        <pre>// ใช้ ZSET score (unix nano timestamp) เป็น cursor
+// ดีกว่า OFFSET/LIMIT ตรงที่:
+//  - ไม่มีปัญหา "sliding window" เมื่อมีข้อมูลเพิ่ม/ลบ
+//  - Performance: O(log N + M) ไม่ว่า page ไหนก็เร็วเท่ากัน
+
+ids := r.rdb.ZRevRangeByScore(ctx, indexKey, &redis.ZRangeBy{
+    Max:   "(" + cursor,   // exclusive upper bound
+    Min:   "-inf",
+    Count: limit + 1,      // +1 เพื่อเช็ค HasMore
+})</pre>
+      </div>
+
+      <h3>Bulk Operations: Pipeline Magic</h3>
+      <div class="glass-card">
+        <pre>// BulkCreate: สร้าง 100 products ใน pipeline เดียว
+pipe := r.rdb.Pipeline()
+for _, product := range products {
+    pipe.Set(ctx, dataKey, data, ttl)       // เก็บข้อมูล
+    pipe.ZAdd(ctx, indexKey, redis.Z{...})  // เพิ่มเข้า index
+    pipe.Expire(ctx, indexKey, ttl)         // ต่ออายุ index
+}
+pipe.Exec(ctx)  // ← ส่งทุกคำสั่งรวมกัน 1 round-trip!
+
+// BulkFindByIDs: ใช้ 3 pipelines
+// Pipeline 1: ลอง hot-cache ก่อน
+// Pipeline 2: storage read สำหรับ cache miss
+// Pipeline 3: back-fill cache สำหรับ miss ที่ read สำเร็จ</pre>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION: Delivery Layer -->
+    <!-- ============================================================ -->
+    <section class="section" id="layer-delivery">
+      <h2>🌐 Delivery Layer — HTTP Interface</h2>
+      <p>Delivery layer คือ <strong>"หน้าต่าง"</strong> ของระบบ — แปลง HTTP request เป็น usecase call แล้วแปลง result กลับเป็น HTTP response</p>
+
+      <h3>Handler Pattern</h3>
+      <div class="glass-card">
+        <pre>func (h *ProductHandler) Create(c *fiber.Ctx) error {
+    // 1. Parse input (HTTP concern)
+    var req CreateProductRequest
+    if err := c.BodyParser(&req); err != nil {
+        return response.BadRequest(c, "invalid JSON body")
+    }
+
+    // 2. Extract user context (from middleware)
+    userID := c.Locals("user_id").(string)
+
+    // 3. Build domain model
+    product := &model.Product{
+        UserID:      userID,
+        Name:        req.Name,
+        Description: req.Description,
+        Price:       req.Price,
+    }
+
+    // 4. Execute business logic (delegate to Usecase)
+    if err := h.uc.Create(c.Context(), product); err != nil {
+        // 5. Map domain errors to HTTP status
+        if errors.Is(err, domain.ErrQuotaLimit) {
+            return response.Err(c, 429, err.Error())
+        }
+        return response.InternalError(c, err.Error())
+    }
+
+    // 6. Return HTTP response
+    return response.Created(c, product)
+}</pre>
+        <p>Handler ทำ 6 ขั้นตอน: <strong>Parse → Extract context → Build model → Delegate → Map errors → Respond</strong></p>
+        <p>สังเกตว่า handler <strong>ไม่มี business logic</strong> — ไม่ validate price, ไม่เช็ค quota เอง — ปล่อยให้ usecase ทำ</p>
+      </div>
+
+      <h3>Standardized Response Format</h3>
+      <div class="glass-card">
+        <pre>// ทุก endpoint ตอบกลับในรูปแบบเดียวกัน:
+{
+  "success": true,           // boolean: สำเร็จหรือไม่
+  "data": { ... },           // ข้อมูล (ถ้าสำเร็จ)
+  "error": "...",            // error message (ถ้าไม่สำเร็จ)
+  "meta": {                  // pagination metadata
+    "total": 42,
+    "count": 20,
+    "next_cursor": "...",
+    "has_more": true
+  }
+}</pre>
+        <p>ใช้ <code>pkg/response</code> package — helper functions: <code>OK()</code>, <code>Created()</code>, <code>Err()</code>, <code>OKWithMeta()</code></p>
+      </div>
+
+      <h3>Router Setup: Middleware Chain</h3>
+      <div class="glass-card">
+        <pre>// Route Groups with layered middleware:
+api := app.Group("/api/v1")       // ทุก route เริ่มด้วย /api/v1
+
+// Public routes — ไม่ต้อง auth
+api.Post("/auth/login", authHandler.Login)
+api.Post("/auth/refresh", authHandler.Refresh)
+
+// Protected routes — ต้อง JWT
+protected := api.Group("", middleware.JWTAuth(jwtSecret))
+protected.Get("/products", productHandler.List)
+protected.Post("/products", productHandler.Create)
+protected.Get("/products/:id", productHandler.GetByID)
+protected.Put("/products/:id", productHandler.Update)
+protected.Delete("/products/:id", productHandler.Delete)
+
+// Admin routes — ต้อง JWT + Role admin
+admin := protected.Group("", middleware.RequireRole("admin"))
+admin.Post("/products/bulk", productHandler.BulkCreate)</pre>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION: cmd/ & pkg/ -->
+    <!-- ============================================================ -->
+    <section class="section" id="layer-cmd">
+      <h2>🚀 cmd/ & pkg/ — Entry & Shared</h2>
+
+      <h3>cmd/api/main.go — Dependency Wiring</h3>
+      <div class="glass-card">
+        <p>ไฟล์ <code>main.go</code> เป็นที่ <strong>"wire" ทุกอย่างเข้าด้วยกัน</strong> (Manual Dependency Injection):</p>
+        <pre>// ลำดับการ wire:
+cfg      := config.Load()                              // 1. Config
+logger   := logging.NewLogger(cfg.App.LogLevel, ...)    // 2. Logger
+metrics  := metrics.NewMetrics(prometheus.Registry)     // 3. Metrics
+redis    := redis.NewClient(cfg.Redis, logger)          // 4. Redis client
+repo     := infraRepo.NewProductRepository(redis, ...)  // 5. Repository (impl)
+usecase  := usecase.NewProductUsecase(repo, logger)     // 6. Usecase
+app      := httpDelivery.NewRouter(cfg, redis, usecase) // 7. HTTP Router
+app.Listen(":" + cfg.Server.Port)                       // 8. Start!</pre>
+        <p>ทุกอย่าง inject ผ่าน constructor — ไม่มี global variable, ไม่มี <code>init()</code> function (ยกเว้น embed)</p>
+      </div>
+
+      <h3>cmd/api/web.go — go:embed</h3>
+      <div class="glass-card">
+        <pre>//go:embed web
+var WebFS embed.FS</pre>
+        <p>Go จะฝังทุกไฟล์ใน <code>cmd/api/web/</code> เข้าไปใน binary ตอน compile
+          ไม่ต้อง copy file แยก, ไม่ต้อง volume mount ใน Docker — <strong>binary เดียวจบ</strong></p>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION: Uber CacheFront -->
+    <!-- ============================================================ -->
+    <section class="section" id="uber-cachefront">
+      <h2>🏢 Uber CacheFront — 150 ล้าน Reads/วินาที</h2>
+      <p>จากบทความ <strong>ByteByteGo</strong>: Uber ต้องรองรับผู้ใช้มือถือ 150+ ล้านคน ด้วยสถาปัตยกรรม 3 ชั้น</p>
+
+      <div class="diagram">┌─────────────────────────────────────────────────────────┐
+│                   Mobile App / Client                    │
+└──────────────────────────┬──────────────────────────────┘
+                           │
+┌──────────────────────────▼──────────────────────────────┐
+│               Query Engine (Microservices)                │
+│     reads/writes → standardized gRPC interface           │
+└──────────────────────────┬──────────────────────────────┘
+                           │
+┌──────────────────────────▼──────────────────────────────┐
+│          🔥 CacheFront (Redis Cluster)                    │
+│    • 150M+ reads/sec    • 99.9% cache hit rate           │
+│    • Integrated Cache Layer — ส่วนใหญ่ตอบจาก Redis       │
+└──────────────────────────┬──────────────────────────────┘
+                           │ (cache miss only)
+┌──────────────────────────▼──────────────────────────────┐
+│          Storage Engine (MySQL + DocStore)                │
+│    • Source of truth     • Schemaless JSON storage        │
+│    • Sharded by partition key                            │
+└─────────────────────────────────────────────────────────┘</div>
+
+      <h3>Read Path ของ Uber</h3>
+      <div class="glass-card">
+        <ul class="flow-list">
+          <li><span class="flow-num">1</span><div>Client ส่ง request มาที่ Query Engine</div></li>
+          <li><span class="flow-num">2</span><div>Query Engine เช็ค <strong>CacheFront (Redis)</strong> ก่อน</div></li>
+          <li><span class="flow-num">3</span><div>ถ้า <span class="badge badge-green">Cache Hit</span> (99.9%) → ตอบกลับทันที ไม่ต้องไป DB</div></li>
+          <li><span class="flow-num">4</span><div>ถ้า <span class="badge badge-orange">Cache Miss</span> (0.1%) → ไปอ่านจาก Storage Engine (MySQL)</div></li>
+          <li><span class="flow-num">5</span><div>เอาข้อมูลจาก MySQL เขียนกลับเข้า Redis (back-fill)</div></li>
+        </ul>
+      </div>
+
+      <h3>🛡️ Triple Cache Invalidation — ป้องกัน Stale Data</h3>
+      <p>ปัญหาที่ยากที่สุดของ cache คือ <strong>"ทำยังไงให้ cache ไม่เก่า?"</strong> Uber ใช้ 3 ชั้นป้องกัน:</p>
+
+      <div class="glass-card highlight">
+        <h3>ชั้นที่ 1: TTL Expiration</h3>
+        <p>ทุก cache key มี Time-To-Live — หมดอายุแล้วลบอัตโนมัติ เป็น <strong>safety net สุดท้าย</strong></p>
+      </div>
+      <div class="glass-card warn">
+        <h3>ชั้นที่ 2: Flux CDC (Asynchronous)</h3>
+        <p><strong>Change Data Capture</strong> — tail MySQL binlog → เมื่อ row เปลี่ยน → invalidate Redis key</p>
+        <p>ข้อเสีย: asynchronous → มี delay เล็กน้อย (มิลลิวินาที) ระหว่างเขียน DB กับ invalidate cache</p>
+      </div>
+      <div class="glass-card success">
+        <h3>ชั้นที่ 3: Write-Path Synchronous Invalidation</h3>
+        <p>เมื่อเขียน DB สำเร็จ → <strong>invalidate cache ทันทีในขั้นตอนเดียวกัน</strong> (synchronous)</p>
+        <p>Uber ใช้ <strong>Soft Deletes + Monotonic Timestamps</strong> เพื่อตรวจจับ conditional updates:</p>
+        <ul>
+          <li><strong>Point Writes</strong> (INSERT/UPDATE/DELETE ที่รู้ key ชัดเจน) → invalidate ตรงๆ</li>
+          <li><strong>Conditional Writes</strong> (UPDATE ... WHERE condition) → ก่อนหน้านี้ทำไม่ได้เพราะไม่รู้ว่า row ไหนโดนแก้ → แก้ด้วย soft delete + timestamp tracking</li>
+        </ul>
+      </div>
+
+      <h3>🔍 Cache Inspector — ตรวจสอบ Consistency</h3>
+      <div class="glass-card">
+        <p>Uber สร้างระบบตรวจสอบอัตโนมัติ:</p>
+        <ol>
+          <li>รอ 1 นาที หลัง CDC event (ให้ทุก invalidation เสร็จ)</li>
+          <li>อ่าน cache value ปัจจุบัน</li>
+          <li>อ่าน DB value ปัจจุบัน</li>
+          <li>เปรียบเทียบ — ถ้าไม่ตรง → alert + force invalidate</li>
+        </ol>
+        <p>ผลลัพธ์: cache inconsistency ลดลงจาก <strong>~0.05% → แทบเป็น 0%</strong></p>
+      </div>
+
+      <h3>Advanced Techniques</h3>
+      <table class="cmp-table">
+        <thead>
+          <tr><th>Technique</th><th>วิธีการ</th><th>แก้ปัญหาอะไร</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Negative Caching</strong></td><td>Cache คำตอบ "ไม่มี" ด้วย (empty result)</td><td>ป้องกัน cache stampede จาก key ที่ไม่มีอยู่จริง</td></tr>
+          <tr><td><strong>Pipelined Reads</strong></td><td>รวม Redis commands หลายตัวเป็น 1 round-trip</td><td>ลด latency + network overhead</td></tr>
+          <tr><td><strong>Adaptive Timeouts</strong></td><td>ถ้า Redis ช้า → timeout เร็วขึ้น → fallback ไป DB ตรง</td><td>ป้องกัน cascading failure</td></tr>
+          <tr><td><strong>Circuit Breakers</strong></td><td>ถ้า Redis ล่มต่อเนื่อง → หยุดส่ง request ไป Redis ชั่วคราว</td><td>ให้ระบบยัง serve ได้ (จาก DB) ระหว่าง Redis มีปัญหา</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION: Our Project vs Uber -->
+    <!-- ============================================================ -->
+    <section class="section" id="our-vs-uber">
+      <h2>⚖️ โปรเจกต์เรา vs Uber — ใช้แนวคิดเดียวกัน</h2>
+      <p>เราเป็น education sandbox ไม่ใช่ production system ขนาด Uber แต่เรา <strong>implement patterns เดียวกัน</strong> ในระดับที่เหมาะสม:</p>
+
+      <table class="cmp-table">
+        <thead>
+          <tr><th>Pattern</th><th>Uber (Production)</th><th>No.1 API (Sandbox)</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Architecture</strong></td>
+            <td>Microservices + gRPC + Kubernetes</td>
+            <td>Clean Architecture monolith + Fiber HTTP</td>
+          </tr>
+          <tr>
+            <td><strong>Data Store</strong></td>
+            <td>MySQL (DocStore) + Redis (CacheFront)</td>
+            <td>Redis เป็นทั้ง Data Store + Cache layer</td>
+          </tr>
+          <tr>
+            <td><strong>Cache Strategy</strong></td>
+            <td>Integrated Cache: Read-through + Write-invalidate</td>
+            <td>เหมือนกัน: Hot-cache → Storage → Back-fill + Write-invalidate</td>
+          </tr>
+          <tr>
+            <td><strong>Cache Invalidation</strong></td>
+            <td>Triple Defense (TTL + CDC + Sync)</td>
+            <td>Dual Defense (TTL + Pipeline Sync invalidation)</td>
+          </tr>
+          <tr>
+            <td><strong>Data Model</strong></td>
+            <td>DocStore Schemaless (JSON in MySQL)</td>
+            <td>JSON in Redis (same concept, different backing store)</td>
+          </tr>
+          <tr>
+            <td><strong>Pagination</strong></td>
+            <td>Cursor-based (consistent with sharding)</td>
+            <td>ZSET cursor-based (score = unix nano)</td>
+          </tr>
+          <tr>
+            <td><strong>Batch Operations</strong></td>
+            <td>Pipelined reads + batch writes</td>
+            <td>Redis Pipeline: BulkCreate, BulkFindByIDs (3-pipeline read)</td>
+          </tr>
+          <tr>
+            <td><strong>Soft Delete</strong></td>
+            <td>ใช้ (สำคัญมากสำหรับ cache invalidation)</td>
+            <td>ใช้ (Product.Deleted flag + ZRem จาก index)</td>
+          </tr>
+          <tr>
+            <td><strong>Observability</strong></td>
+            <td>Jaeger + Prometheus + custom dashboards</td>
+            <td>Prometheus (cache hits/misses, storage ops, HTTP metrics, rate limit)</td>
+          </tr>
+          <tr>
+            <td><strong>Rate Limiting</strong></td>
+            <td>Distributed rate limiter</td>
+            <td>Fixed-window counter via Redis INCR + EXPIRE pipeline</td>
+          </tr>
+          <tr>
+            <td><strong>Auth</strong></td>
+            <td>Internal service mesh auth</td>
+            <td>JWT dual-token (access 15min + refresh 7d) + RBAC</td>
+          </tr>
+          <tr>
+            <td><strong>Key Schema</strong></td>
+            <td>Partition Key + Sort Key (DynamoDB-style)</td>
+            <td><code>sandbox:{user_id}:product:{id}</code> (same pattern)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="glass-card highlight">
+        <h3>💡 สิ่งที่เราเรียนรู้จาก Uber</h3>
+        <p>แม้โปรเจกต์เราเล็กกว่ามาก แต่ <strong>patterns เดียวกัน scale ได้</strong>:
+          ถ้าวันหนึ่งต้อง scale → เปลี่ยน Redis backing store เป็น Redis Cluster,
+          เพิ่ม CDC layer (เช่น Debezium), ใส่ Circuit Breaker (เช่น gobreaker) —
+          โครงสร้าง Clean Architecture ทำให้เปลี่ยนได้โดย <strong>ไม่ต้องเขียนใหม่ทั้งหมด</strong></p>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION: Redis DocStore Detail -->
+    <!-- ============================================================ -->
+    <section class="section" id="redis-docstore">
+      <h2>🗄️ Redis DocStore — Deep Dive</h2>
+      <p>มาดูรายละเอียดว่า Redis ถูกใช้เป็น <strong>primary data store</strong> อย่างไร</p>
+
+      <div class="diagram">┌─ sandbox:user123:product:abc-123 ────────────────────────┐
+│  (STRING) → JSON: {"id":"abc-123","name":"Laptop",...}   │
+└──────────────────────────────────────────────────────────┘
+
+┌─ sandbox:user123:product:_index ─────────────────────────┐
+│  (ZSET)                                                   │
+│  member: abc-123    score: 1719500000000000000  (nano ts) │
+│  member: def-456    score: 1719500001000000000            │
+│  member: ghi-789    score: 1719500002000000000            │
+│  → ใช้ ZRevRangeByScore สำหรับ cursor pagination          │
+└──────────────────────────────────────────────────────────┘
+
+┌─ sandbox:user123:product:_cache:abc-123 ─────────────────┐
+│  (STRING) → JSON copy with TTL=5min (hot-cache)          │
+│  → FindByID ดึงจากนี่ก่อน ถ้า miss ไปดึง data key        │
+└──────────────────────────────────────────────────────────┘</pre></div>
+
+      <h3>ทำไมต้อง ZSET Index?</h3>
+      <div class="glass-card">
+        <p>Redis ไม่มี "SELECT * ORDER BY created_at" — ต้องสร้าง index เอง:</p>
+        <ul>
+          <li><strong>Score = Unix Nano Timestamp</strong> → เรียงลำดับตามเวลา</li>
+          <li><strong>Member = Product ID</strong> → ชี้ไปที่ data key</li>
+          <li><strong>ZRevRangeByScore</strong> → ดึง N items ที่ score น้อยกว่า cursor (newest first)</li>
+          <li>เมื่อ Soft Delete → <code>ZRem(indexKey, id)</code> ลบออกจาก index แต่ data key ยังอยู่</li>
+        </ul>
+      </div>
+
+      <h3>Metrics Integration</h3>
+      <div class="glass-card">
+        <pre>// ทุก operation มี metrics tracking:
+r.metrics.CacheHits.Inc()                           // cache hit counter
+r.metrics.CacheMisses.Inc()                         // cache miss counter
+r.metrics.StorageOps.WithLabelValues("create").Inc() // storage operation by type
+
+// ดูได้ที่ /metrics endpoint (Prometheus format):
+// sandbox_docstore_cache_hits_total
+// sandbox_docstore_cache_misses_total
+// sandbox_docstore_storage_operations_total{operation="create|read|update|delete|list"}</pre>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION: Auth Flow -->
+    <!-- ============================================================ -->
+    <section class="section" id="auth-flow">
+      <h2>🔐 JWT Dual-Token Authentication</h2>
+
+      <div class="diagram">Client                          Server                          Redis
+  │                               │                               │
+  │ POST /auth/login              │                               │
+  │  {user_id, password, role}    │                               │
+  │──────────────────────────────►│                               │
+  │                               │  Generate Access Token (JWT)  │
+  │                               │  Generate Refresh Token (hex) │
+  │                               │  Store refresh token ────────►│
+  │                               │    HSET sandbox:{uid}:auth:   │
+  │                               │      refresh {token, role}    │
+  │◄──────────────────────────────│                               │
+  │ {access_token, refresh_token, │                               │
+  │  token_type, expires_in}      │                               │
+  │                               │                               │
+  │ GET /api/v1/products          │                               │
+  │ Authorization: Bearer {AT}    │                               │
+  │──────────────────────────────►│                               │
+  │                               │ Verify JWT signature          │
+  │                               │ Check expiry                  │
+  │                               │ Extract user_id, role         │
+  │◄──────────────────────────────│                               │
+  │ {success: true, data: [...]}  │                               │
+  │                               │                               │
+  │ POST /auth/refresh            │                               │
+  │ {refresh_token}               │                               │
+  │──────────────────────────────►│                               │
+  │                               │ Lookup in Redis ─────────────►│
+  │                               │   HGET sandbox:{uid}:auth:    │
+  │                               │     refresh → {token, role}   │
+  │                               │ Verify match (constant-time)  │
+  │                               │ Delete old token ────────────►│
+  │                               │ Generate new pair             │
+  │                               │ Store new refresh ───────────►│
+  │◄──────────────────────────────│                               │
+  │ {new access_token,            │                               │
+  │  new refresh_token}           │                               │</div>
+
+      <h3>RBAC (Role-Based Access Control)</h3>
+      <div class="glass-card">
+        <pre>// Middleware chain สำหรับ admin-only routes:
+middleware.JWTAuth(secret)        // 1. ตรวจ JWT valid หรือไม่ → 401 ถ้าไม่ valid
+middleware.RequireRole("admin")   // 2. ตรวจ role claim → 403 ถ้าไม่ใช่ admin
+
+// JWTAuth ใส่ค่าเข้า Locals:
+c.Locals("user_id", claims["sub"])
+c.Locals("role", claims["role"])
+
+// RequireRole อ่านค่าจาก Locals:
+role := c.Locals("role").(string)
+if role != requiredRole {
+    return response.Err(c, 403, "insufficient permissions")
+}</pre>
+      </div>
+
+      <h3>ทำไมต้อง Dual-Token?</h3>
+      <div class="glass-card warn">
+        <ul>
+          <li><strong>Access Token (JWT, 15 min)</strong> — stateless, server ไม่ต้อง lookup ใน DB ทุกครั้ง → เร็ว</li>
+          <li><strong>Refresh Token (random hex, 7 days)</strong> — stateful, เก็บใน Redis → revoke ได้ทันที (logout = ลบจาก Redis)</li>
+          <li><strong>Token Rotation</strong> — ทุกครั้งที่ refresh → ออก access + refresh ใหม่ทั้งคู่ → ลดความเสี่ยงถ้า refresh token หลุด</li>
+          <li><strong>Constant-Time Comparison</strong> — ใช้ <code>secureCompare()</code> ป้องกัน timing attack ตอนเทียบ refresh token</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION: Middleware Pipeline -->
+    <!-- ============================================================ -->
+    <section class="section" id="middleware-pipeline">
+      <h2>🔗 Middleware Pipeline — Request Lifecycle</h2>
+      <p>ทุก HTTP request ที่เข้ามาจะผ่าน middleware chain ตามลำดับ:</p>
+
+      <div class="diagram">HTTP Request
+    │
+    ▼
+┌──────────────────────────┐
+│  1. Recover Middleware    │  ← จับ panic ป้องกัน server crash
+└──────────┬───────────────┘
+           ▼
+┌──────────────────────────┐
+│  2. CORS Middleware       │  ← อนุญาต cross-origin requests
+└──────────┬───────────────┘
+           ▼
+┌──────────────────────────┐
+│  3. Metrics Middleware    │  ← บันทึก request count + latency (Prometheus)
+└──────────┬───────────────┘
+           ▼
+┌──────────────────────────┐
+│  4. Rate Limit Middleware │  ← เช็ค request/minute per user
+│     (Redis INCR+EXPIRE)  │     ถ้าเกิน → 429 Too Many Requests
+└──────────┬───────────────┘
+           ▼
+┌──────────────────────────┐
+│  5. JWT Auth Middleware   │  ← ตรวจ Bearer token, extract user_id + role
+│     (ถ้าเป็น protected)  │     ถ้าไม่ valid → 401 Unauthorized
+└──────────┬───────────────┘
+           ▼
+┌──────────────────────────┐
+│  6. RequireRole Middleware│  ← เช็ค role (ถ้าเป็น admin route)
+│     (ถ้าเป็น admin)      │     ถ้าไม่ใช่ admin → 403 Forbidden
+└──────────┬───────────────┘
+           ▼
+┌──────────────────────────┐
+│  7. Handler              │  ← Execute business logic
+└──────────┬───────────────┘
+           ▼
+      HTTP Response</pre></div>
+
+      <h3>Rate Limiter: Fixed Window via Redis</h3>
+      <div class="glass-card">
+        <pre>// ใช้ Redis Pipeline (2 commands, 1 round-trip):
+key := fmt.Sprintf("rl:%s:%d", userID, window)
+
+pipe := rdb.Pipeline()
+incr := pipe.Incr(ctx, key)          // INCR: เพิ่ม counter
+pipe.Expire(ctx, key, windowSize)     // EXPIRE: ตั้ง TTL (ถ้า key ใหม่)
+pipe.Exec(ctx)
+
+if incr.Val() > maxRequests {
+    // ส่ง 429 + Retry-After header
+    c.Set("Retry-After", remainingSeconds)
+    return response.Err(c, 429, "rate limit exceeded")
+}
+
+// ส่ง rate limit headers ทุก response:
+c.Set("X-RateLimit-Limit", maxRequests)
+c.Set("X-RateLimit-Remaining", remaining)
+c.Set("X-RateLimit-Reset", resetTime)</pre>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION: Rate Limiting -->
+    <!-- ============================================================ -->
+    <section class="section" id="rate-limiting">
+      <h2>🚦 Rate Limiting — ป้องกัน Abuse</h2>
+
+      <div class="glass-card">
+        <h3>Fixed Window Algorithm</h3>
+        <pre>Window: 1 นาที (60 วินาที)
+Max: 60 requests/window
+
+Timeline:
+|------ Window 1 (12:00:00–12:00:59) ------|------ Window 2 (12:01:00–12:01:59) ------|
+  req1 req2 ... req60 → req61 = 429!          req1 (counter reset) ...
+
+Redis Key: rl:{user_id}:{window_number}
+  window_number = unix_timestamp / 60</pre>
+      </div>
+
+      <div class="glass-card warn">
+        <h3>ข้อเปรียบเทียบ Rate Limiting Algorithms</h3>
+        <table class="cmp-table">
+          <thead>
+            <tr><th>Algorithm</th><th>ข้อดี</th><th>ข้อเสีย</th><th>เราใช้?</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Fixed Window</strong></td><td>เรียบง่าย, memory น้อย</td><td>Burst ตรงรอยต่อ window</td><td>✅ ใช้</td></tr>
+            <tr><td><strong>Sliding Window Log</strong></td><td>แม่นยำ</td><td>Memory สูง (เก็บทุก timestamp)</td><td>—</td></tr>
+            <tr><td><strong>Sliding Window Counter</strong></td><td>แม่นยำ + memory น้อย</td><td>คำนวณซับซ้อนกว่า</td><td>—</td></tr>
+            <tr><td><strong>Token Bucket</strong></td><td>รองรับ burst ได้ดี</td><td>Implementation ซับซ้อน</td><td>—</td></tr>
+            <tr><td><strong>Leaky Bucket</strong></td><td>Output rate คงที่</td><td>Burst ถูก delay</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION: Observability -->
+    <!-- ============================================================ -->
+    <section class="section" id="observability">
+      <h2>📊 Observability — Prometheus Metrics</h2>
+      <p>ระบบที่ดีต้อง <strong>รู้ตัวเองว่าเกิดอะไรขึ้น</strong> — Uber สังเกตทุก operation ด้วย metrics</p>
+
+      <div class="glass-card">
+        <h3>Metrics ที่เราเก็บ</h3>
+        <table class="cmp-table">
+          <thead><tr><th>Metric</th><th>Type</th><th>Labels</th><th>ใช้ดูอะไร</th></tr></thead>
+          <tbody>
+            <tr><td><code>sandbox_docstore_cache_hits_total</code></td><td>Counter</td><td>—</td><td>อัตราการ hit cache (ยิ่งสูงยิ่งดี)</td></tr>
+            <tr><td><code>sandbox_docstore_cache_misses_total</code></td><td>Counter</td><td>—</td><td>อัตราการ miss cache </td></tr>
+            <tr><td><code>sandbox_docstore_storage_operations_total</code></td><td>Counter</td><td>operation</td><td>จำนวน CRUD operations แยกประเภท</td></tr>
+            <tr><td><code>sandbox_http_requests_total</code></td><td>Counter</td><td>method, path, status</td><td>request volume + error rate</td></tr>
+            <tr><td><code>sandbox_http_request_duration_seconds</code></td><td>Histogram</td><td>method, path</td><td>latency distribution (p50, p95, p99)</td></tr>
+            <tr><td><code>sandbox_ratelimit_rejected_total</code></td><td>Counter</td><td>—</td><td>จำนวน request ที่โดน rate limit</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="glass-card success">
+        <h3>Cache Hit Ratio Formula</h3>
+        <pre>Hit Ratio = cache_hits / (cache_hits + cache_misses) × 100%
+
+ตัวอย่าง:
+  cache_hits = 950, cache_misses = 50
+  Hit Ratio = 950 / 1000 × 100% = 95%
+
+Uber's target: 99.9%
+Our target: ยิ่งสูงยิ่งดี (ขึ้นกับ cacheTTL + access pattern)</pre>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION: Deployment -->
+    <!-- ============================================================ -->
+    <section class="section" id="deployment">
+      <h2>🐳 Deployment — Docker + Railway</h2>
+
+      <h3>Multi-Stage Dockerfile</h3>
+      <div class="glass-card">
+        <pre># ── Stage 1: Build ──────────────────────────────────
+FROM golang:1.25.1-alpine AS builder
+WORKDIR /build
+COPY go.mod go.sum ./
+RUN go mod download                    # cache dependencies
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+    go build -trimpath -ldflags="-s -w" \
+    -o /app/server ./cmd/api/
+
+# ── Stage 2: Runtime ────────────────────────────────
+FROM scratch                           # ← smallest possible image
+COPY --from=builder /etc/ssl/certs/ /etc/ssl/certs/
+COPY --from=builder /app/server /app/server
+ENTRYPOINT ["/app/server"]</pre>
+        <p>ข้อดีของ Multi-Stage Build:</p>
+        <ul>
+          <li><strong>Image เล็กมาก</strong> — <code>FROM scratch</code> = 0 byte base image, binary เดียว ~15 MB</li>
+          <li><strong>Security</strong> — ไม่มี shell, ไม่มี package manager → attack surface แทบเป็น 0</li>
+          <li><strong><code>CGO_ENABLED=0</code></strong> — static binary, ไม่ depend libc → ทำงานบน scratch ได้</li>
+          <li><strong><code>-trimpath -ldflags="-s -w"</code></strong> — ลบ debug info + path info → binary เล็กลง</li>
+          <li><strong>go:embed</strong> — HTML/CSS/JS อยู่ในส binary ไม่ต้อง COPY แยก</li>
+        </ul>
+      </div>
+
+      <h3>Railway Deployment</h3>
+      <div class="glass-card">
+        <pre># railway.toml
+[build]
+builder = "dockerfile"
+
+[deploy]
+healthcheckPath = "/health"
+restartPolicyType = "on_failure"</pre>
+        <p>Railway จะ:</p>
+        <ol>
+          <li>ตรวจจับ push ไปยัง <code>main</code> branch</li>
+          <li>Build ด้วย Dockerfile</li>
+          <li>Deploy container + set <code>PORT</code> env var</li>
+          <li>Health check ที่ <code>/health</code></li>
+          <li>Auto-restart เมื่อ crash</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION: Checklist -->
+    <!-- ============================================================ -->
+    <section class="section" id="checklist">
+      <h2>✅ Checklist สำหรับ Backend Developer</h2>
+      <p>รายการสิ่งที่ควรทำเมื่อสร้าง Go API project ใหม่:</p>
+
+      <div class="glass-card highlight">
+        <h3>🏗️ Project Structure</h3>
+        <ul>
+          <li>☐ ใช้ <code>cmd/</code> สำหรับ entry points</li>
+          <li>☐ ใช้ <code>internal/</code> สำหรับ private code</li>
+          <li>☐ แยก domain (interface) กับ infrastructure (implementation)</li>
+          <li>☐ Dependency flow: Handler → Usecase → Repository (ทิศทางเดียว)</li>
+          <li>☐ ใช้ <code>pkg/</code> สำหรับ shared utilities เท่านั้น</li>
+        </ul>
+      </div>
+
+      <div class="glass-card warn">
+        <h3>🔐 Security</h3>
+        <ul>
+          <li>☐ JWT with short-lived access token (&le;15 min)</li>
+          <li>☐ Refresh token stored server-side (Redis/DB) — revocable</li>
+          <li>☐ RBAC: แยก public/protected/admin routes</li>
+          <li>☐ Rate limiting per user (ป้องกัน brute force + DDoS)</li>
+          <li>☐ Input validation ใน usecase layer (ไม่ใช่ handler)</li>
+          <li>☐ Constant-time comparison สำหรับ tokens/secrets</li>
+          <li>☐ CORS configuration ที่เข้มงวด</li>
+        </ul>
+      </div>
+
+      <div class="glass-card success">
+        <h3>📊 Observability</h3>
+        <ul>
+          <li>☐ Structured logging (JSON in prod, Console in dev)</li>
+          <li>☐ Prometheus metrics: request count, latency, error rate</li>
+          <li>☐ Health check endpoint (<code>/health</code>)</li>
+          <li>☐ Cache hit/miss ratio tracking</li>
+          <li>☐ Graceful shutdown (handle SIGINT/SIGTERM)</li>
+        </ul>
+      </div>
+
+      <div class="glass-card">
+        <h3>🗄️ Data Layer</h3>
+        <ul>
+          <li>☐ Repository pattern (interface + implementation)</li>
+          <li>☐ Cursor-based pagination (ไม่ใช่ offset/limit)</li>
+          <li>☐ Soft delete (อย่าลบข้อมูลจริง)</li>
+          <li>☐ Pipeline/Batch operations (ลด round-trips)</li>
+          <li>☐ TTL on cache keys</li>
+          <li>☐ Write-invalidate cache strategy</li>
+        </ul>
+      </div>
+
+      <div class="glass-card">
+        <h3>🐳 Deployment</h3>
+        <ul>
+          <li>☐ Multi-stage Dockerfile</li>
+          <li>☐ Static binary (<code>CGO_ENABLED=0</code>)</li>
+          <li>☐ <code>FROM scratch</code> (smallest image)</li>
+          <li>☐ Health check endpoint configured</li>
+          <li>☐ Environment-based configuration (12-factor app)</li>
+          <li>☐ Graceful shutdown</li>
+        </ul>
+      </div>
+
+      <div class="glass-card">
+        <h3>📝 API Design</h3>
+        <ul>
+          <li>☐ Versioned routes (<code>/api/v1/</code>)</li>
+          <li>☐ Standardized response format (<code>{success, data, error, meta}</code>)</li>
+          <li>☐ Proper HTTP status codes</li>
+          <li>☐ Error messages ที่มีประโยชน์ (แต่ไม่เปิดเผย internal details)</li>
+          <li>☐ Pagination metadata (<code>next_cursor</code>, <code>has_more</code>)</li>
+          <li>☐ Rate limit headers (<code>X-RateLimit-*</code>)</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <div style="text-align:center; padding:40px 0 20px; color:var(--text-dim); font-size:12px;">
+      No.1 API · Architecture Guide · สร้างด้วย 💙 เพื่อการศึกษา<br>
+      <a href="playground.html" style="color:var(--accent-cyan); text-decoration:none;">ลองใช้งาน API →</a>
+    </div>
+
+  </main>
+</div>
+
+<!-- Scroll to top button -->
+<button class="scroll-top" id="scrollTop" title="Scroll to top">
+  <svg viewBox="0 0 24 24"><path d="M12 4l-8 8h5v8h6v-8h5z"/></svg>
+</button>
+
+<script>
+// ── Sidebar toggle (mobile) ──────────────
+const menuBtn = document.getElementById('menuBtn');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('sidebarOverlay');
+
+menuBtn.addEventListener('click', () => {
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('show');
+});
+overlay.addEventListener('click', () => {
+  sidebar.classList.remove('open');
+  overlay.classList.remove('show');
+});
+
+// ── Active sidebar link on scroll ────────
+const sections = document.querySelectorAll('.section');
+const sideLinks = document.querySelectorAll('.sidebar a');
+const content = document.getElementById('content');
+
+function updateActive() {
+  let current = '';
+  sections.forEach(s => {
+    const rect = s.getBoundingClientRect();
+    if (rect.top <= 120) current = s.id;
+  });
+  sideLinks.forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+}
+window.addEventListener('scroll', updateActive, { passive: true });
+updateActive();
+
+// ── Sidebar link click closes mobile menu ──
+sideLinks.forEach(a => {
+  a.addEventListener('click', () => {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('show');
+  });
+});
+
+// ── Scroll to top button ─────────────────
+const scrollBtn = document.getElementById('scrollTop');
+window.addEventListener('scroll', () => {
+  scrollBtn.classList.toggle('show', window.scrollY > 400);
+}, { passive: true });
+scrollBtn.addEventListener('click', () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+</script>
+</body>
+</html>

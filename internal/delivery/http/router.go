@@ -178,6 +178,7 @@ func NewRouter(
 	app.Get("/docs.html", htmlPage(webUI, "docs.html"))
 	app.Get("/playground.html", htmlPage(webUI, "playground.html"))
 	app.Get("/code-viewer.html", htmlPage(webUI, "code-viewer.html"))
+	app.Get("/architecture.html", htmlPage(webUI, "architecture.html"))
 	app.Get("/snippets.json", func(c *fiber.Ctx) error {
 		data, err := fs.ReadFile(webUI, "snippets.json")
 		if err != nil {
