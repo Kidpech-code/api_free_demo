@@ -1,0 +1,1517 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>No.1 · Learn Dart & Flutter</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg-deep:      #03040e;
+      --glass-bg:     rgba(12, 18, 48, 0.60);
+      --glass-border: rgba(100, 140, 255, 0.18);
+      --glass-shadow: rgba(0, 10, 60, 0.7);
+      --accent-cyan:  #00e5ff;
+      --accent-orange:#ff8c00;
+      --accent-magenta:#e040fb;
+      --accent-green: #00e676;
+      --accent-red:   #ff5252;
+      --accent-yellow:#ffd740;
+      --purple-mid:   #7c4dff;
+      --blue-mid:     #1a6bff;
+      --text-primary: #e8eeff;
+      --text-secondary:#8899cc;
+      --text-dim:     #4a5580;
+      --radius-lg:    18px;
+      --radius-md:    12px;
+      --radius-sm:    8px;
+    }
+    html { height: 100%; scroll-behavior: smooth; }
+    body {
+      min-height: 100%; font-family: 'Inter','Segoe UI',system-ui,sans-serif;
+      background: var(--bg-deep); color: var(--text-primary); line-height: 1.75;
+    }
+    .cosmos { position: fixed; inset: 0; z-index: 0; pointer-events:none;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 15%, rgba(72,52,180,.22) 0%,transparent 70%),
+        radial-gradient(ellipse 60% 50% at 80% 85%, rgba(0,120,180,.18) 0%,transparent 65%),
+        linear-gradient(160deg, #03040e 0%, #060918 60%, #04061a 100%);
+    }
+    .stars { position: fixed; inset: 0; z-index: 0; pointer-events:none;
+      background-image:
+        radial-gradient(1px 1px at 5% 8%,rgba(220,230,255,.65) 0%,transparent 100%),
+        radial-gradient(1.5px 1.5px at 70% 4%,rgba(255,255,255,.72) 0%,transparent 100%),
+        radial-gradient(1px 1px at 40% 18%,rgba(180,200,255,.50) 0%,transparent 100%),
+        radial-gradient(1px 1px at 90% 25%,rgba(200,220,255,.58) 0%,transparent 100%),
+        radial-gradient(1px 1px at 15% 60%,rgba(210,220,255,.44) 0%,transparent 100%),
+        radial-gradient(1px 1px at 60% 70%,rgba(220,230,255,.40) 0%,transparent 100%),
+        radial-gradient(1.5px 1.5px at 93% 80%,rgba(255,255,255,.62) 0%,transparent 100%);
+    }
+
+    /* ── Topnav ─────────────────────────────────────────── */
+    .topnav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 28px; height: 54px;
+      background: rgba(4,6,22,.92); border-bottom: 1px solid var(--glass-border);
+      backdrop-filter: blur(24px);
+    }
+    .logo { display: flex; align-items: center; gap: 9px; text-decoration: none; }
+    .logo-mark { width: 30px; height: 30px; border-radius: 7px; background: linear-gradient(135deg,var(--purple-mid),var(--accent-cyan)); display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 0 14px rgba(0,229,255,.28); }
+    .logo-text { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+    .logo-text span { color: var(--accent-cyan); }
+    .nav-links { display: flex; gap: 3px; margin-left: 20px; }
+    .nav-link { padding: 5px 12px; border-radius: 16px; font-size: 12px; font-weight: 500; color: var(--text-secondary); text-decoration: none; transition: background .15s,color .15s; white-space:nowrap; }
+    .nav-link:hover { background: rgba(100,140,255,.10); color: var(--text-primary); }
+    .nav-link.active { background: rgba(0,229,255,.10); color: var(--accent-cyan); border: 1px solid rgba(0,229,255,.20); }
+    .nav-spacer { flex: 1; }
+    .btn-sm { padding: 5px 14px; border-radius: 16px; font-size: 12px; font-weight: 600; text-decoration: none; transition: .15s; }
+    .btn-ghost { color: var(--text-secondary); border: 1px solid var(--glass-border); }
+    .btn-ghost:hover { color: var(--accent-cyan); border-color: var(--accent-cyan); }
+
+    /* ── Layout ─────────────────────────────────────────── */
+    .page-wrap { position: relative; z-index: 1; display: flex; min-height: calc(100vh - 54px); }
+    .sidebar {
+      position: sticky; top: 54px; height: calc(100vh - 54px);
+      width: 270px; min-width: 270px; overflow-y: auto;
+      padding: 20px 14px; background: rgba(4,6,22,.70);
+      border-right: 1px solid var(--glass-border); backdrop-filter: blur(16px);
+    }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 4px; }
+    .sidebar h3 {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .12em; color: var(--text-dim); margin: 18px 0 6px;
+    }
+    .sidebar h3:first-child { margin-top: 0; }
+    .sidebar a {
+      display: block; padding: 5px 10px; border-radius: 7px;
+      font-size: 12.5px; color: var(--text-secondary); text-decoration: none;
+      transition: .15s; margin-bottom: 1px;
+    }
+    .sidebar a:hover { background: rgba(100,140,255,.10); color: var(--text-primary); }
+    .sidebar a.active { background: rgba(0,229,255,.10); color: var(--accent-cyan); }
+
+    .main-content { flex: 1; padding: 40px 48px 80px; max-width: 900px; margin: 0 auto; }
+
+    /* ── Elements ────────────────────────────────────────── */
+    .section { margin-bottom: 64px; scroll-margin-top: 70px; }
+    .section h1 {
+      font-size: 32px; font-weight: 800; margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta));
+      background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .section h2 {
+      font-size: 22px; font-weight: 700; color: var(--accent-cyan);
+      margin: 40px 0 12px; padding-bottom: 6px;
+      border-bottom: 1px solid var(--glass-border);
+    }
+    .section h3 { font-size: 17px; font-weight: 600; color: var(--accent-orange); margin: 28px 0 8px; }
+    .section h4 { font-size: 15px; font-weight: 600; color: var(--accent-green); margin: 20px 0 6px; }
+    .section p { color: var(--text-secondary); margin-bottom: 14px; }
+    .section ul, .section ol { color: var(--text-secondary); margin: 0 0 16px 24px; }
+    .section li { margin-bottom: 6px; }
+    .section strong { color: var(--text-primary); }
+
+    .glass-card {
+      background: var(--glass-bg); border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md); padding: 24px; margin-bottom: 20px;
+      box-shadow: 0 8px 32px var(--glass-shadow);
+    }
+    .glass-card.highlight { border-left: 3px solid var(--accent-cyan); }
+    .glass-card.warn { border-left: 3px solid var(--accent-orange); }
+    .glass-card.success { border-left: 3px solid var(--accent-green); }
+    .glass-card.tip { border-left: 3px solid var(--accent-magenta); }
+
+    pre {
+      background: rgba(2,4,18,.80); border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm); padding: 16px 20px;
+      overflow-x: auto; margin-bottom: 16px;
+      font-family: 'SF Mono','Cascadia Code','Fira Code',monospace;
+      font-size: 13px; line-height: 1.65; color: var(--text-primary);
+    }
+    code {
+      font-family: 'SF Mono','Cascadia Code','Fira Code',monospace;
+      font-size: 12.5px;
+    }
+    :not(pre) > code {
+      background: rgba(100,140,255,.12); padding: 2px 7px; border-radius: 5px;
+      color: var(--accent-cyan); font-size: 12px;
+    }
+    .output {
+      background: rgba(0,230,118,.06); border: 1px solid rgba(0,230,118,.18);
+      border-radius: var(--radius-sm); padding: 12px 16px; margin: -8px 0 16px;
+      font-family: 'SF Mono',monospace; font-size: 12.5px; color: var(--accent-green);
+    }
+    .output::before {
+      content: '▶ Output:'; display: block; font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .1em; margin-bottom: 6px;
+      color: rgba(0,230,118,.5);
+    }
+    .analogy {
+      background: rgba(224,64,251,.06); border: 1px solid rgba(224,64,251,.18);
+      border-radius: var(--radius-sm); padding: 14px 18px; margin-bottom: 16px;
+      color: var(--accent-magenta); font-size: 13.5px;
+    }
+    .analogy::before {
+      content: '💡 เปรียบเทียบ:'; display: block; font-size: 11px; font-weight: 700;
+      margin-bottom: 4px; color: rgba(224,64,251,.6);
+    }
+
+    .hamburger {
+      display: none; background: none; border: none; cursor: pointer;
+      padding: 6px; color: var(--text-secondary);
+    }
+    .hamburger svg { width: 22px; height: 22px; }
+
+    /* ── Progress bar ────────────────────────────────── */
+    .progress-bar {
+      position: fixed; top: 54px; left: 0; right: 0; z-index: 99;
+      height: 3px; background: transparent;
+    }
+    .progress-bar .bar {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-magenta));
+      transition: width .1s;
+    }
+
+    /* ── Responsive ─────────────────────────────────── */
+    @media (max-width: 1024px) { .main-content { padding: 32px 24px 60px; } }
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .hamburger { display: block; }
+      .sidebar {
+        position: fixed; top: 54px; left: 0; z-index: 99;
+        width: 280px; height: calc(100vh - 54px);
+        transform: translateX(-100%); transition: transform .25s ease;
+      }
+      .sidebar.open { transform: translateX(0); }
+      .sidebar-overlay { display: none; position: fixed; inset: 0; top: 54px; z-index: 98; background: rgba(0,0,0,.5); }
+      .sidebar-overlay.show { display: block; }
+      .main-content { padding: 24px 16px 60px; }
+      .section h1 { font-size: 24px; }
+      .section h2 { font-size: 18px; }
+      pre { font-size: 11.5px; padding: 12px; }
+    }
+    @media (max-width: 480px) {
+      .topnav { padding: 10px 14px; }
+      .main-content { padding: 18px 12px 40px; }
+      .glass-card { padding: 16px; }
+    }
+
+    .scroll-top {
+      position: fixed; bottom: 24px; right: 24px; z-index: 90;
+      width: 42px; height: 42px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple-mid), var(--accent-cyan));
+      border: none; cursor: pointer; display: none;
+      align-items: center; justify-content: center;
+      box-shadow: 0 4px 20px rgba(0,229,255,.3);
+    }
+    .scroll-top.show { display: flex; }
+    .scroll-top svg { width: 20px; height: 20px; fill: #fff; }
+  </style>
+</head>
+<body>
+<div class="cosmos"></div>
+<div class="stars"></div>
+
+<!-- Topnav -->
+<nav class="topnav">
+  <a class="logo" href="intro.html">
+    <div class="logo-mark">🚀</div>
+    <div class="logo-text">No.1<span>API</span></div>
+  </a>
+  <button class="hamburger" id="menuBtn" aria-label="Toggle menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+  </button>
+  <div class="nav-links">
+    <a class="nav-link" href="intro.html">🏠 เริ่มต้น</a>
+    <a class="nav-link" href="docs.html">📖 Docs</a>
+    <a class="nav-link" href="playground.html">⚡ Playground</a>
+    <a class="nav-link" href="architecture.html">🏗️ Architecture</a>
+    <a class="nav-link" href="learn-go.html">📚 Learn Go</a>
+    <a class="nav-link active" href="learn-dart-flutter.html">📱 Learn Dart & Flutter</a>
+  </div>
+  <div class="nav-spacer"></div>
+  <a class="btn-sm btn-ghost" href="dashboard.html">Dashboard →</a>
+</nav>
+
+<!-- Reading progress -->
+<div class="progress-bar"><div class="bar" id="progressBar"></div></div>
+
+<!-- Layout -->
+<div class="page-wrap">
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <aside class="sidebar" id="sidebar">
+    <h3>🟢 Dart: สำหรับผู้เริ่มต้น</h3>
+    <a href="#why-dart">ทำไมต้อง Dart?</a>
+    <a href="#install">ติดตั้ง & FVM</a>
+    <a href="#hello">Hello World & Types</a>
+    <a href="#null-safety">Null Safety (สำคัญ!)</a>
+    <a href="#variables">Records & Patterns</a>
+    <a href="#collections">Collections & Iterables</a>
+    <a href="#functions">Functions, Generic, Extension</a>
+
+    <h3>🟡 Dart OOP: หัวใจสำคัญ</h3>
+    <a href="#classes">Class Modifiers (Dart 3)</a>
+    <a href="#constructors">Constructors ทุกแบบ</a>
+    <a href="#inheritance">Inheritance & Mixins</a>
+    <a href="#design-patterns">Design Patterns</a>
+
+    <h3>🔴 Asynchronous programming</h3>
+    <a href="#future-async-await">Future, Async/Await, Error</a>
+    <a href="#streams">Streams & RxDart</a>
+    <a href="#isolates">Isolates (True Multithreading)</a>
+
+    <h3>📱 Flutter: สร้างแอปฯ จริง</h3>
+    <a href="#flutter-intro">Flutter Engine & Widget Tree</a>
+    <a href="#stateless-stateful">Stateless vs Stateful</a>
+    <a href="#state-management">State Management 2026</a>
+    <a href="#networking">Networking & Dio Interceptors</a>
+    <a href="#clean-arch-flutter">Clean Architecture</a>
+    <a href="#json-serialization">Data Modeling & Freezed</a>
+    <a href="#testing">Automated Testing</a>
+    <a href="#performance">Performance Tuning</a>
+    <a href="#enterprise-flutter">Enterprise Must-Haves</a>
+  </aside>
+
+  <main class="main-content" id="content">
+
+<!-- ================================================================ -->
+<!--  PART 1: INTRO                                                 -->
+<!-- ================================================================ -->
+
+<section class="section" id="why-dart">
+  <h1>📱 Mastering Dart & Flutter: The Senior Dev Way</h1>
+  <p>สวัสดีครับ! ผม <strong>Kidpech</strong> (Senior Application Developer) &mdash; ผู้สร้าง Packages บน <a href="https://pub.dev/publishers/kidpech.app/packages" target="_blank" style="color:var(--accent-cyan)">kidpech.app</a> ที่มียอดดาวน์โหลดและใช้งานจริง</p>
+  
+  <p>คู่มือนี้ไม่ใช่แค่ "Tutorial" ทั่วไป แต่มันคือ <strong>"คัมภีร์วิศวกรรมซอฟต์แวร์"</strong> ที่ผมกลั่นกรองจากประสบการณ์การขึ้นระบบ Enterprise จริง การแก้บั๊กหน้างาน และการ Optimize แอปให้รองรับ Scale ระดับมหาศาล</p>
+  
+  <div class="glass-card success" style="border-left: 3px solid var(--accent-cyan); background: linear-gradient(90deg, rgba(0,229,255,0.05) 0%, transparent 100%);">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+      <div style="font-size:24px">📦</div>
+      <h3 style="margin:0;color:var(--text-primary)">Verified Publisher Expertise</h3>
+    </div>
+    <p style="margin-bottom:12px">สิ่งที่ยืนยันความเชี่ยวชาญของผมคือ Code ที่ถูกใช้งานจริงโดยนักพัฒนาทั่วโลก ผ่าน Pub.dev packages ภายใต้ชื่อ <strong>kidpech.app</strong></p>
+    <a href="https://pub.dev/publishers/kidpech.app/packages" target="_blank" class="btn-sm btn-ghost" style="border-color:var(--accent-cyan);color:var(--accent-cyan)">
+      🔥 ดูผลงาน Packages ของผมบน Pub.dev
+    </a>
+  </div>
+
+  <h2>🤔 ทำไมต้องเรียนรู้กับ Senior Dev?</h2>
+  <div class="analogy">
+    "ใครๆ ก็สอนคุณเขียนโค้ดให้ 'ทำงานได้' ... แต่ผมจะสอนคุณเขียนโค้ดให้ 'ยั่งยืน, ดูแลได้, และขยายสเกลได้'"
+  </div>
+
+  <div class="glass-card highlight">
+    <h3>Dart 3.x & Flutter 2026: The Game Changer</h3>
+    <p>โลกของ Mobile Cross-platform เปลี่ยนไปแล้ว เราไม่ได้แข่งกันที่ "ทำแอปเสร็จเร็ว" อย่างเดียว แต่แข่งกันที่ <strong>"Performance & Architecture"</strong></p>
+    <ul>
+      <li>✅ <strong>Deep Dive Records & Patterns</strong>: เขียน Code ให้สั้นลง 40% แต่ประสิทธิภาพสูงขึ้น</li>
+      <li>✅ <strong>Architecture-First</strong>: คิดแบบ System Architect ก่อนเริ่มเขียน UI บรรทัดแรก</li>
+      <li>✅ <strong>Production Grade</strong>: จัดการกับ Error, Logging, Analytics แบบที่แอป Top Tier ทำกัน</li>
+    </ul>
+  </div>
+</section>
+
+  <h3>🤖 Flutter: Beyond Mobile</h3>
+  <div class="glass-card">
+    <p>เลิกคิดว่า Flutter ทำได้แค่มือถือ! ในปี 2026 Flutter คือ <strong>Universal UI Kit</strong>:</p>
+    <ul>
+      <li>📱 <strong>Mobile</strong>: iOS/Android ประสิทธิภาพระดับ Native (Impeller Engine เร็วแรงทะลุนรก)</li>
+      <li>💻 <strong>Desktop</strong>: Windows/macOS/Linux Apps ที่ลื่นไหล</li>
+      <li>🌐 <strong>Web</strong>: Wasm (WebAssembly) Support เต็มรูปแบบ ทำให้เว็บโหลดเร็วขึ้นมาก</li>
+      <li>🚗 <strong>Embedded</strong>: หน้าจอรถยนต์ (Toyota ใช้ Flutter), ตู้ Kiosk</li>
+    </ul>
+  </div>
+
+  <h3>ทำไม Backend Developer ถึงควรหลงรัก Flutter?</h3>
+  <div class="glass-card tip">
+    <p>เพื่อนๆ Backend อาจจะมองว่า Frontend มันจุกจิก แต่ Flutter จะเปลี่ยนความคิดนั้น:</p>
+    <ul>
+      <li><strong>Type Safe ทั้งระบบ:</strong> ถ้าคุณใช้ Server เป็น Go/Rust แล้วมาใช้ Flutter คุณจะได้ Type Safety ตั้งแต่ Database ยัน UI (คุยกันรู้เรื่อง ไม่ต้องเดา JSON)</li>
+      <li><strong>Declarative UI:</strong> เขียน UI เหมือนเขียน Config (Code-based) ไม่ต้องลากวาง ไม่ต้องแก้ XML/CSS ที่ยุ่งยาก</li>
+      <li><strong>DevTools สุดเทพ:</strong> เครื่องมือ Debug Network, Memory, Performance Profile ที่ดีที่สุดในวงการ (Backend dev จะชอบสิ่งนี้มาก)</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!--  PART 2: MODERN DART BASICS (2026 Edition)                     -->
+<!-- ================================================================ -->
+
+<section class="section" id="install">
+  <h2>🛠️ ติดตั้งแบบ Professional (FVM)</h2>
+  <p>มือสมัครเล่นจะลง Flutter ตรงๆ แต่มือโปรเราใช้ <strong>FVM (Flutter Version Management)</strong> ครับ!</p>
+  
+  <div class="glass-card warn">
+    <h4>ทำไมต้อง FVM?</h4>
+    <p>ในโปรเจกต์จริง เราอาจต้องดูแลแอปหลายตัว บางตัวใช้ Flutter 3.19 บางตัวใช้ 3.24 ถ้าลงตรงๆ จะปวดหัวมาก FVM ช่วยให้เรา switch version ได้แยกตามโปรเจกต์เลย</p>
+    <pre># ติดตั้ง FVM
+brew tap leoafarias/fvm
+brew install fvm
+
+# ตั้งค่าโปรเจกต์ให้ใช้ version ที่ต้องการ
+fvm use 3.24.0
+
+# เวลาเรียกใช้
+fvm flutter run</pre>
+  </div>
+</section>
+
+<section class="section" id="hello">
+  <h2>👋 Hello World & Type System เต็มรูปแบบ</h2>
+  <p>ใน Dart ทุกอย่างเริ่มที่ <code>main()</code> แต่ลึกกว่านั้น Dart มี Type System ที่แข็งแกร่งมาก เรียนรู้ตั้งแต่ต้น</p>
+
+  <div class="glass-card">
+    <h4>ประเภทข้อมูลพื้นฐาน (Built-in Types)</h4>
+    <pre>void main() {
+  // Numbers
+  int age = 30;
+  double price = 99.99;
+  num anything = 42; // int หรือ double ก็ได้
+
+  // Strings: Dart รองรับ Multiline และ Interpolation
+  String name = 'Kidpech';
+  String greeting = "สวัสดีครับ $name!"; // Interpolation
+  String bio = """
+    Senior Application Developer
+    Dart & Flutter Specialist
+    Pub.dev Verified Publisher
+  """; // Multiline
+
+  // Boolean
+  bool isLoggedIn = true;
+
+  // Runes (Unicode) — สำคัญสำหรับแอป Emoji/Thai
+  String thai = '\u0E2A\u0E27\u0E31\u0E2A\u0E14\u0E35'; // สวัสดี
+  
+  print(greeting);
+  print('อายุของฉัน: ${age * 2} ปีแล้วครึ่งทาง 😄');
+}</pre>
+  </div>
+
+  <div class="glass-card warn">
+    <h4>var vs final vs const — คนละความหมาย!</h4>
+    <p>เรื่องนี้สำคัญมาก Senior Dev ต้องเลือกใช้ถูก:</p>
+    <pre>// var — type ถูก lock หลังกำหนดค่าแรก
+var name = "Dart"; // เป็น String ตลอดชีวิต
+// name = 123; // ❌ Compile Error!
+
+// final — กำหนดค่าครั้งเดียวได้ แต่รู้ค่าตอน runtime
+final DateTime loginTime = DateTime.now(); // ทำได้ เพราะรู้ค่าตอนรัน
+
+// const — ค่า Compile-time constant เท่านั้น (เร็วที่สุด!)
+const double taxRate = 0.07;
+const Color primaryColor = Color(0xFF00E5FF); // Flutter widget
+
+// ⚡ Best Practice: ใช้ const เมื่อทำได้ เพราะ Flutter จะ cache Widget นั้น
+// แทนที่จะสร้างใหม่ทุกครั้งที่ rebuild → ประหยัด Memory มาก</pre>
+  </div>
+</section>
+
+<section class="section" id="null-safety">
+  <h2>🛡️ Null Safety: หัวใจของ Dart ที่ปลอดภัย</h2>
+  <p>ตั้งแต่ Dart 2.12 เป็นต้นมา Dart บังคับใช้ <strong>Sound Null Safety</strong> ซึ่งเป็นความแตกต่างใหญ่ที่สุดระหว่าง Dart กับภาษาอื่นๆ</p>
+  
+  <div class="analogy">
+    ลองนึกภาพแบบนี้: ใน Java/Kotlin/Swift ตัวแปรเหมือนกล่องที่อาจ <strong>"ว่างเปล่า"</strong> (null) ได้ทุกใบ และเราไม่รู้ล่วงหน้า → ต้อง check ตลอด<br/>
+    แต่ใน Dart กล่องทุกใบ <strong>"ต้องมีของอยู่เสมอ"</strong> ยกเว้นกล่องที่มีป้าย <code>?</code> ติดอยู่ ซึ่งหมายถึง "กล่องนี้อาจว่างได้" → Compiler บังคับให้ check ก่อนใช้
+  </div>
+
+  <div class="glass-card highlight">
+    <h4>Non-nullable vs Nullable</h4>
+    <pre>// Non-nullable: ต้องมีค่าเสมอ (Default ใน Dart)
+String username = "kidpech";
+// username = null; ❌ Compile Error ทันที!
+
+// Nullable: เพิ่ม ? เพื่อบอกว่า "อาจเป็น null ได้"
+String? displayName; // null by default
+displayName = "Kidpech App"; // ✅ ใส่ค่าได้
+displayName = null;           // ✅ เป็น null ได้เช่นกัน</pre>
+  </div>
+
+  <div class="glass-card">
+    <h4>Null-aware Operators (อาวุธสำคัญ)</h4>
+    <pre>String? email;
+
+// 1. ?. (Null-aware access) — เรียก method เฉพาะเมื่อไม่ null
+int? length = email?.length; // null ถ้า email เป็น null
+
+// 2. ?? (Null coalescing) — ค่า default ถ้า null
+String display = email ?? "ยังไม่ได้ระบุ Email";
+
+// 3. ??= (Null-aware assignment) — กำหนดค่าถ้ายังเป็น null อยู่
+email ??= "default@example.com"; // set เฉพาะครั้งแรก
+
+// 4. ! (Null assertion operator) — ⚠️ ใช้ด้วยความระวัง!
+// บอก Dart ว่า "ฉันมั่นใจ 100% ว่าค่านี้ไม่ null"
+String definitelyNotNull = email!; // Runtime Error ถ้า null จริง!
+
+// Real-world Pattern: Early Return (Clean & Safe)
+Future&lt;void&gt; updateProfile(String? name) async {
+  if (name == null || name.isEmpty) return; // Guard clause
+  await api.update(name); // ถึงบรรทัดนี้ name ไม่ null แน่นอน
+}</pre>
+  </div>
+</section>
+
+<section class="section" id="collections">
+  <h2>📚 Collections & Functional Programming</h2>
+  <p>List, Map, Set คือหัวใจ แต่บรรดา Senior Dev จะเขียนแบบ Functional ซึ่งกระชับและ Bug-free กว่ามาก</p>
+
+  <div class="glass-card">
+    <h4>List: มากกว่าแค่ Array</h4>
+    <pre>// การสร้าง List แบบต่างๆ
+final primes = [2, 3, 5, 7, 11]; // Type inferred เป็น List&lt;int&gt;
+final fixed = List&lt;String&gt;.filled(5, ""); // 5 ช่อง เริ่มต้นด้วย ""
+final generated = List.generate(10, (i) => i * i); // [0,1,4,9,16,...]
+
+// Spread operator (...) — รวม List ง่ายๆ
+final extra = [13, 17];
+final allPrimes = [...primes, ...extra]; // [2,3,5,7,11,13,17]
+
+// Collection if/for — สร้าง List แบบมีเงื่อนไข
+bool includeAdmin = true;
+final menu = [
+  'หน้าหลัก',
+  'โปรไฟล์',
+  if (includeAdmin) 'จัดการระบบ', // เพิ่มเฉพาะเมื่อ true
+];</pre>
+  </div>
+
+  <div class="glass-card highlight">
+    <h4>Functional Style: map, where, reduce, fold</h4>
+    <p>อย่าเขียน for loop บ้านๆ ให้ใช้ functional style ที่อ่านง่ายกว่า</p>
+    <pre>final products = [
+  Product(name: 'iPhone', price: 35000, inStock: true),
+  Product(name: 'iPad', price: 25000, inStock: false),
+  Product(name: 'MacBook', price: 55000, inStock: true),
+];
+
+// where: filter
+final inStock = products.where((p) => p.inStock);
+
+// map: transform
+final prices = products.map((p) => p.price); // [35000, 25000, 55000]
+
+// fold: aggregate (เหมือน reduce แต่กำหนด initial value ได้)
+final totalValue = products
+    .where((p) => p.inStock)
+    .fold(0.0, (sum, p) => sum + p.price); // 90000.0
+
+// Method chaining (Chain ได้เลย สวยกว่า Loop มาก)
+final summary = products
+    .where((p) => p.inStock)
+    .map((p) => '\${p.name}: ฿\${p.price}')
+    .join(', '); // "iPhone: ฿35000, MacBook: ฿55000"</pre>
+  </div>
+</section>
+
+<section class="section" id="variables">
+  <h2>📦 Modern Variables, Records & Patterns</h2>
+  <p>ลืมการประกาศตัวแปรแบบเดิมๆ มาดูวิธีที่ทันสมัยและ Clean กว่ากันครับ</p>
+
+  <div class="glass-card">
+    <h4>1. Records (New in Dart 3)</h4>
+    <p>ไม่ต้องสร้าง Class เล็กๆ น้อยๆ เพื่อ return ค่าหลายค่าอีกต่อไป</p>
+    <pre>// เก่า: ต้องสร้าง class LatLng
+// ใหม่: ใช้ Records!
+(double, double) getLocation(String city) {
+  if (city == 'Bangkok') return (13.75, 100.50);
+  return (0.0, 0.0);
+}
+
+void main() {
+  // Destructuring (แกะค่าออกมาทันที)
+  var (lat, lng) = getLocation('Bangkok'); 
+  print('Lat: $lat, Lng: $lng');
+  
+  // Named Records (ระบุชื่อได้ด้วย)
+  ({String name, int age}) user = (name: 'Somchai', age: 25);
+  print(user.name);
+}</pre>
+  </div>
+
+  <div class="glass-card">
+    <h4>2. Pattern Matching (Switch Expression)</h4>
+    <p>การเขียน Switch แบบเดิมมันยาวเกะกะ มาดูแบบ Expression สั้นๆ สวยๆ</p>
+    <pre>String getStatusMessage(String status) => switch (status) {
+  'PROCESSED' => '✅ ดำเนินการเสร็จสิ้น',
+  'PENDING'   => '⏳ กำลังรอ...',
+  'FAILED' || 'ERROR' => '❌ เกิดข้อผิดพลาด', // Match หลายเงื่อนไขได้
+  _           => '❓ ไม่ทราบสถานะ',           // Default case
+};
+
+// ใช้กับ Records ก็ได้นะ!
+String authGuard((String, bool) context) => switch (context) {
+  ('admin', true)  => 'Allow Admin',
+  ('user', true)   => 'Allow User',
+  (_, false)       => 'Redirect to Login',
+  _                => 'Access Denied',
+};</pre>
+  </div>
+</section>
+
+<section class="section" id="functions">
+  <h2>🔨 Functions & Null Safety ขั้นสูง</h2>
+
+  <div class="glass-card highlight">
+    <h4>Required Named Parameters + Default Value</h4>
+    <p>ท่าไม้ตายของการออกแบบ API ใน Dart ให้ใช้งานง่าย</p>
+    <pre>
+// การออกแบบ Config ที่ดี
+class ServerConfig {
+  final String host;
+  final int port;
+  final bool isSecure;
+
+  // Constructor แบบนี้เรียกใช้ง่ายสุดๆ
+  ServerConfig({
+    required this.host, 
+    this.port = 8080,    // Default value
+    this.isSecure = false,
+  });
+}
+
+void main() {
+  // คนใช้ไม่ต้องจำลำดับ parameter และรู้ว่าอะไรจำเป็นต้องใส่
+  final config = ServerConfig(
+    host: 'api.example.com',
+    isSecure: true, // port 8080 auto
+  );
+}</pre>
+  </div>
+
+  <div class="glass-card tip">
+    <h4>Generics: เขียนครั้งเดียวใช้ได้ครอบจักรวาล</h4>
+    <p>หัวใจสำคัญของการเขียน Library หรือ Utility Class ให้ Reusable</p>
+    <pre>// ไม่มี Generics: ต้องเขียน class แยกสำหรับ Integer, String, User... เหนื่อยแย่
+// มี Generics (T): เขียนทีเดียวจบ
+class ApiResponse&lt;T&gt; {
+  final bool success;
+  final T? data;        // data เป็น type อะไรก็ได้
+  final String? error;
+
+  ApiResponse.success(this.data) : success = true, error = null;
+  ApiResponse.failure(this.error) : success = false, data = null;
+}
+
+void main() {
+  // Type Safety ยังอยู่ครบ!
+  final userResponse = ApiResponse&lt;User&gt;.success(User(name: "Somchai"));
+  final productResponse = ApiResponse&lt;List&lt;Product&gt;&gt;.success([p1, p2]);
+}</pre>
+  </div>
+
+  <div class="glass-card">
+    <h4>Extension Methods: เพิ่มพลังให้ Class เดิม</h4>
+    <p>ไม่ต้องสร้าง Class ใหม่ (Utils) ให้รก Extension ช่วยให้เราเติม method ลงไปใน class ที่มีอยู่แล้วได้ (แม้แต่ class ของ Dart เอง)</p>
+    <pre>extension StringValidators on String {
+  bool get isValidEmail {
+    return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(this);
+  }
+}
+
+extension ContextTheme on BuildContext {
+  // เรียกง่ายกว่า Theme.of(context).textTheme.headlineLarge
+  TextStyle? get headlineLarge => Theme.of(this).textTheme.headlineLarge;
+  Color get primaryColor => Theme.of(this).colorScheme.primary;
+}
+
+// การใช้งาน
+if (email.isValidEmail) { ... } // อ่านง่ายเหมือนภาษาพูด
+Text("Hello", style: context.headlineLarge); // สั้นกระชับ</pre>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!--  PART 3: MODERN OOP & MODIFIERS                                -->
+<!-- ================================================================ -->
+
+<section class="section" id="classes">
+  <h2>🏗️ Class Modifiers (ของใหม่ต้องรู้!)</h2>
+  <p>ใน Dart 3.0 เราควบคุมการสืบทอดได้ละเอียดมาก เพื่อป้องกันการใช้งานผิดๆ ในทีมขนาดใหญ่</p>
+
+  <div class="glass-card tip">
+    <h4>Sealed Class (พระเอกของ State Management)</h4>
+    <p><code>sealed</code> บังคับให้เรารู้จัก subclass ทั้งหมด เหมาะมากสำหรับทำ State ของหน้าจอ</p>
+    <pre>
+// ประกาศ State ที่เป็นไปได้ทั้งหมด
+sealed class ApiState {}
+
+class Loading extends ApiState {}
+class Success extends ApiState {     
+  final String data;
+  Success(this.data);
+}
+class Error extends ApiState {
+  final String message;
+  Error(this.message);
+}
+
+// เวลาเอาไปใช้ Dart จะบังคับให้เรา handle ให้ครบทุก case (Exhaustive Check)
+// ถ้าลืม case ไหนไป จะ Compile Error ทันที! ปลอดภัยมาก
+String buildUI(ApiState state) => switch (state) {
+  Loading() => 'Spinner...',
+  Success(data: var d) => 'Got data: $d', // Destructure ค่าออกมาใช้ได้เลย
+  Error(message: var m) => 'Alert: $m',
+};</pre>
+  </div>
+
+  <div class="glass-card">
+    <h4>Interface vs Base vs Final</h4>
+    <ul>
+       <li><code>interface class</code>: บังคับให้คนอื่น <code>implement</code> เท่านั้น ห้าม <code>extend</code> (เหมาะสำหรับทำสัญญา API)</li>
+       <li><code>base class</code>: บังคับให้คนอื่น <code>extend</code> เท่านั้น ห้าม <code>implement</code> (เหมาะสำหรับบังคับ implementation logic)</li>
+       <li><code>final class</code>: ปิดตาย! ห้ามสืบทอด ห้าม implement นอก library</li>
+    </ul>
+  </div>
+</section>
+
+<section class="section" id="constructors">
+  <h2>🔧 Constructors: ทุกรูปแบบที่ต้องรู้</h2>
+  <p>Dart มี Constructor หลายแบบมากกว่าภาษาอื่น ซึ่งเป็น Feature ที่ทรงพลังมากสำหรับการออกแบบ API ที่ดี</p>
+
+  <div class="glass-card highlight">
+    <h4>5 แบบ Constructor ที่ใช้บ่อยมาก</h4>
+    <pre>class User {
+  final String id;
+  final String name;
+  final String? email;
+  final DateTime createdAt;
+
+  // 1. Default Constructor (แบบย่อ — Syntactic Sugar)
+  User({required this.id, required this.name, this.email})
+      : createdAt = DateTime.now(); // Initializer list
+
+  // 2. Named Constructor — สร้างจาก context ต่างๆ
+  User.fromJson(Map&lt;String, dynamic&gt; json)
+      : id = json['id'],
+        name = json['name'],
+        email = json['email'],
+        createdAt = DateTime.parse(json['created_at']);
+
+  // 3. Factory Constructor — ควบคุม Object สร้างได้ 100%
+  //    (Return existing instance, Singleton, หรือ subtype ได้!)
+  factory User.guest() {
+    return User(id: 'guest-0', name: 'Guest User');
+  }
+
+  // 4. Const Constructor — Object ถูก Cache ไว้ (เร็วมากใน Flutter)
+  //    ใช้ได้เฉพาะเมื่อ field ทุกตัวเป็น final
+  // const User({...}); ← ทำได้ถ้า createdAt ไม่อยู่
+
+  // 5. Redirect Constructor
+  User.admin({required String name}) :
+    this(id: 'admin-${name.hashCode}', name: name, email: 'admin@example.com');
+}
+
+// การใช้งาน
+final u1 = User(id: 'u1', name: 'Kidpech');
+final u2 = User.fromJson({'id': 'u2', 'name': 'Dev', 'email': null, 'created_at': '2026-01-01T00:00:00Z'});
+final guest = User.guest();
+final admin = User.admin(name: 'SuperAdmin');</pre>
+  </div>
+</section>
+
+<section class="section" id="inheritance">
+  <h2>🧬 Inheritance, Abstract & Mixins</h2>
+  <p>การสืบทอดใน Dart มี 3 เครื่องมือหลักที่ใช้งานต่างกัน: <code>extends</code>, <code>implements</code>, และ <code>with</code></p>
+
+  <div class="glass-card">
+    <h4>Abstract Class: สัญญาที่มี Default Implementation</h4>
+    <pre>// Abstract Class เหมาะสำหรับ "ฐาน" ที่มี Logic บางส่วน
+abstract class Repository&lt;T&gt; {
+  Future&lt;T?&gt; findById(String id);
+  Future&lt;List&lt;T&gt;&gt; findAll();
+  Future&lt;void&gt; save(T entity);
+  Future&lt;void&gt; delete(String id);
+
+  // Default implementation — subclass ใช้ได้เลย
+  Future&lt;bool&gt; exists(String id) async {
+    return (await findById(id)) != null;
+  }
+}
+
+class UserRepository extends Repository&lt;User&gt; {
+  @override
+  Future&lt;User?&gt; findById(String id) async {
+    return await database.query('SELECT * FROM users WHERE id = ?', [id]);
+  }
+  // ต้อง implement ทุก abstract method
+  @override Future&lt;List&lt;User&gt;&gt; findAll() async => [...];
+  @override Future&lt;void&gt; save(User u) async => [...];
+  @override Future&lt;void&gt; delete(String id) async => [...];
+}</pre>
+  </div>
+
+  <div class="glass-card tip">
+    <h4>Mixins: "พลังพิเศษที่ถอด-ใส่ได้"</h4>
+    <p>Mixin ไม่ใช่ Class ที่สืบทอดได้ แต่คือ "ชุดความสามารถ" ที่นำไปติดกับ Class ใดก็ได้</p>
+    <pre>// Real-world Example: Flutter Animation มักใช้ Mixin แบบนี้
+mixin LoggableMixin {
+  String get logTag => runtimeType.toString();
+
+  void log(String message) {
+    print('[\$logTag] \$message');
+  }
+}
+
+mixin RetryableMixin {
+  final int maxRetries = 3;
+
+  Future&lt;T&gt; withRetry&lt;T&gt;(Future&lt;T&gt; Function() fn) async {
+    for (int i = 0; i &lt; maxRetries; i++) {
+      try {
+        return await fn();
+      } catch (e) {
+        if (i == maxRetries - 1) rethrow;
+        await Future.delayed(Duration(seconds: 1 &lt;&lt; i)); // Exponential backoff
+      }
+    }
+    throw StateError('Should not reach here');
+  }
+}
+
+// รวมพลัง!
+class ProductService with LoggableMixin, RetryableMixin {
+  Future&lt;List&lt;Product&gt;&gt; fetchProducts() async {
+    log('Fetching products...');
+    return withRetry(() => api.getProducts()); // retry อัตโนมัติสูงสุด 3 ครั้ง
+  }
+}
+
+// In Flutter: SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin ใช้หลักการนี้</pre>
+  </div>
+</section>
+
+<section class="section" id="design-patterns">
+  <h2>🎨 Design Patterns สำหรับ Dart</h2>
+  <p>Pattern เหล่านี้คือ "ภาษากลาง" ของนักพัฒนา Senior การรู้จัก Pattern ช่วยให้สื่อสารในทีมได้เร็วขึ้น 10 เท่า</p>
+
+  <div class="glass-card">
+    <h4>1. Singleton Pattern (ของที่มีแค่ชิ้นเดียวในระบบ)</h4>
+    <pre>class AppDatabase {
+  // Private constructor — สร้างจากภายนอก class ไม่ได้
+  AppDatabase._internal();
+
+  // Instance เดียวในระบบ
+  static final AppDatabase instance = AppDatabase._internal();
+
+  // Factory constructor — ทุกครั้งที่ new AppDatabase() จะได้ instance เดิม
+  factory AppDatabase() => instance;
+
+  Future&lt;void&gt; connect() async { /* ... */ }
+}
+
+// ใช้งาน
+final db1 = AppDatabase(); // instance เดียวกับ db2 เสมอ
+final db2 = AppDatabase();
+assert(identical(db1, db2)); // true!</pre>
+  </div>
+
+  <div class="glass-card highlight">
+    <h4>2. Builder Pattern (สร้าง Object ซับซ้อนแบบ Fluent API)</h4>
+    <pre>class QueryBuilder {
+  String _table = '';
+  final List&lt;String&gt; _conditions = [];
+  int? _limit;
+  String? _orderBy;
+
+  QueryBuilder from(String table) { _table = table; return this; }
+  QueryBuilder where(String condition) { _conditions.add(condition); return this; }
+  QueryBuilder limit(int n) { _limit = n; return this; }
+  QueryBuilder orderBy(String field) { _orderBy = field; return this; }
+
+  String build() {
+    var query = 'SELECT * FROM \$_table';
+    if (_conditions.isNotEmpty) query += ' WHERE \${_conditions.join(' AND ')}';
+    if (_orderBy != null) query += ' ORDER BY \$_orderBy';
+    if (_limit != null) query += ' LIMIT \$_limit';
+    return query;
+  }
+}
+
+// การใช้งาน อ่านง่ายมาก!
+final query = QueryBuilder()
+    .from('products')
+    .where('price > 1000')
+    .where('in_stock = true')
+    .orderBy('created_at DESC')
+    .limit(20)
+    .build();</pre>
+  </div>
+
+  <div class="glass-card">
+    <h4>3. Repository Pattern (Interface-driven Data Access)</h4>
+    <p>Pattern ที่ขาดไม่ได้ใน Clean Architecture ช่วยให้สลับ Data Source (API →  Local DB) ได้โดยไม่แก้โค้ดชั้น Domain เลย</p>
+    <pre>// Domain Layer: กำหนดสัญญา (ไม่รู้จัก implementation)
+abstract interface class IProductRepository {
+  Future&lt;List&lt;Product&gt;&gt; getProducts({int page = 1});
+  Future&lt;Product?&gt; getProductById(String id);
+}
+
+// Data Layer: Implementation จริง (API)
+class ApiProductRepository implements IProductRepository {
+  final Dio dio;
+  ApiProductRepository(this.dio);
+
+  @override
+  Future&lt;List&lt;Product&gt;&gt; getProducts({int page = 1}) async {
+    final res = await dio.get('/products?page=\$page');
+    return (res.data as List).map((j) => Product.fromJson(j)).toList();
+  }
+  @override
+  Future&lt;Product?&gt; getProductById(String id) async { /* ... */ }
+}
+
+// Data Layer: Mock สำหรับ Test
+class MockProductRepository implements IProductRepository {
+  @override
+  Future&lt;List&lt;Product&gt;&gt; getProducts({int page = 1}) async =>
+      [Product(id: 'p1', name: 'Test Product', price: 100)];
+  @override
+  Future&lt;Product?&gt; getProductById(String id) async => null;
+}</pre>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!--  PART 4: ASYNC & STREAMS (Real World)                          -->
+<!-- ================================================================ -->
+
+<section class="section" id="future-async-await">
+  <h2>⏳ Asynchronous: โลกความจริงมันโหดร้าย</h2>
+  <p>สอนแค่ <code>await Future.delayed</code> มันเด็กๆ ไป ชีวิตจริงเราต้องเจอกับ Timeout, Error, และ Concurrent</p>
+  
+  <div class="glass-card warn">
+    <h4>Error Handling in Async</h4>
+    <p>อย่าแค่ try-catch บ้านๆ ให้ใช้ <code>runZonedGuarded</code> หรือ Catch Error เฉพาะจุด</p>
+    <pre>Future&lt;void&gt; deepDive() async {
+  try {
+    // รอหลาย API พร้อมกัน (Parallel) เร็วกว่ารอทีละอัน
+    final results = await Future.wait([
+      api.getUser(),
+      api.getProduct(),
+      api.getConfig(),
+    ]);
+  } on TimeoutException catch (e) {
+    print("ช้าไปแล้วพี่ชาย: $e");
+  } on SocketException catch (e) {
+    print("เน็ตหลุดหรือเปล่า: $e");
+  } catch (e, stackTrace) {
+    // ส่ง Crash Report ไป Server เสมอ!
+    Crashlytics.record(e, stackTrace);
+  }
+}</pre>
+  </div>
+
+  <div class="glass-card highlight">
+    <h4>Streams: ไม่ใช่แค่น้ำ แต่คือโรงงานผลิตน้ำ</h4>
+    <p>Backend Dev จะเข้าใจง่ายถ้าบอกว่า Stream คือ <strong>"Channel" ใน Go</strong> หรือ <strong>"Observable" ใน RxJava</strong></p>
+    <p>Use Case จริง: <strong>Search Box with Debounce</strong> (พิมพ์ๆ หยุดๆ แล้วค่อยค้นหา)</p>
+    <pre>// นี่โค้ดจริงที่ใช้กันนะ ไม่ใช่โค้ดห้องเรียน
+final searchController = StreamController&lt;String&gt;();
+
+void initSearch() {
+  searchController.stream
+      .distinct()                   // ถ้าคำเดิมไม่ต้องค้นหาซ้ำ
+      .debounceTime(Duration(ms: 500))  // รอ user หยุดพิมพ์ 0.5 วิ
+      .switchMap((text) => api.search(text).asStream()) // ยกเลิก request เก่าถ้ามีใหม่มา
+      .listen((result) {
+        updateUI(result);
+      });
+}</pre>
+  </div>
+</section>
+
+<section class="section" id="isolates">
+  <h2>⚡ Isolates: True Multithreading ใน Dart</h2>
+  <p>Dart เป็น <strong>Single-threaded</strong> แต่ใช้ Event Loop เหมือน JavaScript ทีนี้ถ้า Task หนักมาก (parse JSON ล้านบรรทัด, compress image) มันจะ <strong>Block UI Thread</strong> ทำให้หน้าค้าง (Jank)!</p>
+  <p>คำตอบคือ <strong>Isolates</strong> — กระบวนการ Dart ที่ทำงานแยกอิสระพร้อมกัน โดย <strong>ไม่แชร์ Memory กัน</strong> (คุยกันผ่าน Message เท่านั้น)</p>
+
+  <div class="glass-card">
+    <h4>Analogy: Isolate คืออะไร?</h4>
+    <div class="analogy">
+      คิดว่า Isolate คือ "คนงานคนละคน" ที่อยู่คนละห้อง ห้ามยืมของกัน ต้องส่งโน้ตผ่านใต้ประตูเท่านั้น (Message Passing). ต่างกับ Thread ในภาษาอื่นที่แชร์ Memory ได้เลยแต่เสี่ยง Race Condition.
+    </div>
+  </div>
+
+  <div class="glass-card highlight">
+    <h4>วิธีที่ 1: <code>compute()</code> — ง่ายที่สุด (Flutter Only)</h4>
+    <p>เหมาะเมื่อ "ส่งข้อมูลไป ประมวลผล คืนค่ากลับมา" แบบง่ายๆ</p>
+    <pre>// ฟังก์ชั่นที่จะรันใน Isolate ต้องเป็น top-level function เท่านั้น!
+List&lt;Product&gt; _parseProductsInBackground(String jsonStr) {
+  final List decoded = jsonDecode(jsonStr); // Heavy computation
+  return decoded.map((j) => Product.fromJson(j)).toList();
+}
+
+// เรียกใช้จาก UI Thread — ไม่ค้างหน้าแม้แต่ frame เดียว
+final products = await compute(_parseProductsInBackground, rawJsonString);
+print('Got \${products.length} products');</pre>
+  </div>
+
+  <div class="glass-card">
+    <h4>วิธีที่ 2: <code>Isolate.run()</code> — Dart 2.19+</h4>
+    <pre>// Dart 2.19+ มี Isolate.run() ที่ใช้งานง่ายกว่ามาก
+final result = await Isolate.run(() async {
+  // ทำของหนักที่นี่ (รองรับ closure แต่ capture ได้เฉพาะ data ที่ copy ได้)
+  return await _expensiveEncryption(largeData);
+});</pre>
+  </div>
+
+  <div class="glass-card warn">
+    <h4>ข้อควรระวัง (Senior Dev ต้องรู้!)</h4>
+    <ul>
+      <li>Isolate ใหม่ต้องโหลด Dart VM ใหม่ — มี overhead สูง อย่าสร้าง-ทำลายบ่อย</li>
+      <li>ใช้ <strong>Isolate Pool</strong> pattern หรือ <code>IsolateNameServer</code> สำหรับงานต่อเนื่อง</li>
+      <li>Platform Channels (Flutter ↔ Native) ต้องเรียกจาก <strong>Main Isolate เท่านั้น</strong></li>
+      <li>Object ที่ส่งข้ามไปต้องเป็น primitive, List, Map หรือ implement <code>SendPort</code> เท่านั้น</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!--  PART 5: MODERN FLUTTER ARCHITECTURE                           -->
+<!-- ================================================================ -->
+
+<section class="section" id="flutter-intro">
+  <h1>📱 Flutter Architecture 2026</h1>
+  <p>การเขียนโค้ด UI ในหน้าเดียว (Spaghetti Code) คือบาปมหันต์! เรามาดูวิธีจัดโครงสร้างแบบมืออาชีพกัน</p>
+</section>
+
+<section class="section" id="widget-tree">
+  <h2>🌳 Widget Tree: 3 Trees ที่ Flutter ใช้จริง</h2>
+  <p>Flutter ไม่ได้มีแค่ Widget Tree เดียว แต่มี <strong>3 Trees</strong> ทำงานร่วมกัน การเข้าใจเรื่องนี้ทำให้ Debug Performance ได้เฉียบคมขึ้นมาก</p>
+
+  <div class="glass-card highlight">
+    <h4>3 Trees ของ Flutter</h4>
+    <pre>
+  Widget Tree           Element Tree          Render Tree
+  (Blueprint)           (Instance)            (Actual Pixels)
+  ─────────────         ─────────────         ─────────────
+  Column()        →     ColumnElement   →     RenderFlex
+    Text("Hi")    →     TextElement     →     RenderParagraph
+    Container()   →     ContainerElem   →     RenderConstrainedBox
+</pre>
+    <ul>
+      <li><strong>Widget Tree</strong>: แค่ "คำอธิบาย" (immutable config) สร้าง-ทำลายได้ถูกมาก</li>
+      <li><strong>Element Tree</strong>: "ชีวิตจริง" ของ Widget เก็บ State, parent-child relationship (ทนทาน)</li>
+      <li><strong>Render Tree</strong>: คำนวณ Layout, Paint ลงจอ (หนักสุด)</li>
+    </ul>
+    <div class="analogy">
+      Widget = แบบสถาปัตย์ | Element = ตัวอาคารจริง | RenderObject = งานก่อสร้าง<br>
+      การ rebuild Widget ไม่ได้ทำลาย Element เสมอไป — Flutter ฉลาดพอที่จะ <strong>reuse Element</strong> ถ้า Widget type เหมือนกัน
+    </div>
+  </div>
+
+  <div class="glass-card">
+    <h4>Key: เบาะแสให้ Flutter ระบุ Element</h4>
+    <pre>// ปัญหา: swap เด็ก 2 คนโดยไม่ใช้ Key → Flutter สับสน, State หาย!
+Row(children: [ColorBox(color: red), ColorBox(color: blue)])
+// เปลี่ยน order:
+Row(children: [ColorBox(color: blue), ColorBox(color: red)])  // State ยังผิดอยู่!
+
+// แก้ไข: ใช้ Key บอก Flutter ว่า Widget ไหนคือใคร
+Row(children: [
+  ColorBox(key: ValueKey('red'), color: red),
+  ColorBox(key: ValueKey('blue'), color: blue),
+]) // ✅ State ถูกต้องแม้ swap order
+
+// GlobalKey: ใช้เข้าถึง State ของ Widget จากภายนอก (ใช้น้อยที่สุดเพราะ couple code)
+final formKey = GlobalKey&lt;FormState&gt;();
+formKey.currentState?.validate();</pre>
+  </div>
+</section>
+
+<section class="section" id="stateless-stateful">
+  <h2>🔄 Stateless vs Stateful Widget: Lifecycle ที่ต้องรู้ใจ</h2>
+
+  <div class="glass-card">
+    <h4>StatelessWidget: ไม่มีความจำ (Functional UI)</h4>
+    <p>ทุกครั้งที่ Parent rebuild มัน recreate Widget ใหม่ทั้งหมด เหมาะสำหรับ <strong>UI ที่ขึ้นอยู่กับ Input เท่านั้น</strong></p>
+    <pre>// ดีที่สุดสำหรับ Presentational Widgets
+class ProductCard extends StatelessWidget {
+  final Product product;
+  final VoidCallback onTap;
+
+  const ProductCard({super.key, required this.product, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    // ทุก build จะ recreate ทั้งหมด (แต่ไม่แพงเพราะ Widget เป็นแค่ config)
+    return GestureDetector(
+      onTap: onTap,
+      child: Card(child: Text(product.name)),
+    );
+  }
+}</pre>
+  </div>
+
+  <div class="glass-card highlight">
+    <h4>StatefulWidget: มีความจำ (Mutable State)</h4>
+    <p>Widget + State Object แยกกัน Flutter เก็บ State ไว้ใน Element Tree แม้ Widget ถูก rebuild</p>
+    <pre>class CounterWidget extends StatefulWidget {
+  const CounterWidget({super.key});
+
+  @override
+  State&lt;CounterWidget&gt; createState() =&gt; _CounterWidgetState();
+}
+
+class _CounterWidgetState extends State&lt;CounterWidget&gt;
+    with SingleTickerProviderStateMixin {
+  int _count = 0;
+  late AnimationController _animCtrl;
+
+  // ── LIFECYCLE ──────────────────────────────────────────
+
+  @override
+  void initState() {
+    super.initState();
+    // เรียกครั้งเดียวตอน Widget ถูก insert เข้า Tree
+    // เหมาะสำหรับ: init controller, subscribe stream, fetch data ครั้งแรก
+    _animCtrl = AnimationController(vsync: this, duration: 300.ms);
+    _fetchInitialData();
+  }
+
+  @override
+  void didUpdateWidget(CounterWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // เรียกทุกครั้งที่ Parent ส่ง config ใหม่มา (Widget rebuilt แต่ State ยังอยู่)
+    // เหมาะสำหรับ: update local state เมื่อ props เปลี่ยน
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // เรียกหลัง initState และเมื่อ InheritedWidget ที่ depend เปลี่ยน
+    // เหมาะสำหรับ: ดึงค่าจาก Theme, MediaQuery, Provider
+    final theme = Theme.of(context); // Safe to call here!
+  }
+
+  @override
+  void dispose() {
+    // เรียกตอน Widget ถูก remove ออกจาก Tree — ต้อง cleanup เสมอ!
+    _animCtrl.dispose();       // ❗ ไม่ dispose → memory leak!
+    _subscription?.cancel();  // ❗ ไม่ cancel → zombie listener!
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // เรียกบ่อยที่สุด — อย่าทำงานหนักที่นี่!
+    return Text('\$_count');
+  }
+}</pre>
+  </div>
+
+  <div class="glass-card tip">
+    <h4>Rule of Thumb: เลือกอะไรดี?</h4>
+    <ul>
+      <li>ไม่มี local state, ไม่มี animation, ไม่ subscribe อะไร → <code>StatelessWidget</code></li>
+      <li>มี Counter/Toggle/Form/Animation → <code>StatefulWidget</code></li>
+      <li>State แชร์ข้าม Widget หลายตัว → <strong>Riverpod / BLoC</strong> (อย่าเก็บไว้ใน StatefulWidget)</li>
+    </ul>
+  </div>
+</section>
+
+<section class="section" id="state-management">
+  <h2>🧠 State Management: เลิกตีกันได้แล้ว (ฉบับ 2026)</h2>
+  <p>เมื่อก่อนเถียงกันว่า Provider vs Bloc vs GetX ดี... แต่ปี 2026 เรามีมาตรฐานที่ชัดเจนขึ้น</p>
+
+  <div class="glass-card highlight">
+    <h3>🏆 Riverpod: The Modern Standard</h3>
+    <p>Riverpod คือร่างทองของ Provider ที่แก้ปัญหาทุกอย่าง และให้เราจัดการ <strong>Async State (Loading/Error/Data)</strong> ได้ง่ายที่สุดในโลก</p>
+    
+    <div class="analogy">
+       Riverpod ไม่ใช่แค่ State Management แต่มันคือ <strong>"Reactive Caching Framework"</strong> (ช่วยจำค่า, แชร์ค่า, และรีเฟรชค่าเมื่อจำเป็น)
+    </div>
+
+    <pre>// 1. สร้าง Provider แบบ Async (FutureProvider) เหมาะกับการดึง API
+final productProvider = FutureProvider.family&lt;List&lt;Product&gt;, String&gt;((ref, category) async {
+  final api = ref.watch(apiClientProvider);
+  return api.fetchProducts(category); // คืนค่า Future
+});
+
+// 2. ใช้ใน Widget (Clean สุดๆ ด้วย AsyncValue)
+class ProductPage extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Watch: เมื่อค่าเปลี่ยน Widget จะ rebuild เฉพาะตรงนี้
+    final asyncProducts = ref.watch(productProvider('shoes'));
+    
+    // Pattern Matching กับ UI 3 สถานะ (Loading/Error/Data) อัตโนมัติ!
+    return asyncProducts.when(
+      data: (products) => ListView.builder(itemCount: products.length, itemBuilder: ...),
+      error: (err, stack) => ErrorWidget(err),
+      loading: () => Center(child: CircularProgressIndicator()),
+    );
+  }
+}</pre>
+    <p><strong>ทำไมโค้ดนี้ถึง "เทพ"?</strong></p>
+    <ul>
+       <li>ไม่ต้องเขียน `if (isLoading)` เอง Riverpod จัดการให้</li>
+       <li>ถ้า user ออกจากหน้า `ProductPage` และกลับเข้ามาใหม่ Riverpod จะใช้ **Cache** เดิมถ้ายังไม่หมดอายุ (ไม่ต้องโหลดใหม่)</li>
+       <li>ถ้าเกิด Error มันจะเก็บ state error ไว้ และเราสามารถสั่ง `ref.refresh(productProvider)` เพื่อลองใหม่ได้ง่ายๆ</li>
+    </ul>
+  </div>
+
+  <div class="glass-card">
+    <h3>BLoC (Business Logic Component)</h3>
+    <p>ยังคงเป็น King 👑 ในฝั่ง Enterprise (Banking/FinTech) และทีมขนาดใหญ่ เพราะ:</p>
+    <ul>
+        <li><strong>Event-Driven:</strong> บังคับโครงสร้าง Event -> State ชัดเจน (Strict)</li>
+        <li><strong>Traceability:</strong> รู้หมดว่า State เปลี่ยนเพราะ Event อะไร (ผ่าน BlocObserver)</li>
+        <li><strong>Testability:</strong> เทส logic ง่ายมาก เพราะ input คือ Event และ output คือ State เสมอ</li>
+    </ul>
+  </div>
+
+  <div class="glass-card highlight">
+    <h4>BLoC ตัวอย่างจริง: Auth Flow</h4>
+    <pre>// 1. Events — สิ่งที่ user หรือระบบทำ (immutable!)
+sealed class AuthEvent {}
+final class LoginRequested extends AuthEvent {
+  final String email, password;
+  LoginRequested(this.email, this.password);
+}
+final class LogoutRequested extends AuthEvent {}
+final class SessionRefreshRequested extends AuthEvent {}
+
+// 2. States — สิ่งที่ UI จะแสดง (immutable!)
+sealed class AuthState {}
+final class AuthInitial extends AuthState {}
+final class AuthLoading extends AuthState {}
+final class AuthAuthenticated extends AuthState {
+  final User user;
+  AuthAuthenticated(this.user);
+}
+final class AuthError extends AuthState {
+  final String message;
+  AuthError(this.message);
+}
+
+// 3. BLoC — Business Logic อยู่ที่นี่ทั้งหมด
+class AuthBloc extends Bloc&lt;AuthEvent, AuthState&gt; {
+  final AuthRepository _authRepository;
+
+  AuthBloc(this._authRepository) : super(AuthInitial()) {
+    on&lt;LoginRequested&gt;(_onLoginRequested);
+    on&lt;LogoutRequested&gt;(_onLogoutRequested);
+  }
+
+  Future&lt;void&gt; _onLoginRequested(
+    LoginRequested event,
+    Emitter&lt;AuthState&gt; emit,
+  ) async {
+    emit(AuthLoading());
+    try {
+      final user = await _authRepository.login(event.email, event.password);
+      emit(AuthAuthenticated(user));
+    } catch (e) {
+      emit(AuthError(e.toString()));
+    }
+  }
+
+  Future&lt;void&gt; _onLogoutRequested(LogoutRequested event, Emitter&lt;AuthState&gt; emit) async {
+    await _authRepository.logout();
+    emit(AuthInitial());
+  }
+}
+
+// 4. BlocObserver — Monitor ทุกอย่าง! (Logging, Analytics)
+class AppBlocObserver extends BlocObserver {
+  @override
+  void onEvent(Bloc bloc, Object? event) {
+    super.onEvent(bloc, event);
+    print('[\${bloc.runtimeType}] Event: \$event'); // Log ทุก Event
+  }
+  @override
+  void onError(BlocBase bloc, Object error, StackTrace stackTrace) {
+    Crashlytics.record(error, stackTrace); // Crash report อัตโนมัติ
+    super.onError(bloc, error, stackTrace);
+  }
+}
+
+// 5. ใช้ใน Widget (Pattern Matching กับ sealed class!)
+BlocConsumer&lt;AuthBloc, AuthState&gt;(
+  listener: (ctx, state) {
+    if (state is AuthAuthenticated) Navigator.pushNamed(ctx, '/home');
+  },
+  builder: (ctx, state) =&gt; switch (state) {
+    AuthLoading()         =&gt; CircularProgressIndicator(),
+    AuthAuthenticated(user: final u) =&gt; Text('Welcome, \${u.name}'),
+    AuthError(message: final msg)    =&gt; Text('Error: \$msg', style: TextStyle(color: Colors.red)),
+    _                     =&gt; LoginForm(),
+  },
+)</pre>
+  </div>
+</section>
+
+<section class="section" id="networking">
+  <h2>🌐 Networking: อย่าใช้ http package ตรงๆ!</h2>
+  <p>ในงาน Enterprise เราต้องจัดการ Token Refresh, Error Handling, และ Timeout แบบรวมศูนย์ แนะนำให้ใช้ <strong>Dio</strong> เสมอ</p>
+  
+  <div class="glass-card tip">
+    <h4>Why Dio? (The Supercharged HTTP Client)</h4>
+    <p>Dio มีฟีเจอร์ "Interceptors" ที่เหมือน Middleware ใน Backend ช่วยดัดแปลง request/response ได้ก่อนถึงมือเรา</p>
+    <pre>
+final dio = Dio(BaseOptions(baseUrl: 'https://api.example.com'));
+
+void setupInterceptors() {
+  dio.interceptors.add(InterceptorsWrapper(
+    onRequest: (options, handler) async {
+      // 1. แปะ Token อัตโนมัติทุก request
+      final token = await secureStorage.read(key: 'jwt_token');
+      options.headers['Authorization'] = 'Bearer $token'; 
+      return handler.next(options);
+    },
+    onError: (DioException e, handler) async {
+      // 2. ถ้าเจอ 401 Unauthorized -> ลอง Refresh Token ก่อน
+      if (e.response?.statusCode == 401) {
+         if (await refreshToken()) {
+            return handler.resolve(await dio.fetch(e.requestOptions)); // Retry
+         }
+      }
+      return handler.next(e);
+    },
+  ));
+}</pre>
+  </div>
+</section>
+
+<section class="section" id="clean-arch-flutter">
+  <h2>🏗️ Clean Architecture on Flutter (ฉบับใช้งานจริง)</h2>
+  <p>อย่าเขียน Logic ผสมกับ UI เด็ดขาด! แยกส่วนเพื่อให้ Test ง่ายและเปลี่ยน Database ได้โดยไม่ต้องแก้ทั้งแอป</p>
+  
+  <div class="glass-card success">
+    <h4>The 3 Layers Rule (กฎเหล็ก 3 ชั้น)</h4>
+    <p>โครงสร้าง Folder ที่แนะนำสำหรับโปรเจกต์ขนาดกลาง-ใหญ่ (Feature-first Structure):</p>
+    <pre>lib/
+├── core/                  # ของกลางที่ใช้ร่วมกัน (Error, Network, DI)
+├── features/              # แยกตาม Feature (แนะนำกว่าแยกตาม Layer)
+│   ├── auth/
+│   │   ├── data/          # 🧱 Data Layer (คุยกับโลกภายนอก)
+│   │   │   ├── datasources/ # Remote (API), Local (Storage)
+│   │   │   ├── models/      # JSON DTOs (Data Transfer Objects)
+│   │   │   └── repositories/# Logic การเลือก source (API หรือ Cache?)
+│   │   ├── domain/        # 🧠 Domain Layer (สมองของธุรกิจ)
+│   │   │   ├── entities/    # Plain Dart Class (ห้ามมี JSON logic!)
+│   │   │   ├── repositories/# Abstract Interface (สัญญาว่าทำอะไรได้)
+│   │   │   └── usecases/    # Business Logic จริงๆ (Login, Validate)
+│   │   └── presentation/  # 🖼️ Presentation Layer (หน้าจอ)
+│   │       ├── bloc/        # State Management (BloC/Riverpod)
+│   │       ├── pages/       # Screens
+│   │       └── widgets/     # Local Widgets
+│   └── product/
+└── main.dart</pre>
+  </div>
+  
+  <div class="glass-card warn">
+    <h4>🚫 ข้อห้ามสำคัญของ Clean Arch</h4>
+    <ul>
+       <li><strong>ห้าม Presentation รู้จัก Data Layer:</strong> UI ต้องเรียกผ่าน Domain/Usecase เท่านั้น ห้ามเรียก API ตรงๆ</li>
+       <li><strong>ห้าม Domain รู้จัก Flutter:</strong> Domain Layer ต้องเป็น Pure Dart (ไม่มี `import 'package:flutter/...'`) เพื่อให้ Test ง่ายและ Portable</li>
+       <li><strong>Data Layer เป็นทาส:</strong> มีหน้าที่แค่หาข้อมูลมาให้ Domain ไม่ต้องคิด Logic ซับซ้อน</li>
+    </ul>
+  </div>
+</section>
+
+<section class="section" id="json-serialization">
+  <h2>🔄 Data Modeling: code-gen คือเพื่อนรัก</h2>
+  <p>อย่าเขียน <code>fromJson</code> / <code>toJson</code> เอง! ผิดง่ายและเสียเวลา</p>
+  
+  <div class="glass-card highlight">
+    <h4>Freezed + JsonSerializable</h4>
+    <p>แพ็คเกจคู่บุญที่ต้องมีทุกโปรเจกต์ <code>freezed</code> ช่วยทำ Immutable Data Class + CopyWith + Equality Check ให้ฟรีๆ</p>
+    <pre>@freezed
+class User with _$User {
+  // สร้าง Constructor และระบุ field
+  const factory User({
+    required int id,
+    required String username,
+    @Default(false) bool isActive, // กำหนด default value
+  }) = _User;
+
+  // บอกให้สร้าง fromJson ให้ด้วย
+  factory User.fromJson(Map&lt;String, dynamic&gt; json) => _$UserFromJson(json);
+}</pre>
+  </div>
+</section>
+  <style>.badge-test-pass { background: rgba(0,230,118,0.1); color: var(--accent-green); padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }</style>
+<section class="section" id="testing">
+  <h2>🧪 Automated Testing: เขียนโค้ดให้หลับสบาย</h2>
+  <p>ใน Enterprise, "โค้ดที่ไม่มี Test = Legacy Code". เรามี Test 3 ระดับที่ต้องรู้จัก:</p>
+
+  <div class="glass-card">
+    <h4>1. Unit Test (ทดสอบ Logic) <span class="badge-test-pass">FASTEST</span></h4>
+    <p>ทดสอบ Usecase, Repositories, หรือ Util Functions ว่าทำงานถูกต้องตาม Business Logic ไหม</p>
+    <pre>test('User should be valid if email is correct', () {
+  final user = User(email: 'test@example.com');
+  expect(user.isValid, true);
+});
+
+// ใช้ Mocktail เพื่อจำลอง dependencies (Network/DB)
+when(() => mockApi.login()).thenAnswer((_) async => 'token123');</pre>
+  </div>
+
+  <div class="glass-card">
+    <h4>2. Widget Test (ทดสอบ UI) <span class="badge-test-pass">MEDIUM</span></h4>
+    <p>ทดสอบ Component ว่าแสดง widget ถูกต้องไหมเมื่อ state เปลี่ยนแปลง โดยไม่ต้องรันแอปจริง</p>
+    <pre>testWidgets('Counter increments smoke test', (WidgetTester tester) async {
+  await tester.pumpWidget(MyApp());
+  
+  expect(find.text('0'), findsOneWidget); // เริ่มต้นที่ 0
+  await tester.tap(find.byIcon(Icons.add)); // กดปุ่ม +
+  await tester.pump(); // รอรีเฟรชหน้าจอ
+  
+  expect(find.text('1'), findsOneWidget); // ต้องเป็น 1
+});</pre>
+  </div>
+
+  <div class="glass-card tip">
+    <h4>3. Golden Test (ทดสอบ Pixel Perfect) <span class="badge-test-pass">SLOWEST</span></h4>
+    <p>ถ่ายรูปหน้าจอเทียบกับรูปต้นฉบับ (Master) ถ้ารูปต่างกันแม้แต่ 1 pixel -> Test Failed! (เหมาะสำหรับกัน UI เพี้ยนโดยไม่ตั้งใจ)</p>
+  </div>
+</section>
+
+<section class="section" id="performance">
+  <h2>🚀 Performance Tuning: Secrets of 60 FPS</h2>
+  <p>ทำแอปให้ใช้ได้ กับทำแอปให้ "ลื่นปรื๊ด" มันต่างกันตรงความเข้าใจเรื่อง Widget Tree</p>
+  
+  <div class="glass-card warn">
+    <h4>Common Mistakes (ข้อผิดพลาดที่เจอบ่อย)</h4>
+    <ul>
+        <li><strong>SizedBox vs Container:</strong> ถ้าแค่ต้องการเว้นระยะห่าง ใช้ `SizedBox` เสมอ (เร็วกว่า `Container` มาก เพราะไม่มี painting logic)</li>
+        <li><strong>const keywords:</strong> ใส่ `const` หน้า Widget ทุกครั้งที่ทำได้ (ลดการสร้าง object ใหม่ memory churn)</li>
+        <li><strong>Transparency:</strong> อย่าใช้ Opacity widget โดยไม่จำเป็น เพราะมันบังคับให้ Flutter วาดลง buffer (แพงมาก) ให้ใช้ `Color.withOpacity()` แทนถ้าทำได้</li>
+    </ul>
+  </div>
+
+  <div class="glass-card highlight">
+    <h4>ListView.builder & Image Cache</h4>
+    <ul>
+      <li>อย่าใช้ `ListView(children: ...)` ถ้ามีของเกิน 20 ชิ้น ให้ใช้ `.builder` เพื่อ render เฉพาะสิ่งที่เห็น (Lazy Loading)</li>
+      <li>ใช้ `cached_network_image` เสมอ ห้ามโหลดรูปเดิมซ้ำๆ จากเน็ต</li>
+      <li>ถ้า Animation กระตุก ลองครอบด้วย `RepaintBoundary` (แยก layer การวาด ไม่กระทบส่วนอื่น)</li>
+    </ul>
+  </div>
+</section>
+
+<section class="section" id="enterprise-flutter">
+  <h2>🌟 Enterprise Must-Haves (สิ่งที่ขาดไม่ได้ในปี 2026)</h2>
+  
+  <div class="glass-card success">
+    <h4>1. Internationalization (i18n)</h4>
+    <p>❌ ห้าม Hardcode String เด็ดขาด! (เช่น `Text("สวัสดี")`)</p>
+    <p>✅ ใช้ Library เช่น <strong>slang</strong> หรือ <strong>easy_localization</strong> เสมอ แม้จะทำแอปภาษาเดียว (เผื่ออนาคต)</p>
+    <pre>Text(context.t.welcome_message(name: user.name)) // Type-safe translations!</pre>
+  </div>
+
+  <div class="glass-card success">
+    <h4>2. Dependency Injection (DI)</h4>
+    <p>เลิกส่ง Service ต่อๆ กันเป็นทอดผ่าน Constructor (Prop Drilling). ใช้ <strong>get_it</strong> หรือ <strong>Riverpod</strong> เพื่อเข้าถึง Dependencies จากที่ไหนก็ได้</p>
+    <pre>// BAD: PageA -> PageB -> PageC (ส่ง apiService ต่อกันไปเรื่อยๆ)
+// GOOD: Ref.read(apiProvider) (เรียกใช้ได้เลยเมื่อต้องการ)</pre>
+  </div>
+
+  <div class="glass-card success">
+    <h4>3. Flavor & Environment</h4>
+    <p>แอปจริงต้องมี Dev, Staging, Production แยกกัน (Database คนละก้อน) ใช้ <strong>--dart-define</strong> หรือ package <strong>envied</strong> เพื่อจัดการ Secrets อย่างปลอดภัย</p>
+  </div>
+
+  <div class="glass-card tip">
+    <h4>Senior Developer Checklist:</h4>
+    <ul>
+      <li><strong>Async Gap:</strong> ระวังการใช้ `context` หลัง `await` (เพราะหน้าจออาจถูกปิดไปแล้ว) -> เช็ค `if (context.mounted)` เสมอ</li>
+      <li><strong>Don't fight the framework:</strong> อย่าพยายามฝืน Flutter โดยการเขียน Native UI ผสมเยอะเกินไป, ให้เชื่อใจ Skia/Impeller Engine</li> 
+      <li><strong>Responsive:</strong> ออกแบบเผื่อจอพับ / Tablet เสมอ (ใช้ `LayoutBuilder`)</li>
+    </ul>
+  </div>
+  
+  <h3>📚 ก้าวต่อไปสู่ระดับ Expert</h3>
+  <p>คุณเพิ่งผ่านหลักสูตร Crash Course ระดับเข้มข้น! แต่นี่เป็นเพียงจุดเริ่มต้นของการเป็น <strong>Senior Application Developer</strong></p>
+
+  <div class="glass-card" style="margin-top: 24px; border: 1px solid var(--accent-magenta);">
+    <h3 style="margin-top:0; color:var(--text-primary)">🚀 ติดตามผลงานและ Packages ของผม</h3>
+    <p>เรียนรู้ Best Practices จาก Source Code จริงที่ผม Publish ให้โลกใช้:</p>
+    <a href="https://pub.dev/publishers/kidpech.app/packages" target="_blank" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--accent-cyan);font-weight:600;font-size:16px;">
+      <span style="font-size:20px">📦</span> kidpech.app on Pub.dev (Verified Publisher)
+    </a>
+    <p style="font-size:12px;color:var(--text-dim);margin-top:8px">
+      *Packages เหล่านี้คือตัวอย่าง Code Quality ที่ผมใช้ใน Production จริง คุณสามารถเข้าไปดู Code เพื่อศึกษาโครงสร้าง Library Design ได้
+    </p>
+  </div>
+</section>
+
+  </main>
+
+  <button class="scroll-top" id="scrollTop" aria-label="Scroll to top">
+    <svg viewBox="0 0 24 24"><path d="M12 4l-8 8h6v8h4v-8h6z"/></svg>
+  </button>
+</div>
+
+<script>
+  // Add active class handling and scroll interaction
+  const navLinks = document.querySelectorAll('.sidebar a');
+  const sections = document.querySelectorAll('section');
+  const scrollTopBtn = document.getElementById('scrollTop');
+  const menuBtn = document.getElementById('menuBtn');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  const progressBar = document.getElementById('progressBar');
+
+  // Mobile menu toggle
+  function toggleMenu() {
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('show');
+    document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
+  }
+  
+  menuBtn.addEventListener('click', toggleMenu);
+  overlay.addEventListener('click', toggleMenu);
+  
+  // Close menu when clicking a link (mobile)
+  navLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      if(window.innerWidth <= 768) toggleMenu();
+    });
+  });
+
+  window.addEventListener('scroll', () => {
+    let current = '';
+    const scrollY = window.scrollY;
+    
+    // Progress bar
+    const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const scrolled = (winScroll / height) * 100;
+    progressBar.style.width = scrolled + "%";
+
+    // Active link highlighting
+    sections.forEach(section => {
+      const sectionTop = section.offsetTop;
+      const sectionHeight = section.clientHeight;
+      if (scrollY >= (sectionTop - 150)) {
+        current = section.getAttribute('id');
+      }
+    });
+
+    navLinks.forEach(link => {
+      link.classList.remove('active');
+      if (link.getAttribute('href').includes(current)) {
+        link.classList.add('active');
+      }
+    });
+
+    // Scroll top button
+    if (scrollY > 500) scrollTopBtn.classList.add('show');
+    else scrollTopBtn.classList.remove('show');
+  });
+
+  scrollTopBtn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+</script>
+</body>
+</html>
