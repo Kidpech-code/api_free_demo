@@ -1,0 +1,2371 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>No.1 · Learn Vue.js</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg-deep:      #03040e;
+      --glass-bg:     rgba(12, 18, 48, 0.60);
+      --glass-border: rgba(100, 140, 255, 0.18);
+      --glass-shadow: rgba(0, 10, 60, 0.7);
+      --accent-cyan:  #00e5ff;
+      --accent-orange:#ff8c00;
+      --accent-magenta:#e040fb;
+      --accent-green: #00e676;
+      --accent-red:   #ff5252;
+      --accent-yellow:#ffd740;
+      --purple-mid:   #7c4dff;
+      --blue-mid:     #1a6bff;
+      --text-primary: #e8eeff;
+      --text-secondary:#8899cc;
+      --text-dim:     #4a5580;
+      --radius-lg:    18px;
+      --radius-md:    12px;
+      --radius-sm:    8px;
+    }
+    html { height: 100%; scroll-behavior: smooth; }
+    body {
+      min-height: 100%; font-family: 'Inter','Segoe UI',system-ui,sans-serif;
+      background: var(--bg-deep); color: var(--text-primary); line-height: 1.75;
+    }
+    .cosmos { position: fixed; inset: 0; z-index: 0; pointer-events:none;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 15%, rgba(72,52,180,.22) 0%,transparent 70%),
+        radial-gradient(ellipse 60% 50% at 80% 85%, rgba(0,120,180,.18) 0%,transparent 65%),
+        linear-gradient(160deg, #03040e 0%, #060918 60%, #04061a 100%);
+    }
+    .stars { position: fixed; inset: 0; z-index: 0; pointer-events:none;
+      background-image:
+        radial-gradient(1px 1px at 5% 8%,rgba(220,230,255,.65) 0%,transparent 100%),
+        radial-gradient(1.5px 1.5px at 70% 4%,rgba(255,255,255,.72) 0%,transparent 100%),
+        radial-gradient(1px 1px at 40% 18%,rgba(180,200,255,.50) 0%,transparent 100%),
+        radial-gradient(1px 1px at 90% 25%,rgba(200,220,255,.58) 0%,transparent 100%),
+        radial-gradient(1px 1px at 15% 60%,rgba(210,220,255,.44) 0%,transparent 100%),
+        radial-gradient(1px 1px at 60% 70%,rgba(220,230,255,.40) 0%,transparent 100%),
+        radial-gradient(1.5px 1.5px at 93% 80%,rgba(255,255,255,.62) 0%,transparent 100%);
+    }
+
+    /* ── Topnav ─────────────────────────────────────────── */
+    .topnav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 28px; height: 54px;
+      background: rgba(4,6,22,.92); border-bottom: 1px solid var(--glass-border);
+      backdrop-filter: blur(24px);
+    }
+    .logo { display: flex; align-items: center; gap: 9px; text-decoration: none; }
+    .logo-mark { width: 30px; height: 30px; border-radius: 7px; background: linear-gradient(135deg,var(--purple-mid),var(--accent-cyan)); display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 0 14px rgba(0,229,255,.28); }
+    .logo-text { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+    .logo-text span { color: var(--accent-cyan); }
+    .nav-links { display: flex; gap: 3px; margin-left: 20px; }
+    .nav-link { padding: 5px 12px; border-radius: 16px; font-size: 12px; font-weight: 500; color: var(--text-secondary); text-decoration: none; transition: background .15s,color .15s; white-space:nowrap; }
+    .nav-link:hover { background: rgba(100,140,255,.10); color: var(--text-primary); }
+    .nav-link.active { background: rgba(0,229,255,.10); color: var(--accent-cyan); border: 1px solid rgba(0,229,255,.20); }
+    .nav-spacer { flex: 1; }
+    .btn-sm { padding: 5px 14px; border-radius: 16px; font-size: 12px; font-weight: 600; text-decoration: none; transition: .15s; }
+    .btn-ghost { color: var(--text-secondary); border: 1px solid var(--glass-border); }
+    .btn-ghost:hover { color: var(--accent-cyan); border-color: var(--accent-cyan); }
+
+    /* ── Layout ─────────────────────────────────────────── */
+    .page-wrap { position: relative; z-index: 1; display: flex; min-height: calc(100vh - 54px); }
+    .sidebar {
+      position: sticky; top: 54px; height: calc(100vh - 54px);
+      width: 270px; min-width: 270px; overflow-y: auto;
+      padding: 20px 14px; background: rgba(4,6,22,.70);
+      border-right: 1px solid var(--glass-border); backdrop-filter: blur(16px);
+    }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 4px; }
+    .sidebar h3 {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .12em; color: var(--text-dim); margin: 18px 0 6px;
+    }
+    .sidebar h3:first-child { margin-top: 0; }
+    .sidebar a {
+      display: block; padding: 5px 10px; border-radius: 7px;
+      font-size: 12.5px; color: var(--text-secondary); text-decoration: none;
+      transition: .15s; margin-bottom: 1px;
+    }
+    .sidebar a:hover { background: rgba(100,140,255,.10); color: var(--text-primary); }
+    .sidebar a.active { background: rgba(0,229,255,.10); color: var(--accent-cyan); }
+
+    .main-content { flex: 1; padding: 40px 48px 80px; max-width: 900px; margin: 0 auto; }
+
+    /* ── Elements ────────────────────────────────────────── */
+    .section { margin-bottom: 64px; scroll-margin-top: 70px; }
+    .section h1 {
+      font-size: 32px; font-weight: 800; margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta));
+      background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .section h2 {
+      font-size: 22px; font-weight: 700; color: var(--accent-cyan);
+      margin: 40px 0 12px; padding-bottom: 6px;
+      border-bottom: 1px solid var(--glass-border);
+    }
+    .section h3 { font-size: 17px; font-weight: 600; color: var(--accent-orange); margin: 28px 0 8px; }
+    .section h4 { font-size: 15px; font-weight: 600; color: var(--accent-green); margin: 20px 0 6px; }
+    .section p { color: var(--text-secondary); margin-bottom: 14px; }
+    .section ul, .section ol { color: var(--text-secondary); margin: 0 0 16px 24px; }
+    .section li { margin-bottom: 6px; }
+    .section strong { color: var(--text-primary); }
+
+    .glass-card {
+      background: var(--glass-bg); border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md); padding: 24px; margin-bottom: 20px;
+      box-shadow: 0 8px 32px var(--glass-shadow);
+    }
+    .glass-card.highlight { border-left: 3px solid var(--accent-cyan); }
+    .glass-card.warn { border-left: 3px solid var(--accent-orange); }
+    .glass-card.success { border-left: 3px solid var(--accent-green); }
+    .glass-card.tip { border-left: 3px solid var(--accent-magenta); }
+
+    pre {
+      background: rgba(2,4,18,.80); border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm); padding: 16px 20px;
+      overflow-x: auto; margin-bottom: 16px;
+      font-family: 'SF Mono','Cascadia Code','Fira Code',monospace;
+      font-size: 13px; line-height: 1.65; color: var(--text-primary);
+    }
+    code {
+      font-family: 'SF Mono','Cascadia Code','Fira Code',monospace;
+      font-size: 12.5px;
+    }
+    :not(pre) > code {
+      background: rgba(100,140,255,.12); padding: 2px 7px; border-radius: 5px;
+      color: var(--accent-cyan); font-size: 12px;
+    }
+    .output {
+      background: rgba(0,230,118,.06); border: 1px solid rgba(0,230,118,.18);
+      border-radius: var(--radius-sm); padding: 12px 16px; margin: -8px 0 16px;
+      font-family: 'SF Mono',monospace; font-size: 12.5px; color: var(--accent-green);
+    }
+    .output::before {
+      content: '▶ Output:'; display: block; font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .1em; margin-bottom: 6px;
+      color: rgba(0,230,118,.5);
+    }
+    .analogy {
+      background: rgba(224,64,251,.06); border: 1px solid rgba(224,64,251,.18);
+      border-radius: var(--radius-sm); padding: 14px 18px; margin-bottom: 16px;
+      color: var(--accent-magenta); font-size: 13.5px;
+    }
+    .analogy::before {
+      content: '💡 เปรียบเทียบ:'; display: block; font-size: 11px; font-weight: 700;
+      margin-bottom: 4px; color: rgba(224,64,251,.6);
+    }
+
+    .hamburger {
+      display: none; background: none; border: none; cursor: pointer;
+      padding: 6px; color: var(--text-secondary);
+    }
+    .hamburger svg { width: 22px; height: 22px; }
+
+    .progress-bar {
+      position: fixed; top: 54px; left: 0; right: 0; z-index: 99;
+      height: 3px; background: transparent;
+    }
+    .progress-bar .bar {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-magenta));
+      transition: width .1s;
+    }
+
+    @media (max-width: 1024px) { .main-content { padding: 32px 24px 60px; } }
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .hamburger { display: block; }
+      .sidebar {
+        position: fixed; top: 54px; left: 0; z-index: 99;
+        width: 280px; height: calc(100vh - 54px);
+        transform: translateX(-100%); transition: transform .25s ease;
+      }
+      .sidebar.open { transform: translateX(0); }
+      .sidebar-overlay { display: none; position: fixed; inset: 0; top: 54px; z-index: 98; background: rgba(0,0,0,.5); }
+      .sidebar-overlay.show { display: block; }
+      .main-content { padding: 24px 16px 60px; }
+      .section h1 { font-size: 24px; }
+      .section h2 { font-size: 18px; }
+      pre { font-size: 11.5px; padding: 12px; }
+    }
+    @media (max-width: 480px) {
+      .topnav { padding: 10px 14px; }
+      .main-content { padding: 18px 12px 40px; }
+      .glass-card { padding: 16px; }
+    }
+
+    .scroll-top {
+      position: fixed; bottom: 24px; right: 24px; z-index: 90;
+      width: 42px; height: 42px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple-mid), var(--accent-cyan));
+      border: none; cursor: pointer; display: none;
+      align-items: center; justify-content: center;
+      box-shadow: 0 4px 20px rgba(0,229,255,.3);
+    }
+    .scroll-top.show { display: flex; }
+    .scroll-top svg { width: 20px; height: 20px; fill: #fff; }
+  </style>
+</head>
+<body>
+<div class="cosmos"></div>
+<div class="stars"></div>
+
+<!-- Topnav -->
+<nav class="topnav">
+  <a class="logo" href="intro.html">
+    <div class="logo-mark">🚀</div>
+    <div class="logo-text">No.1<span>API</span></div>
+  </a>
+  <button class="hamburger" id="menuBtn" aria-label="Toggle menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+  </button>
+  <div class="nav-links">
+    <a class="nav-link" href="intro.html">🏠 เริ่มต้น</a>
+    <a class="nav-link" href="docs.html">📖 Docs</a>
+    <a class="nav-link" href="playground.html">⚡ Playground</a>
+    <a class="nav-link" href="architecture.html">🏗️ Architecture</a>
+    <a class="nav-link" href="learn-go.html">📚 Learn Go</a>
+    <a class="nav-link" href="learn-dart-flutter.html">📱 Dart &amp; Flutter</a>
+    <a class="nav-link active" href="learn-vuejs.html">💚 Learn Vue.js</a>
+  </div>
+  <div class="nav-spacer"></div>
+  <a class="btn-sm btn-ghost" href="dashboard.html">Dashboard →</a>
+</nav>
+
+<!-- Reading progress -->
+<div class="progress-bar"><div class="bar" id="progressBar"></div></div>
+
+<!-- Layout -->
+<div class="page-wrap">
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <aside class="sidebar" id="sidebar">
+    <h3>🟢 เริ่มต้น Vue.js</h3>
+    <a href="#why-vue">ทำไมต้อง Vue.js?</a>
+    <a href="#install">ติดตั้ง & สร้างโปรเจค</a>
+    <a href="#project-structure">โครงสร้างโปรเจค</a>
+    <a href="#sfc">Single File Component</a>
+    <a href="#template-syntax">Template Syntax</a>
+    <a href="#reactivity">Reactivity: ref & reactive</a>
+    <a href="#computed-watch">Computed & Watchers</a>
+
+    <h3>🟡 Component System</h3>
+    <a href="#props-emit">Props & Emit</a>
+    <a href="#slots">Slots & Dynamic Component</a>
+    <a href="#lifecycle">Lifecycle Hooks</a>
+    <a href="#composables">Composables (Reusable Logic)</a>
+    <a href="#provide-inject">Provide / Inject</a>
+
+    <h3>🔴 Advanced Patterns</h3>
+    <a href="#vue-router">Vue Router</a>
+    <a href="#pinia">Pinia (State Management)</a>
+    <a href="#async-data">Async Data & Suspense</a>
+    <a href="#typescript-vue">TypeScript + Vue</a>
+    <a href="#custom-directives">Custom Directives</a>
+
+    <h3>🏢 Enterprise & Production</h3>
+    <a href="#testing-vue">Testing (Vitest + Vue Test Utils)</a>
+    <a href="#performance-vue">Performance Optimization</a>
+    <a href="#architecture-vue">Enterprise Architecture</a>
+    <a href="#nuxt-intro">Nuxt 3 (Full-Stack Vue)</a>
+    <a href="#deploy-checklist">Production Checklist</a>
+  </aside>
+
+  <main class="main-content" id="content">
+
+<!-- ================================================================ -->
+<!--  PART 1: WHY VUE.JS?                                           -->
+<!-- ================================================================ -->
+
+<section class="section" id="why-vue">
+  <h1>💚 Mastering Vue.js: จากศูนย์สู่ Enterprise</h1>
+  <p>สวัสดีครับ! ผม <strong>Kidpech</strong> — Senior Application Developer ที่ทำงานกับทั้ง Frontend และ Backend มาทั้งชีวิต</p>
+  <p>คู่มือนี้ไม่ใช่แค่ "Hello World" แต่มันคือ <strong>คัมภีร์ฉบับเต็ม</strong> ที่จะพาคุณจากคนที่ไม่เคยเขียน Vue.js มาก่อน ไปจนถึง Senior Frontend Developer ที่สร้าง Enterprise Application ได้จริงครับ</p>
+
+  <div class="glass-card success">
+    <h4>Vue.js คืออะไร? (แบบเด็ก 5 ขวบก็เข้าใจ)</h4>
+    <div class="analogy">
+      สมมติว่าเว็บไซต์คือ "หนังสือ" — HTML เป็นเนื้อหา, CSS เป็นการตกแต่ง, JavaScript เป็นเวทมนตร์ที่ทำให้หนังสือขยับได้<br><br>
+      <strong>Vue.js คือ "ไม้กายสิทธิ์"</strong> ที่ช่วยให้คุณร่ายเวทมนตร์ JavaScript ได้ง่ายขึ้น 10 เท่า! แทนที่จะเขียน <code>document.getElementById</code> เอง Vue จัดการให้หมด
+    </div>
+  </div>
+
+  <div class="glass-card highlight">
+    <h4>ทำไมต้อง Vue.js ในปี 2026?</h4>
+    <ul>
+      <li><strong>เรียนรู้ง่ายที่สุด</strong> ในบรรดา 3 Framework ใหญ่ (React, Vue, Angular) — ซึ่งไม่ได้แปลว่ามันอ่อน แต่มัน "มีความเป็นมิตร" กับคนเริ่มต้น</li>
+      <li><strong>Composition API</strong> — ระบบใหม่ที่ทำให้จัดระเบียบโค้ดได้สะอาดกว่าเดิมมาก (คล้าย React Hooks แต่ง่ายกว่า)</li>
+      <li><strong>TypeScript First</strong> — Vue 3 เขียนด้วย TypeScript ทั้ง Runtime ทำให้ Type Safety ดีเลิศ</li>
+      <li><strong>Vite</strong> — Dev Server เร็วที่สุดในโลก (สร้างโดย Evan You คนเดียวกับที่สร้าง Vue)</li>
+      <li><strong>Nuxt 3</strong> — Full-stack Framework ที่เหมือน Next.js ของ React แต่เป็น Vue version</li>
+      <li><strong>Ecosystem สมบูรณ์</strong> — Pinia (State), Vue Router, VueUse (200+ Utilities), Nuxt, Quasar, PrimeVue</li>
+    </ul>
+  </div>
+
+  <div class="glass-card">
+    <h4>Vue vs React vs Angular — เปรียบเทียบจริงจัง</h4>
+    <pre>
+┌──────────────────┬─────────────┬─────────────┬──────────────┐
+│                  │   Vue 3     │   React 18  │  Angular 17  │
+├──────────────────┼─────────────┼─────────────┼──────────────┤
+│ Learning Curve   │ ⭐ ง่าย      │ ⭐⭐ ปานกลาง  │ ⭐⭐⭐ ยาก      │
+│ Bundle Size      │ ~33KB       │ ~42KB       │ ~143KB       │
+│ State Management │ Pinia       │ Zustand/Redux│ RxJS/Signal │
+│ Template         │ HTML-based  │ JSX         │ HTML-based   │
+│ Reactivity       │ Proxy-based │ Virtual DOM │ Zone.js/Signal│
+│ TypeScript       │ Built-in    │ @types      │ Built-in     │
+│ SSR/Full-Stack   │ Nuxt 3      │ Next.js     │ Angular SSR  │
+│ Company Behind   │ Community   │ Meta        │ Google       │
+└──────────────────┴─────────────┴─────────────┴──────────────┘
+
+สรุป: Vue เหมาะเริ่มต้น, เหมาะ startups, เหมาะทีมเล็ก-กลาง
+     React เหมาะ ecosystem ใหญ่, หางานเยอะ
+     Angular เหมาะ enterprise ขนาดใหญ่มาก (Banking/Government)</pre>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!--  PART 2: INSTALLATION & PROJECT SETUP                          -->
+<!-- ================================================================ -->
+
+<section class="section" id="install">
+  <h2>🛠️ ติดตั้ง & สร้างโปรเจค (แบบมืออาชีพ)</h2>
+  <p>เราจะใช้ <strong>create-vue</strong> (Official tool) + <strong>Vite</strong> ซึ่งเป็น Build Tool ที่เร็วที่สุดในปี 2026</p>
+
+  <div class="glass-card highlight">
+    <h4>Step 1: สร้างโปรเจคใหม่</h4>
+    <pre># ต้องมี Node.js >= 18.3 (แนะนำ Node 20 LTS)
+npm create vue@latest
+
+# มันจะถามว่าต้องการอะไรบ้าง:
+✔ Project name: … my-vue-app
+✔ Add TypeScript? … Yes            ← แนะนำ Yes เสมอ!
+✔ Add JSX Support? … No            ← ไม่จำเป็น (Vue มี Template ที่ดีกว่า)
+✔ Add Vue Router? … Yes            ← ต้อง Yes ถ้าทำ SPA
+✔ Add Pinia? … Yes                 ← State Management มาตรฐาน
+✔ Add Vitest? … Yes                ← Unit Test
+✔ Add End-to-End Testing? … Playwright  ← E2E Test
+✔ Add ESLint? … Yes
+✔ Add Prettier? … Yes
+
+cd my-vue-app
+npm install
+npm run dev    # 🚀 เปิด http://localhost:5173</pre>
+  </div>
+
+  <div class="glass-card tip">
+    <h4>สิ่งที่ npm run dev ทำเบื้องหลัง</h4>
+    <div class="analogy">
+      Vite ไม่ได้ "Build" ทุกไฟล์ก่อนเสิร์ฟเหมือน Webpack แต่มันใช้ Native ES Modules ของ Browser — กดเซฟปุ๊บเห็นผลปั๊บ! เพราะมันแปลงเฉพาะไฟล์ที่เปลี่ยนเท่านั้น (Hot Module Replacement)
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!--  PROJECT STRUCTURE                                              -->
+<!-- ================================================================ -->
+
+<section class="section" id="project-structure">
+  <h2>📁 โครงสร้างโปรเจค Vue.js 2026</h2>
+  <p>การวางโครงสร้างที่ดีตั้งแต่ต้นสำคัญมาก เหมือนการวางฐานรากบ้าน ถ้าวางไม่ดีตอนต่อเติมจะลำบาก</p>
+
+  <div class="glass-card highlight">
+    <h4>โครงสร้างเริ่มต้น (Beginner-Friendly)</h4>
+    <pre>my-vue-app/
+├── index.html              ← Entry Point (Vite ใช้ไฟล์นี้เป็น root)
+├── vite.config.ts          ← Vite Configuration
+├── tsconfig.json           ← TypeScript Configuration
+├── package.json            ← Dependencies & Scripts
+├── env.d.ts                ← Type declarations for .vue files
+│
+├── public/                 ← Static assets (ไม่ผ่านการ build)
+│   └── favicon.ico
+│
+└── src/
+    ├── main.ts             ← App Bootstrap (สร้าง Vue instance)
+    ├── App.vue             ← Root Component
+    │
+    ├── assets/             ← รูปภาพ, fonts ที่ Vite จะ optimize
+    │   └── logo.svg
+    │
+    ├── components/         ← UI Components ที่ใช้ซ้ำได้ (Reusable)
+    │   ├── AppHeader.vue
+    │   ├── AppFooter.vue
+    │   └── ui/
+    │       ├── BaseButton.vue
+    │       ├── BaseInput.vue
+    │       └── BaseModal.vue
+    │
+    ├── views/              ← หน้าเพจ (1 route = 1 view)
+    │   ├── HomeView.vue
+    │   ├── AboutView.vue
+    │   └── LoginView.vue
+    │
+    ├── router/             ← Vue Router configuration
+    │   └── index.ts
+    │
+    ├── stores/             ← Pinia Stores (State Management)
+    │   ├── auth.ts
+    │   └── products.ts
+    │
+    └── composables/        ← Reusable Logic (Custom Hooks)
+        ├── useAuth.ts
+        └── useFetch.ts</pre>
+  </div>
+
+  <div class="glass-card warn">
+    <h4>Enterprise Structure (โปรเจคจริง 50+ คนทำ)</h4>
+    <pre>src/
+├── main.ts
+├── App.vue
+│
+├── modules/                  ← Feature-based modules!
+│   ├── auth/
+│   │   ├── components/       ← Components เฉพาะ feature นี้
+│   │   │   ├── LoginForm.vue
+│   │   │   └── RegisterForm.vue
+│   │   ├── composables/      ← Logic เฉพาะ feature นี้
+│   │   │   └── useAuth.ts
+│   │   ├── stores/           ← State เฉพาะ feature นี้
+│   │   │   └── auth.store.ts
+│   │   ├── types/            ← TypeScript types
+│   │   │   └── auth.types.ts
+│   │   ├── services/         ← API calls
+│   │   │   └── auth.service.ts
+│   │   └── views/
+│   │       ├── LoginView.vue
+│   │       └── RegisterView.vue
+│   │
+│   └── products/
+│       ├── components/
+│       ├── composables/
+│       ├── stores/
+│       ├── types/
+│       ├── services/
+│       └── views/
+│
+├── shared/                   ← ของที่ใช้ร่วมกันทุก module
+│   ├── components/           ← Base/Shared UI
+│   │   ├── ui/               ← Atomic components (Button, Input, Modal)
+│   │   └── layout/           ← Layouts (DefaultLayout, AuthLayout)
+│   ├── composables/          ← Shared hooks (useFetch, useDebounce)
+│   ├── constants/            ← Enum, config constants
+│   ├── types/                ← Shared TypeScript types
+│   ├── utils/                ← Helper functions
+│   └── plugins/              ← Vue plugins
+│
+├── router/                   ← Central router
+├── stores/                   ← Root-level stores (app, theme)
+├── api/                      ← Axios/Fetch instance + interceptors
+│   ├── client.ts
+│   └── interceptors.ts
+└── styles/                   ← Global styles
+    ├── _variables.scss
+    └── main.scss</pre>
+    <p><strong>ทำไมต้อง Feature-based?</strong> เพราะเมื่อทีมใหญ่ขึ้น แต่ละทีมดูแล Module ของตัวเอง ไม่ต้องแก้ไฟล์เดียวกัน ลด Merge Conflict ได้ 90%</p>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!--  SINGLE FILE COMPONENT                                         -->
+<!-- ================================================================ -->
+
+<section class="section" id="sfc">
+  <h2>📄 Single File Component (SFC): หัวใจของ Vue</h2>
+  <p>ไฟล์ <code>.vue</code> คือสิ่งที่ทำให้ Vue พิเศษ — มันรวม HTML + JavaScript + CSS ไว้ในไฟล์เดียว แต่แยกส่วนกันชัดเจน</p>
+
+  <div class="glass-card highlight">
+    <h4>Anatomy แรกของไฟล์ .vue</h4>
+    <pre>&lt;!-- ProductCard.vue --&gt;
+&lt;script setup lang="ts"&gt;
+// ═══════════════════════════════════════════
+// 1. &lt;script setup&gt; — "สมอง" ของ Component
+// ═══════════════════════════════════════════
+// setup = Composition API + auto-import
+// lang="ts" = ใช้ TypeScript (แนะนำเสมอ)
+import { ref, computed } from 'vue'
+
+// Props: ข้อมูลที่ Parent ส่งเข้ามา
+interface Props {
+  title: string
+  price: number
+  inStock?: boolean  // ? = optional (default: undefined)
+}
+const props = withDefaults(defineProps&lt;Props&gt;(), {
+  inStock: true,
+})
+
+// Reactive State: ข้อมูลที่เปลี่ยนแปลงได้
+const quantity = ref(1)
+
+// Computed: ค่าที่คำนวณจาก state อื่น (auto cache!)
+const totalPrice = computed(() =&gt; props.price * quantity.value)
+
+// Methods
+function increment() {
+  quantity.value++
+}
+
+// Emits: ส่ง event กลับไปที่ Parent
+const emit = defineEmits&lt;{
+  addToCart: [productTitle: string, qty: number]
+}&gt;()
+
+function handleAddToCart() {
+  emit('addToCart', props.title, quantity.value)
+}
+&lt;/script&gt;
+
+&lt;!-- ═══════════════════════════════════════════ --&gt;
+&lt;!-- 2. &lt;template&gt; — "ร่างกาย" ที่ User เห็น    --&gt;
+&lt;!-- ═══════════════════════════════════════════ --&gt;
+&lt;template&gt;
+  &lt;div class="product-card"&gt;
+    &lt;h3&gt;{{ title }}&lt;/h3&gt;
+    &lt;p class="price"&gt;฿{{ totalPrice.toLocaleString() }}&lt;/p&gt;
+
+    &lt;div v-if="inStock" class="controls"&gt;
+      &lt;button @click="quantity--" :disabled="quantity &lt;= 1"&gt;−&lt;/button&gt;
+      &lt;span&gt;{{ quantity }}&lt;/span&gt;
+      &lt;button @click="increment"&gt;+&lt;/button&gt;
+    &lt;/div&gt;
+    &lt;p v-else class="out-of-stock"&gt;สินค้าหมด&lt;/p&gt;
+
+    &lt;button class="btn-primary" @click="handleAddToCart"&gt;
+      🛒 เพิ่มลงตะกร้า
+    &lt;/button&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;!-- ═══════════════════════════════════════════ --&gt;
+&lt;!-- 3. &lt;style scoped&gt; — CSS เฉพาะ Component นี้  --&gt;
+&lt;!-- ═══════════════════════════════════════════ --&gt;
+&lt;style scoped&gt;
+/* scoped = CSS นี้จะไม่รั่วไปกระทบ Component อื่น! */
+.product-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+}
+.price { font-size: 24px; font-weight: bold; color: #10b981; }
+.out-of-stock { color: #ef4444; }
+.btn-primary {
+  background: #3b82f6; color: white;
+  border: none; border-radius: 8px;
+  padding: 10px 20px; cursor: pointer;
+}
+&lt;/style&gt;</pre>
+  </div>
+
+  <div class="glass-card tip">
+    <h4>ทำไม &lt;script setup&gt; ถึงดีกว่าแบบเดิม?</h4>
+    <pre>// ❌ แบบเก่า (Options API) — ยาว, ต้อง return ทุกอย่าง
+export default {
+  props: {...},
+  data() { return { quantity: 1 } },
+  computed: { totalPrice() { return this.price * this.quantity } },
+  methods: { increment() { this.quantity++ } },
+}
+
+// ✅ แบบใหม่ (&lt;script setup&gt;) — สั้น, อ่านง่าย, TypeScript support ดีกว่า
+// ทุกอย่างที่ประกาศใน &lt;script setup&gt; จะ "expose" ให้ template อัตโนมัติ!
+// ไม่ต้อง return, ไม่ต้อง this, ไม่ต้อง methods: {}</pre>
+    <p><strong>กฎเหล็ก 2026:</strong> ใช้ <code>&lt;script setup&gt;</code> + Composition API เท่านั้น ยกเว้นดูแล Legacy Code</p>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!--  TEMPLATE SYNTAX                                                -->
+<!-- ================================================================ -->
+
+<section class="section" id="template-syntax">
+  <h2>📝 Template Syntax: ภาษาของ Vue Template</h2>
+  <p>Template ของ Vue คือ HTML ที่มี "พลังพิเศษ" เพิ่มเข้ามา เรียกว่า <strong>Directives</strong> (คำสั่ง v-)</p>
+
+  <div class="glass-card">
+    <h4>1. Interpolation: แสดงข้อมูลใน Template</h4>
+    <pre>&lt;template&gt;
+  &lt;!-- Text Interpolation: ใช้ {{ }} --&gt;
+  &lt;h1&gt;{{ message }}&lt;/h1&gt;
+
+  &lt;!-- Expression ได้ด้วย (ใส่ JavaScript expression ได้!) --&gt;
+  &lt;p&gt;{{ price * quantity }}&lt;/p&gt;
+  &lt;p&gt;{{ isLoggedIn ? 'สวัสดี' : 'กรุณาเข้าสู่ระบบ' }}&lt;/p&gt;
+  &lt;p&gt;{{ name.toUpperCase() }}&lt;/p&gt;
+
+  &lt;!-- ⚠️ ห้ามใช้ statement (แค่ expression เท่านั้น!) --&gt;
+  &lt;!-- ❌ {{ if (ok) { return yes } }}  → ใช้ ternary แทน --&gt;
+  &lt;!-- ❌ {{ let x = 1 }}               → ประกาศตัวแปร ทำใน script --&gt;
+&lt;/template&gt;</pre>
+  </div>
+
+  <div class="glass-card highlight">
+    <h4>2. Directives: คำสั่ง v-* ที่ใช้บ่อยที่สุด</h4>
+    <pre>&lt;template&gt;
+  &lt;!-- ═══ v-if / v-else-if / v-else : แสดง/ซ่อน (จริงๆ คือ สร้าง/ทำลาย DOM) ═══ --&gt;
+  &lt;div v-if="status === 'loading'"&gt;⏳ กำลังโหลด...&lt;/div&gt;
+  &lt;div v-else-if="status === 'error'"&gt;❌ เกิดข้อผิดพลาด&lt;/div&gt;
+  &lt;div v-else&gt;✅ โหลดสำเร็จ!&lt;/div&gt;
+
+  &lt;!-- ═══ v-show : แสดง/ซ่อน (ใช้ CSS display:none ไม่ทำลาย DOM) ═══ --&gt;
+  &lt;!-- ใช้เมื่อ toggle บ่อยๆ (เช่น dropdown, tooltip) --&gt;
+  &lt;div v-show="isDropdownOpen"&gt;เนื้อหา dropdown&lt;/div&gt;
+
+  &lt;!-- ═══ v-for : วนลูป ═══ --&gt;
+  &lt;ul&gt;
+    &lt;li v-for="(item, index) in products" :key="item.id"&gt;
+      {{ index + 1 }}. {{ item.name }} — ฿{{ item.price }}
+    &lt;/li&gt;
+  &lt;/ul&gt;
+  &lt;!-- ⚠️ :key สำคัญมาก! บอก Vue ว่า item ไหนคือใคร หาไม่ UI จะบั๊ก --&gt;
+
+  &lt;!-- ═══ v-bind : ผูกค่า Attribute (ย่อ : ได้) ═══ --&gt;
+  &lt;img :src="product.imageUrl" :alt="product.name"&gt;
+  &lt;button :disabled="!isValid" :class="{ active: isActive }"&gt;Submit&lt;/button&gt;
+
+  &lt;!-- ═══ v-on : ผูก Event (ย่อ @ ได้) ═══ --&gt;
+  &lt;button @click="handleClick"&gt;คลิกฉัน&lt;/button&gt;
+  &lt;input @keyup.enter="submitForm"&gt;  &lt;!-- .enter = Key Modifier --&gt;
+  &lt;form @submit.prevent="onSubmit"&gt;   &lt;!-- .prevent = preventDefault() --&gt;
+
+  &lt;!-- ═══ v-model : Two-way Binding (ผูก input กับ data) ═══ --&gt;
+  &lt;input v-model="searchQuery" placeholder="ค้นหา..."&gt;
+  &lt;!-- เทียบเท่ากับ: :value="searchQuery" @input="searchQuery = $event.target.value" --&gt;
+
+  &lt;!-- v-model modifiers --&gt;
+  &lt;input v-model.trim="name"&gt;         &lt;!-- ตัด whitespace อัตโนมัติ --&gt;
+  &lt;input v-model.number="age"&gt;        &lt;!-- แปลงเป็น number อัตโนมัติ --&gt;
+  &lt;input v-model.lazy="comment"&gt;      &lt;!-- update ตอน blur แทน input --&gt;
+&lt;/template&gt;</pre>
+  </div>
+
+  <div class="glass-card">
+    <h4>3. Class & Style Binding (ต้องใช้บ่อยมาก)</h4>
+    <pre>&lt;template&gt;
+  &lt;!-- Object Syntax: เปิด/ปิด class ตามเงื่อนไข --&gt;
+  &lt;div :class="{ 
+    'bg-green': isSuccess, 
+    'bg-red': isError,
+    'text-bold': true 
+  }"&gt;...&lt;/div&gt;
+
+  &lt;!-- Array Syntax: รวม class หลายๆ ค่า --&gt;
+  &lt;div :class="[
+    baseClass, 
+    isActive ? 'active' : '', 
+    errorClass
+  ]"&gt;...&lt;/div&gt;
+
+  &lt;!-- Dynamic Style --&gt;
+  &lt;div :style="{
+    color: activeColor,
+    fontSize: fontSize + 'px',
+    'background-color': bgColor   // kebab-case ต้องใส่ quote
+  }"&gt;...&lt;/div&gt;
+&lt;/template&gt;</pre>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!--  REACTIVITY                                                     -->
+<!-- ================================================================ -->
+
+<section class="section" id="reactivity">
+  <h2>⚡ Reactivity System: หัวใจสำคัญที่สุดของ Vue</h2>
+  <p>ถ้าคุณเข้าใจ Reactivity = คุณเข้าใจ Vue ถ้าคุณไม่เข้าใจ Reactivity = คุณจะเขียน Vue ไม่ได้เลย</p>
+
+  <div class="glass-card success">
+    <h4>Analogy: Reactivity คืออะไร?</h4>
+    <div class="analogy">
+      คิดว่า Reactivity เหมือน "Excel Spreadsheet" — เมื่อคุณเปลี่ยนค่าใน Cell A1 ทุก Cell ที่อ้างอิง A1 จะ <strong>คำนวณใหม่อัตโนมัติ</strong> ไม่ต้องกดปุ่มอะไร<br><br>
+      Vue ทำเหมือนกัน: เมื่อ data เปลี่ยน → ทุก component ที่ใช้ data นั้นจะ <strong>update UI อัตโนมัติ</strong>
+    </div>
+  </div>
+
+  <div class="glass-card highlight">
+    <h4><code>ref()</code> — สำหรับค่าเดี่ยว (Primitive + Object)</h4>
+    <pre>&lt;script setup lang="ts"&gt;
+import { ref } from 'vue'
+
+// ref() ทำให้ค่าเป็น "reactive" — Vue จะ track การเปลี่ยนแปลง
+const count = ref(0)            // Ref&lt;number&gt;
+const name = ref('Kidpech')     // Ref&lt;string&gt;
+const isLoading = ref(false)    // Ref&lt;boolean&gt;
+
+// ═══ กฎสำคัญ: ใน &lt;script&gt; ต้องใช้ .value ═══
+function increment() {
+  count.value++           // ✅ ต้องใช้ .value ใน script
+  console.log(count.value)
+}
+
+// ═══ ใน &lt;template&gt; ไม่ต้องใช้ .value (Vue unwrap ให้อัตโนมัติ) ═══
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;p&gt;{{ count }}&lt;/p&gt;            &lt;!-- ✅ ไม่ต้อง count.value --&gt;
+  &lt;button @click="increment"&gt;+1&lt;/button&gt;
+&lt;/template&gt;</pre>
+  </div>
+
+  <div class="glass-card">
+    <h4><code>reactive()</code> — สำหรับ Object/Array</h4>
+    <pre>&lt;script setup lang="ts"&gt;
+import { reactive } from 'vue'
+
+// reactive() ทำให้ Object ทั้งก้อนเป็น reactive
+// ข้อดี: ไม่ต้องใช้ .value!
+interface UserForm {
+  name: string
+  email: string
+  age: number
+}
+
+const form = reactive&lt;UserForm&gt;({
+  name: '',
+  email: '',
+  age: 0,
+})
+
+function updateName(newName: string) {
+  form.name = newName   // ✅ ไม่ต้อง .value เลย!
+}
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;input v-model="form.name" placeholder="ชื่อ"&gt;
+  &lt;input v-model="form.email" placeholder="อีเมล"&gt;
+  &lt;input v-model.number="form.age" placeholder="อายุ"&gt;
+&lt;/template&gt;</pre>
+  </div>
+
+  <div class="glass-card warn">
+    <h4>ref vs reactive — เลือกอะไรดี?</h4>
+    <pre>// ═══ RULE OF THUMB ═══
+// 1. ใช้ ref() เป็น default สำหรับทุกอย่าง (ปลอดภัยที่สุด)
+// 2. ใช้ reactive() เมื่อจัดกลุ่ม related state เช่น form
+
+// ⚠️ ข้อควรระวัง reactive():
+const state = reactive({ count: 0 })
+// ❌ ห้าม destructure! จะสูญเสีย reactivity!
+const { count } = state   // count ไม่ reactive แล้ว!
+// ✅ ถ้าอยาก destructure ใช้ toRefs()
+const { count } = toRefs(state)  // count เป็น Ref&lt;number&gt; ที่ reactive
+
+// ❌ ห้าม reassign ทั้ง object!
+state = { count: 1 }    // ❌ หลุด reactive!
+Object.assign(state, { count: 1 })  // ✅ ทำแบบนี้แทน</pre>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!--  COMPUTED & WATCH                                               -->
+<!-- ================================================================ -->
+
+<section class="section" id="computed-watch">
+  <h2>🧮 Computed & Watchers: ดักจับการเปลี่ยนแปลง</h2>
+
+  <div class="glass-card highlight">
+    <h4>Computed: ค่าคำนวณที่ Cache อัตโนมัติ</h4>
+    <p><code>computed</code> จะคำนวณค่าใหม่ <strong>เฉพาะเมื่อ dependency เปลี่ยน</strong> ไม่ได้คำนวณทุกครั้งที่ render</p>
+    <pre>&lt;script setup lang="ts"&gt;
+import { ref, computed } from 'vue'
+
+const products = ref([
+  { name: 'iPhone', price: 35000, inStock: true },
+  { name: 'iPad', price: 28000, inStock: false },
+  { name: 'MacBook', price: 55000, inStock: true },
+])
+const searchQuery = ref('')
+const showOnlyInStock = ref(false)
+
+// Computed: filter + search อัตโนมัติเมื่อ dependencies เปลี่ยน
+const filteredProducts = computed(() =&gt; {
+  return products.value
+    .filter(p =&gt; !showOnlyInStock.value || p.inStock)
+    .filter(p =&gt; p.name.toLowerCase().includes(searchQuery.value.toLowerCase()))
+})
+
+// Computed จะ cache ผลลัพธ์:
+// ถ้า searchQuery ไม่เปลี่ยน → return ค่าเดิมทันที (ไม่ filter ซ้ำ)
+
+// Writable Computed (ใช้น้อย แต่ทำได้)
+const fullName = computed({
+  get: () =&gt; `${firstName.value} ${lastName.value}`,
+  set: (newVal: string) =&gt; {
+    const [first, ...rest] = newVal.split(' ')
+    firstName.value = first
+    lastName.value = rest.join(' ')
+  },
+})
+&lt;/script&gt;</pre>
+  </div>
+
+  <div class="glass-card">
+    <h4>watch() — ดัก "การเปลี่ยนแปลง" แล้วทำอะไรบางอย่าง</h4>
+    <p>ใช้เมื่อต้อง "ทำ Side Effect" เช่น เรียก API, เขียน localStorage, ส่ง Analytics</p>
+    <pre>&lt;script setup lang="ts"&gt;
+import { ref, watch, watchEffect } from 'vue'
+
+const searchQuery = ref('')
+const selectedCategory = ref('all')
+
+// ═══ watch: ดักค่าเดียว ═══
+watch(searchQuery, (newVal, oldVal) =&gt; {
+  console.log(`Search changed: "${oldVal}" → "${newVal}"`)
+  fetchSearchResults(newVal)  // เรียก API!
+})
+
+// ═══ watch หลายค่าพร้อมกัน ═══
+watch([searchQuery, selectedCategory], ([newSearch, newCat], [oldSearch, oldCat]) =&gt; {
+  fetchProducts({ search: newSearch, category: newCat })
+})
+
+// ═══ watch deep object ═══
+const form = ref({ name: '', address: { city: '', zip: '' } })
+watch(form, (newVal) =&gt; {
+  console.log('Form changed!', newVal)
+}, { deep: true })  // deep: true = track nested changes
+
+// ═══ watch immediate (รันทันทีตอน mount) ═══
+watch(searchQuery, (val) =&gt; {
+  fetchResults(val)
+}, { immediate: true })
+
+// ═══ watchEffect: Auto-track dependencies ═══
+// ไม่ต้องระบุว่า watch อะไร — Vue จะ detect เอง!
+watchEffect(async () =&gt; {
+  // Vue จะ "อ่าน" ว่าในนี้ใช้ ref อะไรบ้าง
+  // แล้ว watch ทุกตัวที่ใช้อัตโนมัติ!
+  const results = await fetchProducts({
+    search: searchQuery.value,      // Vue detect: ต้อง watch searchQuery
+    category: selectedCategory.value // Vue detect: ต้อง watch selectedCategory
+  })
+  products.value = results
+})
+&lt;/script&gt;</pre>
+  </div>
+
+  <div class="glass-card tip">
+    <h4>เมื่อไหร่ใช้ computed vs watch vs watchEffect?</h4>
+    <ul>
+      <li><code>computed</code> — เมื่อต้องการ <strong>ค่าที่คำนวณมา</strong> (derived value) เช่น filteredList, totalPrice</li>
+      <li><code>watch</code> — เมื่อต้องทำ <strong>side effect ที่ควบคุมได้</strong> (เรียก API, write to storage) และต้องการรู้ค่าเก่าด้วย</li>
+      <li><code>watchEffect</code> — เมื่อต้องทำ side effect แต่ <strong>ไม่สน oldValue</strong> และอยากให้ auto-track ง่ายๆ</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!--  PROPS & EMIT                                                   -->
+<!-- ================================================================ -->
+
+<section class="section" id="props-emit">
+  <h2>📬 Props & Emit: การสื่อสารระหว่าง Components</h2>
+  <p>Vue ใช้ระบบ <strong>"Data Down, Events Up"</strong> — Parent ส่งข้อมูลลงผ่าน Props, Child ส่ง event กลับขึ้นผ่าน Emit</p>
+
+  <div class="glass-card highlight">
+    <h4>Props: รับข้อมูลจาก Parent</h4>
+    <pre>&lt;!-- ChildComponent.vue --&gt;
+&lt;script setup lang="ts"&gt;
+// ═══ วิธีที่ 1: defineProps กับ TypeScript (แนะนำ!) ═══
+interface Props {
+  title: string
+  count: number
+  items?: string[]       // optional prop
+  variant?: 'primary' | 'secondary' | 'danger'  // union type
+}
+
+// withDefaults: กำหนดค่า default ให้ optional props
+const props = withDefaults(defineProps&lt;Props&gt;(), {
+  items: () =&gt; [],       // ⚠️ ค่า default ที่เป็น object/array ต้องใช้ factory function
+  variant: 'primary',
+})
+
+// ═══ ใช้ค่า props ═══
+console.log(props.title)
+
+// ⚠️ Props เป็น READONLY — ห้ามแก้ไข!
+// props.title = 'new'  // ❌ Error! one-way data flow
+&lt;/script&gt;
+
+&lt;!-- ParentComponent.vue --&gt;
+&lt;template&gt;
+  &lt;!-- Static prop --&gt;
+  &lt;ChildComponent title="Hello" :count="5" /&gt;
+
+  &lt;!-- Dynamic prop (ใช้ v-bind หรือ :) --&gt;
+  &lt;ChildComponent :title="dynamicTitle" :count="state.count" /&gt;
+
+  &lt;!-- Boolean prop shorthand --&gt;
+  &lt;ChildComponent visible /&gt;  &lt;!-- = :visible="true" --&gt;
+&lt;/template&gt;</pre>
+  </div>
+
+  <div class="glass-card">
+    <h4>Emit: ส่ง Event กลับ Parent</h4>
+    <pre>&lt;!-- SearchInput.vue --&gt;
+&lt;script setup lang="ts"&gt;
+// ═══ defineEmits กับ TypeScript ═══
+const emit = defineEmits&lt;{
+  // ชื่อ event: [parameter types]
+  search: [query: string]
+  clear: []                    // ไม่มี parameter
+  update: [value: string, isValid: boolean]
+}&gt;()
+
+function handleSearch(query: string) {
+  emit('search', query)
+}
+
+function handleClear() {
+  emit('clear')
+}
+&lt;/script&gt;
+
+&lt;!-- Parent.vue --&gt;
+&lt;template&gt;
+  &lt;!-- ฟัง emit event ด้วย @ (v-on) --&gt;
+  &lt;SearchInput
+    @search="handleSearchResult"
+    @clear="resetSearch"
+    @update="(val, valid) =&gt; console.log(val, valid)"
+  /&gt;
+&lt;/template&gt;</pre>
+  </div>
+
+  <div class="glass-card tip">
+    <h4>v-model บน Custom Component (Two-way Binding)</h4>
+    <pre>&lt;!-- CustomInput.vue --&gt;
+&lt;script setup lang="ts"&gt;
+// Vue 3.4+ — defineModel() ง่ายสุดๆ!
+const model = defineModel&lt;string&gt;()
+// เท่านี้! ไม่ต้อง defineProps + defineEmits เอง
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;input :value="model" @input="model = ($event.target as HTMLInputElement).value"&gt;
+&lt;/template&gt;
+
+&lt;!-- Parent.vue --&gt;
+&lt;template&gt;
+  &lt;!-- ใช้ v-model ได้เลย เหมือน input ธรรมดา --&gt;
+  &lt;CustomInput v-model="username" /&gt;
+
+  &lt;!-- Multiple v-model (Vue 3 feature) --&gt;
+  &lt;UserForm v-model:first-name="first" v-model:last-name="last" /&gt;
+&lt;/template&gt;</pre>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!--  SLOTS                                                          -->
+<!-- ================================================================ -->
+
+<section class="section" id="slots">
+  <h2>🎰 Slots & Dynamic Components</h2>
+  <p>Slots ช่วยให้สร้าง Component ที่ "ยืดหยุ่น" มาก — Parent สามารถ "ฉีด" เนื้อหาเข้าไปใน Child ได้</p>
+
+  <div class="glass-card">
+    <h4>1. Default Slot</h4>
+    <pre>&lt;!-- BaseCard.vue --&gt;
+&lt;template&gt;
+  &lt;div class="card"&gt;
+    &lt;div class="card-body"&gt;
+      &lt;slot&gt;Default content (ถ้า parent ไม่ส่งอะไรมา)&lt;/slot&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;!-- Parent.vue --&gt;
+&lt;template&gt;
+  &lt;BaseCard&gt;
+    &lt;h2&gt;เนื้อหาที่ Parent ส่งเข้ามา&lt;/h2&gt;
+    &lt;p&gt;อะไรก็ได้ ข้อความ, component, HTML&lt;/p&gt;
+  &lt;/BaseCard&gt;
+&lt;/template&gt;</pre>
+  </div>
+
+  <div class="glass-card highlight">
+    <h4>2. Named Slots — ใส่เนื้อหาหลายจุด</h4>
+    <pre>&lt;!-- PageLayout.vue --&gt;
+&lt;template&gt;
+  &lt;div class="page"&gt;
+    &lt;header&gt;&lt;slot name="header" /&gt;&lt;/header&gt;
+    &lt;main&gt;&lt;slot /&gt;&lt;/main&gt;           &lt;!-- default slot --&gt;
+    &lt;aside&gt;&lt;slot name="sidebar" /&gt;&lt;/aside&gt;
+    &lt;footer&gt;&lt;slot name="footer"&gt;© 2026 Default Footer&lt;/slot&gt;&lt;/footer&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;!-- Parent.vue --&gt;
+&lt;template&gt;
+  &lt;PageLayout&gt;
+    &lt;template #header&gt;         &lt;!-- #header = v-slot:header --&gt;
+      &lt;nav&gt;My Navigation&lt;/nav&gt;
+    &lt;/template&gt;
+
+    &lt;!-- Default slot content --&gt;
+    &lt;article&gt;Main Content&lt;/article&gt;
+
+    &lt;template #sidebar&gt;
+      &lt;ul&gt;&lt;li&gt;Link 1&lt;/li&gt;&lt;li&gt;Link 2&lt;/li&gt;&lt;/ul&gt;
+    &lt;/template&gt;
+
+    &lt;!-- ไม่ส่ง #footer → ใช้ default "© 2026 Default Footer" --&gt;
+  &lt;/PageLayout&gt;
+&lt;/template&gt;</pre>
+  </div>
+
+  <div class="glass-card">
+    <h4>3. Scoped Slots — Child ส่งข้อมูลให้ Parent ใช้ใน Slot</h4>
+    <pre>&lt;!-- DataTable.vue — Reusable Table Component --&gt;
+&lt;script setup lang="ts"&gt;
+interface Props { items: any[]; columns: string[] }
+defineProps&lt;Props&gt;()
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;table&gt;
+    &lt;tr v-for="item in items" :key="item.id"&gt;
+      &lt;!-- ส่ง item ให้ parent ตัดสินใจว่าจะ render อย่างไร --&gt;
+      &lt;slot name="row" :item="item" :index="index"&gt;
+        &lt;td&gt;{{ item }}&lt;/td&gt;  &lt;!-- default rendering --&gt;
+      &lt;/slot&gt;
+    &lt;/tr&gt;
+  &lt;/table&gt;
+&lt;/template&gt;
+
+&lt;!-- Parent.vue --&gt;
+&lt;template&gt;
+  &lt;DataTable :items="products" :columns="['name','price']"&gt;
+    &lt;template #row="{ item }"&gt;
+      &lt;td&gt;{{ item.name }}&lt;/td&gt;
+      &lt;td&gt;฿{{ item.price.toLocaleString() }}&lt;/td&gt;
+      &lt;td&gt;&lt;button @click="edit(item)"&gt;แก้ไข&lt;/button&gt;&lt;/td&gt;
+    &lt;/template&gt;
+  &lt;/DataTable&gt;
+&lt;/template&gt;</pre>
+  </div>
+
+  <div class="glass-card tip">
+    <h4>Dynamic Components: สลับ Component ได้</h4>
+    <pre>&lt;script setup lang="ts"&gt;
+import LoginForm from './LoginForm.vue'
+import RegisterForm from './RegisterForm.vue'
+import { ref, shallowRef } from 'vue'
+
+const tabs = [
+  { id: 'login', label: 'เข้าสู่ระบบ', component: LoginForm },
+  { id: 'register', label: 'สมัครสมาชิก', component: RegisterForm },
+]
+// ใช้ shallowRef สำหรับ component reference (ประหยัด memory)
+const activeTab = shallowRef(LoginForm)
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;button v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.component"&gt;
+    {{ tab.label }}
+  &lt;/button&gt;
+
+  &lt;!-- KeepAlive: เก็บ state ของ component ไว้แม้สลับไปมา --&gt;
+  &lt;KeepAlive&gt;
+    &lt;component :is="activeTab" /&gt;
+  &lt;/KeepAlive&gt;
+&lt;/template&gt;</pre>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!--  LIFECYCLE HOOKS                                                -->
+<!-- ================================================================ -->
+
+<section class="section" id="lifecycle">
+  <h2>🔄 Lifecycle Hooks: วงจรชีวิตของ Component</h2>
+  <p>เหมือนมนุษย์มี "เกิด โต แก่ ตาย" — Component ก็มี Lifecycle ครบวงจร</p>
+
+  <div class="glass-card highlight">
+    <h4>Lifecycle Hooks ทั้งหมด (เรียงตามลำดับ)</h4>
+    <pre>&lt;script setup lang="ts"&gt;
+import {
+  onBeforeMount,
+  onMounted,
+  onBeforeUpdate,
+  onUpdated,
+  onBeforeUnmount,
+  onUnmounted,
+} from 'vue'
+
+// ═══ CREATION PHASE ═══
+// &lt;script setup&gt; ตัวมันเองรันตอน "setup" เลย (เร็วที่สุด)
+console.log('1. setup() — Component ถูกสร้างแล้ว แต่ยังไม่มี DOM')
+
+// ═══ MOUNTING PHASE ═══
+onBeforeMount(() =&gt; {
+  console.log('2. onBeforeMount — กำลังจะ render DOM')
+  // DOM ยังไม่พร้อม! อย่าเข้าถึง DOM ที่นี่
+})
+
+onMounted(() =&gt; {
+  console.log('3. onMounted — DOM พร้อมแล้ว! ✅')
+  // ✅ ทำอะไรก็ได้กับ DOM: fetch data, add event listener,
+  //    init 3rd party library (Chart.js, Google Maps, etc.)
+  const el = document.querySelector('.my-element')
+  fetchInitialData()          // เรียก API ตรงนี้!
+  initThirdPartyChart()       // init library ตรงนี้!
+})
+
+// ═══ UPDATE PHASE (เมื่อ reactive data เปลี่ยน) ═══
+onBeforeUpdate(() =&gt; {
+  console.log('4. onBeforeUpdate — data เปลี่ยน, กำลังจะ re-render')
+})
+
+onUpdated(() =&gt; {
+  console.log('5. onUpdated — re-render เสร็จแล้ว')
+  // ⚠️ ระวัง: ถ้าแก้ reactive data ตรงนี้ จะ infinite loop!
+})
+
+// ═══ UNMOUNT PHASE (Component ถูกทำลาย) ═══
+onBeforeUnmount(() =&gt; {
+  console.log('6. onBeforeUnmount — กำลังจะถอด Component ออกจาก DOM')
+})
+
+onUnmounted(() =&gt; {
+  console.log('7. onUnmounted — ถอดออกแล้ว ✅')
+  // ✅ CLEANUP ที่นี่! ถ้าไม่ทำ = Memory Leak!
+  clearInterval(intervalId)
+  window.removeEventListener('resize', handleResize)
+  subscription.unsubscribe()
+})
+&lt;/script&gt;</pre>
+  </div>
+
+  <div class="glass-card warn">
+    <h4>กฎเหล็ก Lifecycle</h4>
+    <ul>
+      <li>Fetch data → ใช้ <code>onMounted</code> หรือ <code>watchEffect</code> (ใน script setup ก็ได้ ถ้า SSR-compatible)</li>
+      <li>Init DOM-dependent library → ใช้ <code>onMounted</code> เท่านั้น!</li>
+      <li>Cleanup (timer, listener, subscription) → <code>onUnmounted</code> เสมอ!</li>
+      <li>ห้ามเปลี่ยน reactive data ใน <code>onUpdated</code> → infinite loop!</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!--  COMPOSABLES                                                    -->
+<!-- ================================================================ -->
+
+<section class="section" id="composables">
+  <h2>🧩 Composables: Logic ที่ใช้ซ้ำได้ (Vue's Superpower)</h2>
+  <p>Composable คือ "ฟังก์ชั่น" ที่ใช้ Composition API ข้างใน ทำให้แยก Logic ออกมาใช้ซ้ำข้าม Component ได้</p>
+
+  <div class="glass-card success">
+    <div class="analogy">
+      Composable ใน Vue = Custom Hook ใน React = Mixin แต่ดีกว่า 100 เท่า (ไม่มีปัญหา name collision, ไม่มี implicit dependency, TypeScript friendly)
+    </div>
+  </div>
+
+  <div class="glass-card highlight">
+    <h4>ตัวอย่าง 1: useFetch — ดึงข้อมูลจาก API</h4>
+    <pre>// composables/useFetch.ts
+import { ref, watchEffect, type Ref } from 'vue'
+
+interface UseFetchReturn&lt;T&gt; {
+  data: Ref&lt;T | null&gt;
+  error: Ref&lt;Error | null&gt;
+  isLoading: Ref&lt;boolean&gt;
+  refresh: () =&gt; Promise&lt;void&gt;
+}
+
+export function useFetch&lt;T&gt;(url: string | Ref&lt;string&gt;): UseFetchReturn&lt;T&gt; {
+  const data = ref&lt;T | null&gt;(null) as Ref&lt;T | null&gt;
+  const error = ref&lt;Error | null&gt;(null)
+  const isLoading = ref(false)
+
+  async function fetchData() {
+    isLoading.value = true
+    error.value = null
+    try {
+      const urlValue = typeof url === 'string' ? url : url.value
+      const response = await fetch(urlValue)
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
+      data.value = await response.json()
+    } catch (e) {
+      error.value = e as Error
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  // ถ้า url เป็น ref → auto-refetch เมื่อ url เปลี่ยน!
+  watchEffect(() =&gt; { fetchData() })
+
+  return { data, error, isLoading, refresh: fetchData }
+}
+
+// ═══ การใช้งานใน Component ═══
+// &lt;script setup&gt;
+// import { useFetch } from '@/composables/useFetch'
+// const { data: products, isLoading, error } = useFetch&lt;Product[]&gt;('/api/products')
+// &lt;/script&gt;</pre>
+  </div>
+
+  <div class="glass-card">
+    <h4>ตัวอย่าง 2: useDebounce — หน่วงเวลาก่อนค้นหา</h4>
+    <pre>// composables/useDebounce.ts
+import { ref, watch, type Ref } from 'vue'
+
+export function useDebounce&lt;T&gt;(source: Ref&lt;T&gt;, delayMs = 300): Ref&lt;T&gt; {
+  const debounced = ref(source.value) as Ref&lt;T&gt;
+  let timer: ReturnType&lt;typeof setTimeout&gt;
+
+  watch(source, (newVal) =&gt; {
+    clearTimeout(timer)
+    timer = setTimeout(() =&gt; {
+      debounced.value = newVal
+    }, delayMs)
+  })
+
+  return debounced
+}
+
+// ═══ ใช้งาน ═══
+// const searchQuery = ref('')
+// const debouncedQuery = useDebounce(searchQuery, 500)
+// watch(debouncedQuery, (q) =&gt; fetchResults(q))  // ค้นหาหลัง user หยุดพิมพ์ 500ms</pre>
+  </div>
+
+  <div class="glass-card">
+    <h4>ตัวอย่าง 3: useLocalStorage — เก็บค่าใน localStorage</h4>
+    <pre>// composables/useLocalStorage.ts
+import { ref, watch, type Ref } from 'vue'
+
+export function useLocalStorage&lt;T&gt;(key: string, defaultValue: T): Ref&lt;T&gt; {
+  // อ่านค่าเดิมจาก localStorage (ถ้ามี)
+  const stored = localStorage.getItem(key)
+  const data = ref&lt;T&gt;(stored ? JSON.parse(stored) : defaultValue) as Ref&lt;T&gt;
+
+  // เมื่อค่าเปลี่ยน → เขียนลง localStorage อัตโนมัติ
+  watch(data, (newVal) =&gt; {
+    localStorage.setItem(key, JSON.stringify(newVal))
+  }, { deep: true })
+
+  return data
+}
+
+// ═══ ใช้งาน ═══
+// const theme = useLocalStorage('theme', 'dark')
+// theme.value = 'light'  // → เปลี่ยน UI + เซฟลง localStorage ด้วย!</pre>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!--  PROVIDE / INJECT                                               -->
+<!-- ================================================================ -->
+
+<section class="section" id="provide-inject">
+  <h2>💉 Provide / Inject: ส่งข้อมูลข้าม Layers</h2>
+  <p>ปัญหา: ถ้า Component A ต้องส่งข้อมูลให้ Component D ที่อยู่ลึก 3 ชั้น ต้อง Props drill: A→B→C→D (น่าเบื่อ!)</p>
+  <p>Provide/Inject แก้ปัญหานี้ได้ — A "provide" ข้อมูล แล้ว D "inject" มาใช้ได้ตรงๆ โดยไม่ต้องผ่าน B, C</p>
+
+  <div class="glass-card highlight">
+    <h4>Provide/Inject กับ TypeScript (แบบมืออาชีพ)</h4>
+    <pre>// ═══ 1. สร้าง Injection Key (Type-safe) ═══
+// injection-keys.ts
+import type { InjectionKey, Ref } from 'vue'
+
+interface ThemeContext {
+  isDark: Ref&lt;boolean&gt;
+  toggleTheme: () =&gt; void
+  primaryColor: Ref&lt;string&gt;
+}
+export const ThemeKey: InjectionKey&lt;ThemeContext&gt; = Symbol('Theme')
+
+// ═══ 2. Provide ที่ Parent (ด้านบน) ═══
+// App.vue
+&lt;script setup lang="ts"&gt;
+import { provide, ref } from 'vue'
+import { ThemeKey } from '@/injection-keys'
+
+const isDark = ref(true)
+const primaryColor = ref('#3b82f6')
+
+provide(ThemeKey, {
+  isDark,
+  primaryColor,
+  toggleTheme: () =&gt; { isDark.value = !isDark.value },
+})
+&lt;/script&gt;
+
+// ═══ 3. Inject ที่ Child (ที่ไหนก็ได้ในลูกหลาน) ═══
+// DeepNestedComponent.vue
+&lt;script setup lang="ts"&gt;
+import { inject } from 'vue'
+import { ThemeKey } from '@/injection-keys'
+
+// inject จะ return ThemeContext | undefined
+// ใส่ค่า default เพื่อหลีกเลี่ยง undefined
+const theme = inject(ThemeKey)!  // ! = assert ว่ามีค่าแน่นอน
+// หรือ: const theme = inject(ThemeKey, { ...defaultValues })
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;div :class="{ dark: theme.isDark.value }"&gt;
+    &lt;button @click="theme.toggleTheme()"&gt;Toggle Theme&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/template&gt;</pre>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!--  VUE ROUTER                                                     -->
+<!-- ================================================================ -->
+
+<section class="section" id="vue-router">
+  <h2>🗺️ Vue Router: Navigation มืออาชีพ</h2>
+  <p>Vue Router ทำให้ SPA มีหลายหน้าได้โดยไม่ต้อง reload browser — URL เปลี่ยนแต่ page ไม่ refresh</p>
+
+  <div class="glass-card highlight">
+    <h4>Router Configuration แบบ Enterprise</h4>
+    <pre>// router/index.ts
+import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
+
+const routes: RouteRecordRaw[] = [
+  {
+    path: '/',
+    component: () =&gt; import('@/layouts/DefaultLayout.vue'),  // Layout
+    children: [
+      { path: '', name: 'home', component: () =&gt; import('@/views/HomeView.vue') },
+      { path: 'about', name: 'about', component: () =&gt; import('@/views/AboutView.vue') },
+
+      // ═══ Dynamic Route (ใช้กับ product/:id) ═══
+      {
+        path: 'products/:id',
+        name: 'product-detail',
+        component: () =&gt; import('@/views/ProductDetailView.vue'),
+        props: true,  // route params จะกลายเป็น props ของ component
+      },
+    ],
+  },
+
+  // ═══ Protected Routes (ต้อง Login) ═══
+  {
+    path: '/dashboard',
+    component: () =&gt; import('@/layouts/DashboardLayout.vue'),
+    meta: { requiresAuth: true },  // metadata สำหรับ guard
+    children: [
+      { path: '', name: 'dashboard', component: () =&gt; import('@/views/DashboardView.vue') },
+      { path: 'settings', name: 'settings', component: () =&gt; import('@/views/SettingsView.vue') },
+    ],
+  },
+
+  // ═══ Auth Routes (ห้ามเข้าถ้า Login แล้ว) ═══
+  {
+    path: '/login',
+    name: 'login',
+    component: () =&gt; import('@/views/LoginView.vue'),
+    meta: { requiresGuest: true },
+  },
+
+  // ═══ 404 Catch-all ═══
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'not-found',
+    component: () =&gt; import('@/views/NotFoundView.vue'),
+  },
+]
+
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes,
+  scrollBehavior(to, from, savedPosition) {
+    // กลับไปตำแหน่ง scroll เดิมเมื่อกดปุ่มย้อนกลับ
+    if (savedPosition) return savedPosition
+    return { top: 0 }
+  },
+})
+
+// ═══ Navigation Guard (ตรวจสอบสิทธิ์ก่อนเข้าหน้า) ═══
+router.beforeEach(async (to, from) =&gt; {
+  const authStore = useAuthStore()
+
+  // ถ้าหน้าต้อง Login แต่ยังไม่ Login → redirect ไป /login
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    return { name: 'login', query: { redirect: to.fullPath } }
+  }
+
+  // ถ้า Login แล้วจะเข้าหน้า Login → redirect ไป Dashboard
+  if (to.meta.requiresGuest && authStore.isAuthenticated) {
+    return { name: 'dashboard' }
+  }
+})
+
+export default router</pre>
+  </div>
+
+  <div class="glass-card">
+    <h4>ใช้งาน Router ใน Component</h4>
+    <pre>&lt;script setup lang="ts"&gt;
+import { useRouter, useRoute } from 'vue-router'
+
+const router = useRouter()   // สำหรับ navigate (push, replace, back)
+const route = useRoute()     // สำหรับอ่านค่า route ปัจจุบัน
+
+// อ่านค่า route
+console.log(route.params.id)     // :id จาก URL
+console.log(route.query.search)  // ?search=xxx
+console.log(route.meta)          // { requiresAuth: true }
+
+// Navigate programmatically
+function goToProduct(id: string) {
+  router.push({ name: 'product-detail', params: { id } })
+  // หรือ: router.push(`/products/${id}`)
+}
+
+function goBack() {
+  router.back()  // เหมือนกดปุ่มย้อนกลับ
+}
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;!-- RouterLink: สร้าง link ที่ไม่ reload หน้า --&gt;
+  &lt;RouterLink :to="{ name: 'home' }"&gt;Home&lt;/RouterLink&gt;
+  &lt;RouterLink :to="{ name: 'product-detail', params: { id: '123' } }"&gt;
+    Product #123
+  &lt;/RouterLink&gt;
+
+  &lt;!-- RouterView: ที่ที่ Component ของ route จะถูก render --&gt;
+  &lt;RouterView /&gt;
+&lt;/template&gt;</pre>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!--  PINIA                                                          -->
+<!-- ================================================================ -->
+
+<section class="section" id="pinia">
+  <h2>🍍 Pinia: State Management สมัยใหม่</h2>
+  <p>Pinia คือ Official State Management ของ Vue 3 (Vuex เลิกแนะนำแล้ว) — มันง่ายกว่า Vuex 10 เท่า</p>
+
+  <div class="glass-card success">
+    <div class="analogy">
+      คิดว่า Pinia Store เหมือน "กล่องข้อความกลาง" ที่ทุก Component เข้าถึงได้ — อ่านข้อมูลร่วมกัน เปลี่ยนข้อมูลร่วมกัน โดยไม่ต้อง Props drill
+    </div>
+  </div>
+
+  <div class="glass-card highlight">
+    <h4>Setup Store (แนะนำ — เหมือนเขียน Composable)</h4>
+    <pre>// stores/auth.ts
+import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
+import { apiClient } from '@/api/client'
+
+interface User {
+  id: string
+  name: string
+  email: string
+  role: 'admin' | 'user'
+}
+
+export const useAuthStore = defineStore('auth', () =&gt; {
+  // ═══ State ═══ (เหมือน ref ธรรมดา)
+  const user = ref&lt;User | null&gt;(null)
+  const token = ref&lt;string | null&gt;(localStorage.getItem('token'))
+  const isLoading = ref(false)
+
+  // ═══ Getters ═══ (เหมือน computed)
+  const isAuthenticated = computed(() =&gt; !!token.value)
+  const isAdmin = computed(() =&gt; user.value?.role === 'admin')
+  const displayName = computed(() =&gt; user.value?.name ?? 'Guest')
+
+  // ═══ Actions ═══ (เหมือน function ธรรมดา — รองรับ async!)
+  async function login(email: string, password: string) {
+    isLoading.value = true
+    try {
+      const res = await apiClient.post('/auth/login', { email, password })
+      token.value = res.data.token
+      user.value = res.data.user
+      localStorage.setItem('token', res.data.token)
+    } catch (e) {
+      throw e  // ให้ component จัดการ error
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  function logout() {
+    user.value = null
+    token.value = null
+    localStorage.removeItem('token')
+  }
+
+  async function fetchProfile() {
+    if (!token.value) return
+    const res = await apiClient.get('/auth/me')
+    user.value = res.data
+  }
+
+  return { user, token, isLoading, isAuthenticated, isAdmin, displayName, login, logout, fetchProfile }
+})
+
+// ═══ ใช้ใน Component ═══
+// &lt;script setup&gt;
+// const auth = useAuthStore()
+// await auth.login('john@example.com', 'password123')
+// console.log(auth.isAuthenticated)  // true
+// console.log(auth.displayName)      // "John"
+// &lt;/script&gt;</pre>
+  </div>
+
+  <div class="glass-card">
+    <h4>Product Store: ตัวอย่าง CRUD</h4>
+    <pre>// stores/products.ts
+import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
+
+interface Product {
+  id: string; name: string; price: number; category: string
+}
+
+export const useProductStore = defineStore('products', () =&gt; {
+  const items = ref&lt;Product[]&gt;([])
+  const selectedCategory = ref('all')
+  const searchQuery = ref('')
+
+  // Computed: filter ตามเงื่อนไข
+  const filteredItems = computed(() =&gt; {
+    return items.value
+      .filter(p =&gt; selectedCategory.value === 'all' || p.category === selectedCategory.value)
+      .filter(p =&gt; p.name.toLowerCase().includes(searchQuery.value.toLowerCase()))
+  })
+
+  const totalCount = computed(() =&gt; filteredItems.value.length)
+  const categories = computed(() =&gt; [...new Set(items.value.map(p =&gt; p.category))])
+
+  // Actions
+  async function fetchProducts() {
+    const res = await fetch('/api/products')
+    items.value = await res.json()
+  }
+
+  function addProduct(product: Product) {
+    items.value.push(product)
+  }
+
+  function removeProduct(id: string) {
+    items.value = items.value.filter(p =&gt; p.id !== id)
+  }
+
+  // Pinia supports $reset() for option stores only
+  // For setup stores, write your own:
+  function $reset() {
+    items.value = []
+    selectedCategory.value = 'all'
+    searchQuery.value = ''
+  }
+
+  return {
+    items, selectedCategory, searchQuery,
+    filteredItems, totalCount, categories,
+    fetchProducts, addProduct, removeProduct, $reset,
+  }
+})</pre>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!--  ASYNC DATA & SUSPENSE                                          -->
+<!-- ================================================================ -->
+
+<section class="section" id="async-data">
+  <h2>🌐 Async Data & Suspense</h2>
+  <p>โลกจริงเราต้องโหลดข้อมูลจาก API เกือบทุกหน้า Vue มีหลายวิธีจัดการเรื่องนี้</p>
+
+  <div class="glass-card highlight">
+    <h4>Pattern 1: Composable + onMounted (แนะนำ)</h4>
+    <pre>&lt;script setup lang="ts"&gt;
+import { useFetch } from '@/composables/useFetch'
+
+const { data: products, isLoading, error, refresh } = useFetch&lt;Product[]&gt;('/api/products')
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;div v-if="isLoading"&gt;⏳ กำลังโหลด...&lt;/div&gt;
+  &lt;div v-else-if="error"&gt;❌ {{ error.message }}&lt;/div&gt;
+  &lt;div v-else&gt;
+    &lt;ProductCard v-for="p in products" :key="p.id" :product="p" /&gt;
+  &lt;/div&gt;
+  &lt;button @click="refresh"&gt;🔄 Refresh&lt;/button&gt;
+&lt;/template&gt;</pre>
+  </div>
+
+  <div class="glass-card">
+    <h4>Pattern 2: Suspense (Experimental — แต่ล้ำมาก)</h4>
+    <pre>&lt;!-- AsyncProductList.vue — Component ที่มี top-level await --&gt;
+&lt;script setup lang="ts"&gt;
+// ⚡ top-level await ใน &lt;script setup&gt; ทำให้ component เป็น "async"
+const res = await fetch('/api/products')
+const products = await res.json()
+// Component จะไม่ render จนกว่า await จะเสร็จ
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;div v-for="p in products" :key="p.id"&gt;{{ p.name }}&lt;/div&gt;
+&lt;/template&gt;
+
+&lt;!-- Parent.vue — ใช้ Suspense รอ async component --&gt;
+&lt;template&gt;
+  &lt;Suspense&gt;
+    &lt;!-- #default: แสดงเมื่อ async component โหลดเสร็จ --&gt;
+    &lt;template #default&gt;
+      &lt;AsyncProductList /&gt;
+    &lt;/template&gt;
+
+    &lt;!-- #fallback: แสดงระหว่างรอ (Loading state) --&gt;
+    &lt;template #fallback&gt;
+      &lt;div class="skeleton"&gt;⏳ กำลังโหลดสินค้า...&lt;/div&gt;
+    &lt;/template&gt;
+  &lt;/Suspense&gt;
+&lt;/template&gt;</pre>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!--  TYPESCRIPT + VUE                                               -->
+<!-- ================================================================ -->
+
+<section class="section" id="typescript-vue">
+  <h2>🔷 TypeScript + Vue: Type Safety ระดับ Pro</h2>
+  <p>TypeScript ไม่ใช่ "optional nice-to-have" อีกต่อไป มันคือ <strong>ข้อบังคับ</strong> ในทีม Enterprise ทุกทีมในปี 2026</p>
+
+  <div class="glass-card highlight">
+    <h4>Type ที่ต้องรู้ใน Vue + TypeScript</h4>
+    <pre>// ═══ 1. Interface สำหรับ API Response ═══
+interface ApiResponse&lt;T&gt; {
+  success: boolean
+  data: T
+  message?: string
+  pagination?: {
+    page: number
+    perPage: number
+    total: number
+  }
+}
+
+interface Product {
+  id: string
+  name: string
+  price: number
+  description: string | null    // nullable field
+  category: ProductCategory
+  tags: string[]
+  createdAt: string            // ISO date string
+}
+
+// ═══ 2. Enum / Const Object (แนะนำ const object มากกว่า enum) ═══
+// ❌ enum มีปัญหากับ tree-shaking
+// enum ProductCategory { SHOES = 'shoes', CLOTHING = 'clothing' }
+
+// ✅ const object + type inference
+const PRODUCT_CATEGORY = {
+  SHOES: 'shoes',
+  CLOTHING: 'clothing',
+  ELECTRONICS: 'electronics',
+} as const
+
+type ProductCategory = typeof PRODUCT_CATEGORY[keyof typeof PRODUCT_CATEGORY]
+// = 'shoes' | 'clothing' | 'electronics'
+
+// ═══ 3. Utility Types ที่ใช้บ่อย ═══
+type ProductFormData = Omit&lt;Product, 'id' | 'createdAt'&gt;      // ตัดบาง field ออก
+type ProductUpdateData = Partial&lt;ProductFormData&gt;               // ทำทุก field เป็น optional
+type ProductSummary = Pick&lt;Product, 'id' | 'name' | 'price'&gt;  // เลือกเฉพาะบาง field
+
+// ═══ 4. Discriminated Union (Pattern ที่ใช้กับ State) ═══
+type AsyncState&lt;T&gt; =
+  | { status: 'idle' }
+  | { status: 'loading' }
+  | { status: 'success'; data: T }
+  | { status: 'error'; error: Error }
+
+// ใช้กับ switch:
+function render(state: AsyncState&lt;Product[]&gt;) {
+  switch (state.status) {
+    case 'loading': return 'Loading...'
+    case 'success': return state.data.map(p =&gt; p.name) // TypeScript รู้ว่ามี .data!
+    case 'error':   return state.error.message          // TypeScript รู้ว่ามี .error!
+  }
+}</pre>
+  </div>
+
+  <div class="glass-card">
+    <h4>Template Refs กับ TypeScript</h4>
+    <pre>&lt;script setup lang="ts"&gt;
+import { ref, onMounted } from 'vue'
+
+// ═══ DOM Element ref ═══
+const inputRef = ref&lt;HTMLInputElement | null&gt;(null)
+
+onMounted(() =&gt; {
+  inputRef.value?.focus()  // Auto-focus เมื่อ mount
+})
+
+// ═══ Component ref ═══
+import type MyComponent from './MyComponent.vue'
+const componentRef = ref&lt;InstanceType&lt;typeof MyComponent&gt; | null&gt;(null)
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;input ref="inputRef" type="text"&gt;
+  &lt;MyComponent ref="componentRef" /&gt;
+&lt;/template&gt;</pre>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!--  CUSTOM DIRECTIVES                                              -->
+<!-- ================================================================ -->
+
+<section class="section" id="custom-directives">
+  <h2>🎯 Custom Directives: สร้าง v-* ของตัวเอง</h2>
+  <p>Directive คือวิธีที่ Vue จัดการ DOM โดยตรง — เหมาะเมื่อ logic ต้อง "สัมผัส DOM" จริงๆ</p>
+
+  <div class="glass-card highlight">
+    <h4>ตัวอย่าง: v-click-outside (ปิด dropdown เมื่อคลิกข้างนอก)</h4>
+    <pre>// directives/clickOutside.ts
+import type { Directive } from 'vue'
+
+export const vClickOutside: Directive&lt;HTMLElement, () =&gt; void&gt; = {
+  mounted(el, binding) {
+    // เก็บ handler ไว้ที่ element เพื่อจะได้ remove ได้
+    (el as any).__clickOutsideHandler = (event: MouseEvent) =&gt; {
+      // ถ้าคลิกนอก element → เรียก callback
+      if (!el.contains(event.target as Node)) {
+        binding.value()   // ฟังก์ชั่นที่ผ่านมาใน v-click-outside="fn"
+      }
+    }
+    document.addEventListener('click', (el as any).__clickOutsideHandler)
+  },
+  unmounted(el) {
+    document.removeEventListener('click', (el as any).__clickOutsideHandler)
+  },
+}
+
+// ═══ ลงทะเบียน directive (ใน main.ts หรือ plugin) ═══
+// app.directive('click-outside', vClickOutside)
+
+// ═══ ใช้ใน Component ═══
+// &lt;div v-click-outside="closeDropdown"&gt;
+//   &lt;button @click="toggleDropdown"&gt;Menu&lt;/button&gt;
+//   &lt;ul v-show="isOpen"&gt;...&lt;/ul&gt;
+// &lt;/div&gt;</pre>
+  </div>
+
+  <div class="glass-card">
+    <h4>ตัวอย่าง: v-focus (Auto-focus เมื่อ mount)</h4>
+    <pre>// directives/focus.ts
+import type { Directive } from 'vue'
+
+export const vFocus: Directive = {
+  mounted(el: HTMLElement) {
+    // ถ้าเป็น input/textarea focus ตรงๆ
+    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+      el.focus()
+    } else {
+      // ถ้าเป็น wrapper → หา input ข้างใน
+      el.querySelector('input')?.focus()
+    }
+  },
+}
+
+// ═══ ใช้งาน ═══
+// &lt;input v-focus type="text" /&gt;  ← focus ทันทีที่ mount</pre>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!--  TESTING                                                        -->
+<!-- ================================================================ -->
+
+<section class="section" id="testing-vue">
+  <h2>🧪 Testing: Vitest + Vue Test Utils</h2>
+  <p>โค้ดที่ไม่มี Test = โค้ดที่พร้อมพังทุกเมื่อ ในทีม Enterprise ต้องมี Test Coverage อย่างน้อย 80%</p>
+
+  <div class="glass-card highlight">
+    <h4>Unit Test: ทดสอบ Composable</h4>
+    <pre>// composables/__tests__/useCounter.test.ts
+import { describe, it, expect } from 'vitest'
+import { useCounter } from '../useCounter'
+
+describe('useCounter', () =&gt; {
+  it('should start with initial value', () =&gt; {
+    const { count } = useCounter(10)
+    expect(count.value).toBe(10)
+  })
+
+  it('should increment', () =&gt; {
+    const { count, increment } = useCounter()
+    increment()
+    expect(count.value).toBe(1)
+  })
+
+  it('should not go below zero', () =&gt; {
+    const { count, decrement } = useCounter(0)
+    decrement()
+    expect(count.value).toBe(0)  // ไม่ติดลบ
+  })
+})</pre>
+  </div>
+
+  <div class="glass-card">
+    <h4>Component Test: ทดสอบ Vue Component</h4>
+    <pre>// components/__tests__/ProductCard.test.ts
+import { describe, it, expect, vi } from 'vitest'
+import { mount } from '@vue/test-utils'
+import ProductCard from '../ProductCard.vue'
+
+describe('ProductCard', () =&gt; {
+  const defaultProps = {
+    title: 'iPhone 16',
+    price: 35000,
+    inStock: true,
+  }
+
+  it('renders product title', () =&gt; {
+    const wrapper = mount(ProductCard, { props: defaultProps })
+    expect(wrapper.text()).toContain('iPhone 16')
+  })
+
+  it('displays formatted price', () =&gt; {
+    const wrapper = mount(ProductCard, { props: defaultProps })
+    expect(wrapper.find('.price').text()).toContain('35,000')
+  })
+
+  it('emits addToCart event on button click', async () =&gt; {
+    const wrapper = mount(ProductCard, { props: defaultProps })
+    await wrapper.find('.btn-primary').trigger('click')
+
+    // ตรวจสอบว่า emit ถูกเรียก
+    expect(wrapper.emitted('addToCart')).toBeTruthy()
+    expect(wrapper.emitted('addToCart')![0]).toEqual(['iPhone 16', 1])
+  })
+
+  it('shows out of stock message when not in stock', () =&gt; {
+    const wrapper = mount(ProductCard, {
+      props: { ...defaultProps, inStock: false },
+    })
+    expect(wrapper.find('.out-of-stock').exists()).toBe(true)
+    expect(wrapper.text()).toContain('สินค้าหมด')
+  })
+
+  it('disables minus button at quantity 1', () =&gt; {
+    const wrapper = mount(ProductCard, { props: defaultProps })
+    const minusBtn = wrapper.findAll('button')[0]
+    expect(minusBtn.attributes('disabled')).toBeDefined()
+  })
+})</pre>
+  </div>
+
+  <div class="glass-card">
+    <h4>Store Test: ทดสอบ Pinia Store</h4>
+    <pre>// stores/__tests__/auth.test.ts
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { setActivePinia, createPinia } from 'pinia'
+import { useAuthStore } from '../auth'
+
+// Mock API
+vi.mock('@/api/client', () =&gt; ({
+  apiClient: {
+    post: vi.fn().mockResolvedValue({
+      data: { token: 'mock-token', user: { id: '1', name: 'Test', role: 'user' } },
+    }),
+  },
+}))
+
+describe('Auth Store', () =&gt; {
+  beforeEach(() =&gt; {
+    setActivePinia(createPinia())
+    localStorage.clear()
+  })
+
+  it('should start with null user', () =&gt; {
+    const auth = useAuthStore()
+    expect(auth.user).toBeNull()
+    expect(auth.isAuthenticated).toBe(false)
+  })
+
+  it('should login successfully', async () =&gt; {
+    const auth = useAuthStore()
+    await auth.login('test@example.com', 'password')
+
+    expect(auth.isAuthenticated).toBe(true)
+    expect(auth.user?.name).toBe('Test')
+    expect(localStorage.getItem('token')).toBe('mock-token')
+  })
+
+  it('should logout and clear state', async () =&gt; {
+    const auth = useAuthStore()
+    await auth.login('test@example.com', 'password')
+    auth.logout()
+
+    expect(auth.user).toBeNull()
+    expect(auth.isAuthenticated).toBe(false)
+    expect(localStorage.getItem('token')).toBeNull()
+  })
+})</pre>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!--  PERFORMANCE                                                    -->
+<!-- ================================================================ -->
+
+<section class="section" id="performance-vue">
+  <h2>⚡ Performance Optimization</h2>
+  <p>Vue เร็วอยู่แล้วแบบ default แต่เมื่อแอปใหญ่ขึ้น ต้องรู้จักเทคนิค Optimization เหล่านี้</p>
+
+  <div class="glass-card highlight">
+    <h4>1. Lazy Loading Routes (Code Splitting)</h4>
+    <pre>// ❌ Bad: import ทุก component ตอน initial load
+import HomeView from '@/views/HomeView.vue'
+import ProductView from '@/views/ProductView.vue'
+import SettingsView from '@/views/SettingsView.vue'
+
+// ✅ Good: Lazy load เฉพาะตอนเข้าหน้านั้นจริงๆ
+const routes = [
+  { path: '/', component: () =&gt; import('@/views/HomeView.vue') },         // chunk แยก
+  { path: '/products', component: () =&gt; import('@/views/ProductView.vue') }, // chunk แยก
+  { path: '/settings', component: () =&gt; import('@/views/SettingsView.vue') },// chunk แยก
+]
+// ผลลัพธ์: Initial bundle เล็กลง → หน้าเว็บโหลดเร็วขึ้น</pre>
+  </div>
+
+  <div class="glass-card">
+    <h4>2. v-once, v-memo, shallowRef</h4>
+    <pre>&lt;template&gt;
+  &lt;!-- v-once: render ครั้งเดียว ไม่เคย update (เหมาะสำหรับ static content) --&gt;
+  &lt;h1 v-once&gt;{{ title }}&lt;/h1&gt;  &lt;!-- ถ้า title เปลี่ยน h1 ก็ไม่ update --&gt;
+
+  &lt;!-- v-memo: re-render เฉพาะเมื่อ dependency เปลี่ยน --&gt;
+  &lt;div v-for="item in list" :key="item.id" v-memo="[item.id, item.selected]"&gt;
+    {{ item.name }}
+  &lt;/div&gt;
+  &lt;!-- ถ้า item.name เปลี่ยนแต่ id, selected ไม่เปลี่ยน → ไม่ re-render! --&gt;
+&lt;/template&gt;
+
+&lt;script setup lang="ts"&gt;
+import { shallowRef, triggerRef } from 'vue'
+
+// ═══ shallowRef: reactive เฉพาะ .value ไม่ deep track ═══
+// เหมาะสำหรับ large list ที่ไม่ได้แก้ nested property
+const bigList = shallowRef&lt;Product[]&gt;([])
+
+// ✅ Replace ทั้ง array → trigger update
+bigList.value = [...newData]
+
+// ❌ Push item → ไม่ trigger! (เพราะ shallow)
+// bigList.value.push(item)
+// triggerRef(bigList) ← ต้อง manual trigger
+&lt;/script&gt;</pre>
+  </div>
+
+  <div class="glass-card warn">
+    <h4>3. Virtual Scrolling (สำหรับ List ยาวๆ)</h4>
+    <pre>&lt;!-- ปัญหา: render 10,000 items = DOM elements 10,000 ตัว = ช้ามาก! --&gt;
+&lt;!-- แก้: ใช้ virtual scroll — render เฉพาะที่เห็นบนจอ --&gt;
+
+&lt;!-- ใช้ package: @tanstack/vue-virtual (แนะนำ) --&gt;
+&lt;script setup lang="ts"&gt;
+import { useVirtualizer } from '@tanstack/vue-virtual'
+import { ref } from 'vue'
+
+const parentRef = ref&lt;HTMLElement | null&gt;(null)
+const items = Array.from({ length: 10000 }, (_, i) =&gt; `Item ${i}`)
+
+const virtualizer = useVirtualizer({
+  count: items.length,
+  getScrollElement: () =&gt; parentRef.value,
+  estimateSize: () =&gt; 40,  // ความสูงโดยประมาณของแต่ละ item (px)
+})
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;div ref="parentRef" style="height: 400px; overflow: auto;"&gt;
+    &lt;div :style="{ height: virtualizer.getTotalSize() + 'px', position: 'relative' }"&gt;
+      &lt;div
+        v-for="row in virtualizer.getVirtualItems()" :key="row.index"
+        :style="{ position: 'absolute', top: row.start + 'px', height: row.size + 'px' }"
+      &gt;
+        {{ items[row.index] }}
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;!-- 10,000 items แต่ DOM จริงมีแค่ ~20 elements! --&gt;
+&lt;/template&gt;</pre>
+  </div>
+
+  <div class="glass-card tip">
+    <h4>Performance Checklist</h4>
+    <ul>
+      <li>✅ Lazy load ทุก route ด้วย <code>() =&gt; import()</code></li>
+      <li>✅ ใช้ <code>:key</code> ที่ถูกต้องกับ <code>v-for</code> (ใช้ id, อย่าใช้ index)</li>
+      <li>✅ ใช้ <code>computed</code> แทน method ใน template (มี cache)</li>
+      <li>✅ ใช้ <code>shallowRef</code> สำหรับ large data ที่ไม่ต้อง deep reactivity</li>
+      <li>✅ ใช้ <code>v-show</code> แทน <code>v-if</code> สำหรับ toggle บ่อยๆ</li>
+      <li>✅ Virtual scroll สำหรับ list เกิน 100 items</li>
+      <li>✅ <code>defineAsyncComponent</code> สำหรับ component ที่ไม่ได้ใช้ทันที</li>
+      <li>✅ ใช้ <code>KeepAlive</code> เก็บ state ของ component ที่ switch บ่อย</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!--  ENTERPRISE ARCHITECTURE                                        -->
+<!-- ================================================================ -->
+
+<section class="section" id="architecture-vue">
+  <h2>🏢 Enterprise Architecture Patterns</h2>
+  <p>เมื่อโปรเจคใหญ่ขึ้น (10+ devs, 50+ components) ต้องมีกฎตาย และ patterns ที่ทีมตกลงร่วมกัน</p>
+
+  <div class="glass-card highlight">
+    <h4>1. API Layer: Axios Instance + Interceptors</h4>
+    <pre>// api/client.ts
+import axios from 'axios'
+import { useAuthStore } from '@/stores/auth'
+import router from '@/router'
+
+export const apiClient = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || '/api',
+  timeout: 15000,
+  headers: { 'Content-Type': 'application/json' },
+})
+
+// ═══ Request Interceptor: แปะ Token อัตโนมัติ ═══
+apiClient.interceptors.request.use((config) =&gt; {
+  const auth = useAuthStore()
+  if (auth.token) {
+    config.headers.Authorization = `Bearer ${auth.token}`
+  }
+  return config
+})
+
+// ═══ Response Interceptor: จัดการ Error กลาง ═══
+apiClient.interceptors.response.use(
+  (response) =&gt; response,
+  async (error) =&gt; {
+    const auth = useAuthStore()
+
+    if (error.response?.status === 401) {
+      auth.logout()
+      router.push({ name: 'login' })
+    }
+
+    if (error.response?.status === 403) {
+      router.push({ name: 'forbidden' })
+    }
+
+    // Network error
+    if (!error.response) {
+      console.error('Network Error: ไม่สามารถเชื่อมต่อ server ได้')
+    }
+
+    return Promise.reject(error)
+  },
+)</pre>
+  </div>
+
+  <div class="glass-card">
+    <h4>2. Service Layer: แยก API calls ออกจาก Component</h4>
+    <pre>// services/product.service.ts
+import { apiClient } from '@/api/client'
+import type { Product, ProductFormData, ApiResponse } from '@/types'
+
+export const productService = {
+  async getAll(params?: { page?: number; search?: string }): Promise&lt;ApiResponse&lt;Product[]&gt;&gt; {
+    const { data } = await apiClient.get('/products', { params })
+    return data
+  },
+
+  async getById(id: string): Promise&lt;Product&gt; {
+    const { data } = await apiClient.get(`/products/${id}`)
+    return data.data
+  },
+
+  async create(payload: ProductFormData): Promise&lt;Product&gt; {
+    const { data } = await apiClient.post('/products', payload)
+    return data.data
+  },
+
+  async update(id: string, payload: Partial&lt;ProductFormData&gt;): Promise&lt;Product&gt; {
+    const { data } = await apiClient.put(`/products/${id}`, payload)
+    return data.data
+  },
+
+  async delete(id: string): Promise&lt;void&gt; {
+    await apiClient.delete(`/products/${id}`)
+  },
+}
+
+// ═══ ใช้ใน Store หรือ Composable ═══
+// const products = await productService.getAll({ page: 1 })</pre>
+  </div>
+
+  <div class="glass-card">
+    <h4>3. Error Handling: Global Error Boundary</h4>
+    <pre>// plugins/errorHandler.ts
+import type { App } from 'vue'
+
+export function setupErrorHandler(app: App) {
+  // จับ error ที่เกิดใน Component (render, lifecycle, event handlers)
+  app.config.errorHandler = (err, instance, info) =&gt; {
+    console.error(`[Vue Error] ${info}:`, err)
+    // ส่งไป Sentry / Datadog / custom logging
+    // Sentry.captureException(err, { extra: { info } })
+  }
+
+  // จับ unhandled promise rejection
+  window.addEventListener('unhandledrejection', (event) =&gt; {
+    console.error('[Unhandled Promise]', event.reason)
+  })
+
+  // จับ global JS errors
+  window.addEventListener('error', (event) =&gt; {
+    console.error('[Global Error]', event.error)
+  })
+}
+
+// ═══ main.ts ═══
+// import { setupErrorHandler } from './plugins/errorHandler'
+// const app = createApp(App)
+// setupErrorHandler(app)</pre>
+  </div>
+
+  <div class="glass-card tip">
+    <h4>4. Environment Variables (.env files)</h4>
+    <pre># .env — ทุก environment
+VITE_APP_TITLE=My Vue App
+
+# .env.development — dev เท่านั้น
+VITE_API_URL=http://localhost:3000/api
+VITE_DEBUG=true
+
+# .env.production — production เท่านั้น
+VITE_API_URL=https://api.myapp.com
+VITE_DEBUG=false
+
+# .env.staging — staging
+VITE_API_URL=https://staging-api.myapp.com
+
+# ═══ ใช้ใน Code ═══
+# console.log(import.meta.env.VITE_API_URL)
+# console.log(import.meta.env.VITE_APP_TITLE)
+# ⚠️ ต้องขึ้นต้นด้วย VITE_ เท่านั้นจึงจะเข้าถึงได้ใน client code!</pre>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!--  NUXT 3                                                         -->
+<!-- ================================================================ -->
+
+<section class="section" id="nuxt-intro">
+  <h2>🌊 Nuxt 3: Full-Stack Vue Framework</h2>
+  <p>ถ้า Vue คือ "Engine" — Nuxt ก็คือ "รถที่ประกอบมาแล้ว พร้อมขับ" ไม่ต้อง configure อะไรเอง</p>
+
+  <div class="glass-card success">
+    <div class="analogy">
+      Vue เดี่ยว = ซื้อชิ้นส่วนมาประกอบเอง (ต้อง config Router, SSR, SEO, Middleware เอง)<br>
+      Nuxt 3 = ซื้อรถสำเร็จรูป (มีครบ: File-based routing, SSR, API routes, Auto-import, SEO, Middleware)
+    </div>
+  </div>
+
+  <div class="glass-card highlight">
+    <h4>เริ่มต้น Nuxt 3</h4>
+    <pre># สร้างโปรเจค
+npx nuxi@latest init my-nuxt-app
+cd my-nuxt-app
+npm install
+npm run dev    # 🚀 http://localhost:3000</pre>
+  </div>
+
+  <div class="glass-card">
+    <h4>Nuxt 3 Features ที่ทำให้ชีวิตง่ายขึ้น</h4>
+    <pre>// ═══ 1. File-based Routing (ไม่ต้องเขียน router!) ═══
+// pages/
+//   index.vue          → /
+//   about.vue          → /about
+//   products/
+//     index.vue        → /products
+//     [id].vue         → /products/:id  (dynamic route)
+
+// ═══ 2. Auto-import (ไม่ต้อง import เอง!) ═══
+// ไม่ต้อง: import { ref, computed } from 'vue'
+// ไม่ต้อง: import { useRouter } from 'vue-router'
+// Nuxt auto-import ให้หมด!
+&lt;script setup lang="ts"&gt;
+const count = ref(0)          // ✅ ใช้ได้เลย ไม่ต้อง import
+const route = useRoute()      // ✅ ใช้ได้เลย ไม่ต้อง import
+const { data } = await useFetch('/api/products')  // ✅ built-in composable
+&lt;/script&gt;
+
+// ═══ 3. Server API Routes (Full-stack!) ═══
+// server/api/products.ts → GET /api/products
+export default defineEventHandler(async (event) =&gt; {
+  const products = await db.query('SELECT * FROM products')
+  return { success: true, data: products }
+})
+
+// server/api/products.post.ts → POST /api/products
+export default defineEventHandler(async (event) =&gt; {
+  const body = await readBody(event)
+  const product = await db.insert('products', body)
+  return { success: true, data: product }
+})
+
+// ═══ 4. SEO & Meta Tags ═══
+&lt;script setup&gt;
+useHead({
+  title: 'สินค้า - My Shop',
+  meta: [
+    { name: 'description', content: 'ซื้อสินค้าออนไลน์ราคาดี' },
+    { property: 'og:title', content: 'My Shop' },
+  ],
+})
+&lt;/script&gt;
+
+// ═══ 5. Rendering Modes (ยืดหยุ่นสุด) ═══
+// nuxt.config.ts
+export default defineNuxtConfig({
+  // ssr: true,         // Server-Side Rendering (default)
+  // ssr: false,        // SPA Mode
+  routeRules: {
+    '/':          { prerender: true },     // Static Generation (SSG)
+    '/dashboard': { ssr: false },          // SPA Mode เฉพาะหน้านี้
+    '/products':  { swr: 3600 },           // ISR: revalidate ทุก 1 ชม.
+    '/api/**':    { cors: true },          // API routes permit CORS
+  },
+})</pre>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!--  PRODUCTION CHECKLIST                                           -->
+<!-- ================================================================ -->
+
+<section class="section" id="deploy-checklist">
+  <h2>🚀 Production Deployment Checklist</h2>
+  <p>ก่อน Deploy จริง ต้องผ่าน Checklist นี้ทุกข้อ ไม่งั้นคุณจะเจ็บตัว (จากประสบการณ์จริง)</p>
+
+  <div class="glass-card highlight">
+    <h4>Pre-Deployment Checklist</h4>
+    <ul>
+      <li>✅ <strong>TypeScript strict mode</strong> — <code>"strict": true</code> ใน tsconfig.json</li>
+      <li>✅ <strong>ESLint + Prettier</strong> — format เหมือนกันทุกคนในทีม</li>
+      <li>✅ <strong>Test Coverage ≥ 80%</strong> — run <code>npm run test -- --coverage</code></li>
+      <li>✅ <strong>Bundle Analysis</strong> — <code>npx vite-bundle-visualizer</code> ดูว่าไฟล์ไหนใหญ่</li>
+      <li>✅ <strong>Lighthouse Score ≥ 90</strong> — Performance, A11y, SEO, Best Practices</li>
+      <li>✅ <strong>Error Tracking</strong> — ติดตั้ง Sentry / Datadog / LogRocket</li>
+      <li>✅ <strong>Environment Variables</strong> — ไม่ commit .env.production ลง git!</li>
+      <li>✅ <strong>HTTPS</strong> — ทุก API call ต้องเป็น HTTPS</li>
+      <li>✅ <strong>CSP Headers</strong> — Content Security Policy กัน XSS</li>
+      <li>✅ <strong>Rate Limiting</strong> — ป้องกัน API Abuse</li>
+    </ul>
+  </div>
+
+  <div class="glass-card">
+    <h4>Recommended Technology Stack 2026</h4>
+    <pre>
+┌────────────────────┬─────────────────────────────────────────┐
+│ Category           │ Recommended                             │
+├────────────────────┼─────────────────────────────────────────┤
+│ Framework          │ Vue 3 + TypeScript                      │
+│ Build Tool         │ Vite                                    │
+│ State Management   │ Pinia                                   │
+│ Router             │ Vue Router 4                            │
+│ HTTP Client        │ Axios (+ interceptors)                  │
+│ UI Components      │ PrimeVue / Radix Vue / Headless UI      │
+│ Icons              │ Iconify / Lucide                        │
+│ Forms              │ VeeValidate + Zod                       │
+│ Testing            │ Vitest + Vue Test Utils + Playwright    │
+│ CSS                │ Tailwind CSS / UnoCSS                   │
+│ Utilities          │ VueUse (200+ composables!)              │
+│ Full-Stack         │ Nuxt 3                                  │
+│ Deployment         │ Vercel / Netlify / Cloudflare Pages     │
+│ Error Tracking     │ Sentry                                  │
+│ CI/CD              │ GitHub Actions                          │
+│ Monorepo           │ pnpm workspaces + Turborepo             │
+└────────────────────┴─────────────────────────────────────────┘</pre>
+  </div>
+
+  <div class="glass-card success">
+    <h4>🎉 จบแล้ว! สรุปเส้นทาง Frontend Developer ด้วย Vue.js</h4>
+    <ul>
+      <li><strong>Level 1 (Beginner):</strong> Template Syntax, ref/reactive, computed, v-if/v-for, Props/Emit</li>
+      <li><strong>Level 2 (Intermediate):</strong> Composables, Slots, Vue Router, Pinia, Lifecycle Hooks</li>
+      <li><strong>Level 3 (Advanced):</strong> TypeScript Generics, Custom Directives, Suspense, Performance</li>
+      <li><strong>Level 4 (Enterprise):</strong> Architecture Patterns, Testing, Nuxt 3, CI/CD, Monitoring</li>
+    </ul>
+    <p style="margin-top: 16px;">
+      <strong>ทุกอย่างที่สอนมานี้ ไม่ใช่ทฤษฎีลอยๆ แต่คือสิ่งที่ใช้ในงานจริงทุกวัน</strong> —
+      ขอให้ลองทำตาม ทำผิด ทำพัง แล้วแก้ มันคือวิธีเรียนรู้ที่ดีที่สุดครับ 💪
+    </p>
+  </div>
+</section>
+
+  </main>
+</div>
+
+<!-- Scroll to top button -->
+<button class="scroll-top" id="scrollTop" title="Back to top">
+  <svg viewBox="0 0 24 24"><path d="M12 4l-8 8h5v8h6v-8h5z"/></svg>
+</button>
+
+<script>
+// ── Sidebar toggle (mobile) ──
+const menuBtn = document.getElementById('menuBtn');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('sidebarOverlay');
+menuBtn?.addEventListener('click', () => {
+  sidebar?.classList.toggle('open');
+  overlay?.classList.toggle('show');
+});
+overlay?.addEventListener('click', () => {
+  sidebar?.classList.remove('open');
+  overlay?.classList.remove('show');
+});
+
+// ── Scroll spy: highlight active sidebar link ──
+const sections = document.querySelectorAll('.section');
+const navLinks = document.querySelectorAll('.sidebar a');
+const progressBar = document.getElementById('progressBar');
+const scrollBtn = document.getElementById('scrollTop');
+
+function onScroll() {
+  const scrollY = window.scrollY;
+  const docH = document.documentElement.scrollHeight - window.innerHeight;
+  if (progressBar) progressBar.style.width = (scrollY / docH * 100) + '%';
+
+  if (scrollBtn) scrollBtn.classList.toggle('show', scrollY > 400);
+
+  let current = '';
+  sections.forEach(s => {
+    if (scrollY >= s.offsetTop - 100) current = s.getAttribute('id') || '';
+  });
+  navLinks.forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+}
+window.addEventListener('scroll', onScroll, { passive: true });
+onScroll();
+
+scrollBtn?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+// Close sidebar when clicking a link (mobile)
+navLinks.forEach(a => a.addEventListener('click', () => {
+  sidebar?.classList.remove('open');
+  overlay?.classList.remove('show');
+}));
+</script>
+</body>
+</html>
