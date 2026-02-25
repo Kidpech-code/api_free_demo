@@ -16,6 +16,16 @@ type Config struct {
 	JWT    JWTConfig
 	App    AppConfig
 	GitHub GitHubOAuthConfig
+	TMD    TMDConfig
+}
+
+// TMDConfig holds settings for the Thai Meteorological Department NWP API worker.
+type TMDConfig struct {
+	Enabled      bool          // TMD_ENABLED — set to "true" to activate the cron worker
+	Token        string        // TMD_TOKEN — Bearer token for the TMD NWP API
+	CronExpr     string        // TMD_CRON — cron expression (default: every 6 hours)
+	CacheTTL     time.Duration // TMD_CACHE_TTL — Redis TTL for cached forecasts
+	RequestDelay time.Duration // TMD_REQUEST_DELAY — throttle between API calls
 }
 
 type ServerConfig struct {
@@ -113,6 +123,13 @@ func Load() *Config {
 			ClientSecret:  os.Getenv("GITHUB_CLIENT_SECRET"),
 			AllowedLogin:  getEnv("GITHUB_ALLOWED_LOGIN", "Kidpech-code"),
 			SessionSecret: getEnv("SESSION_SECRET", "dashboard-session-secret-change-me"),
+		},
+		TMD: TMDConfig{
+			Enabled:      getEnv("TMD_ENABLED", "false") == "true",
+			Token:        os.Getenv("TMD_TOKEN"),
+			CronExpr:     getEnv("TMD_CRON", "0 */6 * * *"),
+			CacheTTL:     getDuration("TMD_CACHE_TTL", 12*time.Hour),
+			RequestDelay: getDuration("TMD_REQUEST_DELAY", 2*time.Second),
 		},
 	}
 }

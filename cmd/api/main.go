@@ -16,6 +16,7 @@ import (
 	"api_free_demo/internal/infrastructure/metrics"
 	redisClient "api_free_demo/internal/infrastructure/redis"
 	infraRepo "api_free_demo/internal/infrastructure/repository"
+	"api_free_demo/internal/infrastructure/tmd"
 	"api_free_demo/internal/usecase"
 )
 
@@ -50,13 +51,39 @@ func main() {
 	// ── 6. Usecase ──
 	productUC := usecase.NewProductUsecase(productRepo, logger)
 
+	// ── 6b. TMD Weather Cron Worker ──
+	var tmdCache *tmd.CacheRepository
+	var tmdWorker *tmd.Worker
+	if cfg.TMD.Enabled && cfg.TMD.Token != "" {
+		tmdCache = tmd.NewCacheRepository(rc.RDB(), cfg.TMD.CacheTTL, logger)
+
+		clientCfg := tmd.DefaultClientConfig(cfg.TMD.Token)
+		clientCfg.RequestDelay = cfg.TMD.RequestDelay
+		tmdClient := tmd.NewClient(clientCfg, logger)
+
+		workerCfg := tmd.DefaultWorkerConfig()
+		workerCfg.CronExpr = cfg.TMD.CronExpr
+
+		tmdWorker = tmd.NewWorker(tmdClient, tmdCache, tmd.DefaultLocations(), workerCfg, logger)
+		if err := tmdWorker.Start(); err != nil {
+			logger.Fatal("failed to start TMD worker", zap.Error(err))
+		}
+		defer tmdWorker.Stop()
+		logger.Info("TMD weather cron worker enabled",
+			zap.String("cron", cfg.TMD.CronExpr),
+			zap.Duration("cache_ttl", cfg.TMD.CacheTTL),
+		)
+	} else {
+		logger.Info("TMD weather cron worker disabled (set TMD_ENABLED=true and TMD_TOKEN to activate)")
+	}
+
 	// ── 7. HTTP Router (Fiber) ──
 	// Strip the "web/" prefix so the embedded FS root maps directly to the URL root.
 	webRoot, err := fs.Sub(WebFS, "web")
 	if err != nil {
 		logger.Fatal("failed to sub webFS", zap.Error(err))
 	}
-	app := httpDelivery.NewRouter(cfg, rc.RDB(), productUC, m, logger, webRoot)
+	app := httpDelivery.NewRouter(cfg, rc.RDB(), productUC, m, logger, webRoot, tmdCache)
 
 	// ── 8. Graceful Shutdown ──
 	quit := make(chan os.Signal, 1)

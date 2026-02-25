@@ -19,6 +19,7 @@ import (
 	"api_free_demo/internal/delivery/http/middleware"
 	"api_free_demo/internal/domain/usecase"
 	"api_free_demo/internal/infrastructure/metrics"
+	"api_free_demo/internal/infrastructure/tmd"
 	appUsecase "api_free_demo/internal/usecase"
 )
 
@@ -44,6 +45,7 @@ func NewRouter(
 	m *metrics.Metrics,
 	logger *zap.Logger,
 	webUI fs.FS,
+	tmdCache *tmd.CacheRepository, // nil when TMD worker is disabled
 ) *fiber.App {
 	app := fiber.New(fiber.Config{
 		AppName:      "API Free Demo Sandbox",
@@ -160,6 +162,17 @@ func NewRouter(
 			"user_id": c.Locals(middleware.ContextKeyUserID),
 		})
 	})
+
+	// ── TMD Weather Endpoints (public — no JWT required) ───────────────────
+	// Weather data is cached public information from TMD NWP.
+	// Rate-limited to prevent abuse but does NOT require a JWT token.
+	if tmdCache != nil {
+		tmdH := handler.NewTMDHandler(tmdCache, logger)
+		weather := app.Group("/api/v1/weather")
+		weather.Use(middleware.RateLimiter(rdb, cfg.App.RateLimit, cfg.App.RateWindow, m, logger))
+		weather.Get("/locations", tmdH.ListLocations)
+		weather.Get("/:type/:location", tmdH.GetForecast)
+	}
 
 	// ── GitHub OAuth Routes (dashboard protection) ───────────────────────
 	// Register these BEFORE the static Web UI routes.

@@ -504,6 +504,20 @@
     <div class="ep-item" data-ep="bulk" onclick="selectEndpoint(this,'bulk')">
       <span class="ep-method m-post">POST</span><span class="ep-path">/api/v1/products/bulk</span>
     </div>
+    <div class="ep-group-label" style="margin-top:8px;color:#00e5ff">🌤️ Weather (TMD)</div>
+    <div style="padding:2px 14px 6px;font-size:9px;color:var(--text-dim);line-height:1.55">พยากรณ์อากาศ กรมอุตุนิยมวิทยา<br>cache Redis • อัปเดตทุก 6 ชม. • <strong style="color:#00e5ff">ไม่ต้อง Token</strong></div>
+    <div class="ep-item" data-ep="wlocations" onclick="selectEndpoint(this,'wlocations')">
+      <span class="ep-method m-get">GET</span><span class="ep-path">/api/v1/weather/locations</span>
+    </div>
+    <div class="ep-item" data-ep="whourly" onclick="selectEndpoint(this,'whourly')">
+      <span class="ep-method m-get">GET</span><span class="ep-path">/api/v1/weather/hourly/:loc</span>
+    </div>
+    <div class="ep-item" data-ep="wdaily" onclick="selectEndpoint(this,'wdaily')">
+      <span class="ep-method m-get">GET</span><span class="ep-path">/api/v1/weather/daily/:loc</span>
+    </div>
+    <div class="ep-item" data-ep="warea" onclick="selectEndpoint(this,'warea')">
+      <span class="ep-method m-get">GET</span><span class="ep-path">/api/v1/weather/area/:loc</span>
+    </div>
     <div class="ep-group-label" style="margin-top:8px;color:#ff8c00">🔴 Error Sandbox</div>
     <div style="padding:2px 14px 6px;font-size:9px;color:var(--text-dim);line-height:1.55">เรียกแล้วได้ error จริง ๆ<br>เรียนรู้การ handle แต่ละแบบ</div>
     <div class="ep-item" data-ep="e400" onclick="selectEndpoint(this,'e400')">
@@ -675,6 +689,15 @@ const ENDPOINTS = {
   update:  { method:'PUT',    url:BASE+'/api/v1/products/<id>',    body:'{\n  "price": 19.99\n}',    desc:'อัปเดต product (Write-Invalidate cache)' },
   delete:  { method:'DELETE', url:BASE+'/api/v1/products/<id>',    body:'',                          desc:'Soft delete + ลบจาก ZSET index' },
   bulk:    { method:'POST',   url:BASE+'/api/v1/products/bulk',    body:'{\n  "items": [\n    {"name": "Item A", "price": 9.99, "sku": "A-01"},\n    {"name": "Item B", "price": 14.99, "sku": "B-01"},\n    {"name": "Item C", "price": 24.99, "sku": "C-01"}\n  ]\n}', desc:'Bulk create ด้วย Redis Pipeline (batch optimize)' },
+
+  // ── Weather (TMD NWP) ─────────────────────────────────────────────────────
+  // ข้อมูลพยากรณ์อากาศจากกรมอุตุนิยมวิทยา เสิร์ฟจาก Redis cache (ไม่ต้อง Token)
+  // Worker อัปเดต cache ทุก 6 ชั่วโมง  •  locations: bangkok, chiang_mai, phuket,
+  // chiang_rai, khon_kaen, nakhon_ratchasima, hat_yai, udon_thani, surat_thani, nonthaburi
+  wlocations: { method:'GET', url:BASE+'/api/v1/weather/locations',               body:'', desc:'รายการสถานที่ทั้ง 10 แห่งที่มี cache — bangkok, chiang_mai, phuket, khon_kaen, nakhon_ratchasima, hat_yai, udon_thani, surat_thani, chiang_rai, nonthaburi' },
+  whourly:    { method:'GET', url:BASE+'/api/v1/weather/hourly/bangkok',           body:'', desc:'พยากรณ์รายชั่วโมง 48 ชม. (tc°C, rh%, rain mm, ws10m m/s, cond) — เปลี่ยน "bangkok" เป็น code อื่นได้ ไม่ต้อง Token' },
+  wdaily:     { method:'GET', url:BASE+'/api/v1/weather/daily/bangkok',            body:'', desc:'พยากรณ์รายวัน 7 วัน (tc_max, tc_min, rh, rain, cond) — เปลี่ยน "bangkok" เป็น code อื่นได้ ไม่ต้อง Token' },
+  warea:      { method:'GET', url:BASE+'/api/v1/weather/area/bangkok',             body:'', desc:'พยากรณ์รายพื้นที่ 72 ชม. (Area/Place domain=2) — เปลี่ยน "bangkok" เป็น code อื่นได้ ไม่ต้อง Token' },
 };
 
 // Restore token
